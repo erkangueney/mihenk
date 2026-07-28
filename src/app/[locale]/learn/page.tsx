@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { TrackExplorer, type ExplorerTrack } from "@/components/track-explorer";
-import { lessonKeyOf, tracks, trackStats } from "@/lib/content";
+import { lessonKeyOf, trackStats } from "@/lib/content";
+import { getTracks } from "@/lib/content-docs/resolve";
 import { isLocale, t, ui } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
 
@@ -25,7 +26,7 @@ export default async function LearnPage({ params }: { params: Promise<{ locale: 
   if (!isLocale(raw)) notFound();
   const locale: Locale = raw;
 
-  const cards: ExplorerTrack[] = tracks.map((track) => {
+  const cards: ExplorerTrack[] = (await getTracks()).map((track) => {
     const stats = trackStats(track);
     return {
       slug: track.slug,
@@ -46,7 +47,7 @@ export default async function LearnPage({ params }: { params: Promise<{ locale: 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
       <header className="mb-8">
-        <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
+        <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
           {ui("tracks.title", locale)}
         </h1>
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted">

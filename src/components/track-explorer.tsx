@@ -65,7 +65,7 @@ function FilterChip({
       aria-pressed={active}
       className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium whitespace-nowrap transition ${
         active
-          ? "border-accent bg-accent text-white"
+          ? "border-accent bg-accent text-on-accent"
           : "border-border bg-surface text-muted hover:text-text"
       }`}
     >

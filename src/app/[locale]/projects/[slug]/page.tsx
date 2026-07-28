@@ -4,11 +4,12 @@ import { notFound } from "next/navigation";
 import { ProjectComplete } from "@/components/project-complete";
 import { CodeCard } from "@/components/ui/code-view";
 import { Markdown } from "@/components/ui/markdown";
-import { getProject, getTrack, projects } from "@/lib/content";
+import { getProjectBySlug, getProjects, getTrackBySlug } from "@/lib/content-docs/resolve";
 import { isLocale, locales, t, ui } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const projects = await getProjects();
   return locales.flatMap((locale) =>
     projects.map((project) => ({ locale, slug: project.slug })),
   );
@@ -20,7 +21,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const project = getProject(slug);
+  const project = await getProjectBySlug(slug);
   if (!project || !isLocale(locale)) return {};
   return { title: t(project.title, locale), description: t(project.summary, locale) };
 }
@@ -34,9 +35,9 @@ export default async function ProjectPage({
   if (!isLocale(raw)) notFound();
   const locale: Locale = raw;
 
-  const project = getProject(slug);
+  const project = await getProjectBySlug(slug);
   if (!project) notFound();
-  const track = getTrack(project.trackSlug);
+  const track = await getTrackBySlug(project.trackSlug);
   const color = track?.color ?? "var(--accent)";
 
   return (
@@ -77,7 +78,7 @@ export default async function ProjectPage({
           </span>
         </div>
 
-        <h1 className="mt-4 text-3xl font-black tracking-tight text-balance sm:text-4xl">
+        <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
           {t(project.title, locale)}
         </h1>
         <p className="mt-3 text-base leading-relaxed text-muted">{t(project.summary, locale)}</p>

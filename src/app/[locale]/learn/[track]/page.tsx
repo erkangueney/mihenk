@@ -2,18 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TrackLevels, type LevelData } from "@/components/track-levels";
-import {
-  getProject,
-  getTrack,
-  lessonKeyOf,
-  lessonStats,
-  tracks,
-  trackStats,
-} from "@/lib/content";
+import { lessonKeyOf, lessonStats, trackStats } from "@/lib/content";
+import { getProjectBySlug, getTrackBySlug, getTracks } from "@/lib/content-docs/resolve";
 import { isLocale, locales, t, ui } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const tracks = await getTracks();
   return locales.flatMap((locale) => tracks.map((track) => ({ locale, track: track.slug })));
 }
 
@@ -23,7 +18,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; track: string }>;
 }): Promise<Metadata> {
   const { locale, track: slug } = await params;
-  const track = getTrack(slug);
+  const track = await getTrackBySlug(slug);
   if (!track || !isLocale(locale)) return {};
   return {
     title: track.name,
@@ -40,39 +35,41 @@ export default async function TrackPage({
   if (!isLocale(raw)) notFound();
   const locale: Locale = raw;
 
-  const track = getTrack(slug);
+  const track = await getTrackBySlug(slug);
   if (!track) notFound();
 
   const stats = trackStats(track);
 
-  const levels: LevelData[] = track.levels.map((level) => {
-    const project = level.projectSlug ? getProject(level.projectSlug) : undefined;
-    return {
-      id: level.id,
-      title: t(level.title, locale),
-      description: t(level.description, locale),
-      lessons: level.lessons.map((lesson) => {
-        const ls = lessonStats(track, lesson.slug);
-        return {
-          slug: lesson.slug,
-          title: t(lesson.title, locale),
-          summary: t(lesson.summary, locale),
-          minutes: lesson.minutes,
-          tasks: ls.tasks,
-          xp: ls.xp,
-          key: lessonKeyOf(track.slug, lesson.slug),
-        };
-      }),
-      project: project
-        ? {
-            slug: project.slug,
-            title: t(project.title, locale),
-            hours: project.hours,
-            xp: project.xp,
-          }
-        : undefined,
-    };
-  });
+  const levels: LevelData[] = await Promise.all(
+    track.levels.map(async (level) => {
+      const project = level.projectSlug ? await getProjectBySlug(level.projectSlug) : undefined;
+      return {
+        id: level.id,
+        title: t(level.title, locale),
+        description: t(level.description, locale),
+        lessons: level.lessons.map((lesson) => {
+          const ls = lessonStats(track, lesson.slug);
+          return {
+            slug: lesson.slug,
+            title: t(lesson.title, locale),
+            summary: t(lesson.summary, locale),
+            minutes: lesson.minutes,
+            tasks: ls.tasks,
+            xp: ls.xp,
+            key: lessonKeyOf(track.slug, lesson.slug),
+          };
+        }),
+        project: project
+          ? {
+              slug: project.slug,
+              title: t(project.title, locale),
+              hours: project.hours,
+              xp: project.xp,
+            }
+          : undefined,
+      };
+    }),
+  );
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
@@ -92,7 +89,7 @@ export default async function TrackPage({
             {track.icon}
           </span>
           <div className="min-w-0">
-            <h1 className="text-3xl font-black tracking-tight sm:text-4xl">{track.name}</h1>
+            <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">{track.name}</h1>
             <p className="mt-1 text-base font-medium" style={{ color: track.color }}>
               {t(track.tagline, locale)}
             </p>

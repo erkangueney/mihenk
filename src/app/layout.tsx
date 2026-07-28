@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 import { ProgressProvider } from "@/components/progress-provider";
+import { SessionProvider } from "@/components/auth/session-provider";
+import { BRAND_NAME } from "@/lib/brand";
 import { Toaster } from "@/components/toaster";
 import { themeScript } from "@/components/theme-toggle";
 import "./globals.css";
@@ -17,11 +19,19 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
+// Başlıklar için serif display font — markaya "premium yayın" dokusu katar.
+const display = Fraunces({
+  variable: "--font-display-stack",
+  subsets: ["latin", "latin-ext"],
+  display: "swap",
+  axes: ["opsz"],
+});
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://veri-akademi.vercel.app"),
+  metadataBase: new URL("https://mihenk.vercel.app"),
   title: {
-    default: "Veri Akademi — Oyunlaştırılmış veri analizi ve veri bilimi eğitimi",
-    template: "%s · Veri Akademi",
+    default: `${BRAND_NAME} — Oyunlaştırılmış veri analizi ve veri bilimi eğitimi`,
+    template: `%s · ${BRAND_NAME}`,
   },
   description:
     "Python, SQL, Tableau, Power BI, Microsoft Fabric ve daha fazlası. Tarayıcıda çalışan kod, XP ve rozetlerle oyunlaştırılmış dersler, her seviyede uçtan uca projeler.",
@@ -38,8 +48,8 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     type: "website",
-    siteName: "Veri Akademi",
-    title: "Veri Akademi — Veriyle çalışmayı oynayarak öğren",
+    siteName: BRAND_NAME,
+    title: `${BRAND_NAME} — Veriyle çalışmayı oynayarak öğren`,
     description:
       "Uçtan uca projeler, tarayıcıda çalışan Python ve SQL, XP ve rozetlerle ilerleyen bir müfredat.",
   },
@@ -47,8 +57,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#070b14" },
-    { media: "(prefers-color-scheme: light)", color: "#f7f9ff" },
+    { media: "(prefers-color-scheme: dark)", color: "#07080d" },
+    { media: "(prefers-color-scheme: light)", color: "#faf8f2" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -58,15 +68,21 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="tr" className={`${sans.variable} ${mono.variable} h-full antialiased`}>
+    <html
+      lang="tr"
+      className={`${sans.variable} ${mono.variable} ${display.variable} h-full antialiased`}
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="flex min-h-full flex-col">
-        <ProgressProvider>
-          {children}
-          <Toaster />
-        </ProgressProvider>
+        {/* Oturum dışta: ilerleme deposu hangi kullanıcıya ait olduğunu bilmeli. */}
+        <SessionProvider>
+          <ProgressProvider>
+            {children}
+            <Toaster />
+          </ProgressProvider>
+        </SessionProvider>
       </body>
     </html>
   );

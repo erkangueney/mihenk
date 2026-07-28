@@ -1,15 +1,18 @@
+import { supabaseEnabled } from "../supabase/config";
 import { localAdapter } from "./local";
+import { supabaseAdapter } from "./supabase";
 import type { ProgressAdapter } from "./adapter";
 
 /**
  * Aktif ilerleme deposu.
  *
- * Supabase'e geçerken yapılacak tek değişiklik burada olur:
- *   import { supabaseAdapter } from "./supabase";
- *   export const adapter = supabaseAdapter;
- * Kurulum adımları ve hazır adaptör kodu: `docs/supabase-adapter.md`
+ * Supabase anahtarları tanımlıysa bulut adaptörü — giriş yapılmamışsa o da
+ * kendi içinde localStorage'a düşer. Anahtar yoksa doğrudan localStorage.
+ * Uygulamanın geri kalanı yalnızca `ProgressAdapter` arayüzünü tanır;
+ * hangisinin seçildiğini bilmez.
  */
-export const adapter: ProgressAdapter = localAdapter;
+export const adapter: ProgressAdapter = supabaseEnabled ? supabaseAdapter : localAdapter;
 
 export { emptyProgress, normalize, PROGRESS_VERSION } from "./adapter";
+export { flushPendingProgress } from "./supabase";
 export type { ProgressAdapter } from "./adapter";

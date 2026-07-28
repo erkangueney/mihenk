@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { HeroCta, type ResumeTarget } from "@/components/hero-cta";
 import { TrackCard } from "@/components/track-card";
 import { badges } from "@/lib/gamification";
-import { flatLessons, lessonKeyOf, platformStats, tracks, trackStats } from "@/lib/content";
+import { flatLessons, lessonKeyOf, trackStats } from "@/lib/content";
+import { getPlatformStats, getTracks } from "@/lib/content-docs/resolve";
 import { isLocale, t, ui } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
 
@@ -12,7 +13,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   if (!isLocale(raw)) notFound();
   const locale: Locale = raw;
 
-  const stats = platformStats();
+  const [stats, tracks] = await Promise.all([getPlatformStats(), getTracks()]);
 
   const cards = tracks.map((track) => {
     const s = trackStats(track);
@@ -89,32 +90,39 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <>
       {/* ---------------------------- Hero ---------------------------- */}
-      <section className="mx-auto w-full max-w-7xl px-4 pt-12 pb-16 sm:px-6 sm:pt-20">
+      <section className="mx-auto w-full max-w-7xl px-4 pt-16 pb-20 sm:px-6 sm:pt-28">
         <div className="max-w-3xl">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-muted">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent-2" aria-hidden />
-            {ui("home.badge", locale)}
+          <span className="inline-flex items-center gap-2.5 rounded-full border border-accent/30 bg-surface/70 px-4 py-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_10px_2px_var(--accent)]" aria-hidden />
+            <span className="eyebrow">{ui("home.badge", locale)}</span>
           </span>
-          <h1 className="mt-5 text-4xl leading-[1.1] font-black tracking-tight text-balance sm:text-6xl">
+          <h1 className="font-display mt-6 text-5xl leading-[1.04] font-semibold tracking-tight text-balance sm:text-7xl">
             <span className="gradient-text">{ui("home.title", locale)}</span>
           </h1>
-          <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
+          <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
             {ui("home.subtitle", locale)}
           </p>
 
           <HeroCta locale={locale} resume={resume} />
         </div>
 
-        <dl className="mt-14 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <dl className="card mt-16 grid grid-cols-2 overflow-hidden lg:grid-cols-4">
           {[
             { value: stats.tracks, label: ui("home.stats.tracks", locale) },
             { value: stats.lessons, label: ui("home.stats.lessons", locale) },
             { value: stats.projects, label: ui("home.stats.projects", locale) },
             { value: stats.xp.toLocaleString(locale), label: ui("home.stats.xp", locale) },
-          ].map((item) => (
-            <div key={item.label} className="card p-4 sm:p-5">
-              <dt className="text-2xl font-black tracking-tight sm:text-3xl">{item.value}</dt>
-              <dd className="mt-1 text-xs text-muted sm:text-sm">{item.label}</dd>
+          ].map((item, index) => (
+            <div
+              key={item.label}
+              className={`border-border/70 p-5 sm:p-7 ${index % 2 === 1 ? "border-l" : ""} ${
+                index >= 2 ? "max-lg:border-t" : ""
+              } ${index > 0 ? "lg:border-l" : ""}`}
+            >
+              <dt className="font-display text-3xl font-semibold tracking-tight text-accent sm:text-4xl">
+                {item.value}
+              </dt>
+              <dd className="mt-1.5 text-xs tracking-wide text-muted sm:text-sm">{item.label}</dd>
             </div>
           ))}
         </dl>
@@ -122,18 +130,18 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       {/* --------------------------- Patikalar -------------------------- */}
       <section className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
               {ui("home.tracks.title", locale)}
             </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
               {ui("home.tracks.subtitle", locale)}
             </p>
           </div>
           <Link
             href={`/${locale}/learn`}
-            className="text-sm font-semibold text-accent-2 hover:underline"
+            className="text-sm font-semibold text-accent transition hover:text-accent-2"
           >
             {ui("tracks.all", locale)} →
           </Link>
@@ -147,17 +155,25 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </section>
 
       {/* -------------------------- Nasıl çalışır ------------------------ */}
-      <section className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6">
-        <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+      <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6">
+        <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
           {ui("home.how.title", locale)}
         </h2>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {howItWorks.map((item) => (
-            <div key={item.title} className="card p-5">
-              <span className="text-3xl" aria-hidden>
-                {item.icon}
-              </span>
-              <h3 className="mt-3 font-bold">{item.title}</h3>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {howItWorks.map((item, index) => (
+            <div key={item.title} className="card group p-6 transition hover:border-accent/40">
+              <div className="flex items-center justify-between">
+                <span
+                  className="grid h-12 w-12 place-items-center rounded-2xl bg-accent/10 text-2xl ring-1 ring-accent/20"
+                  aria-hidden
+                >
+                  {item.icon}
+                </span>
+                <span className="font-display text-sm font-semibold text-muted/60" aria-hidden>
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+              </div>
+              <h3 className="mt-4 font-bold tracking-tight">{item.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted">{item.body}</p>
             </div>
           ))}
@@ -169,7 +185,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <div className="card overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border p-5 sm:p-6">
             <div>
-              <h2 className="text-xl font-bold tracking-tight">{ui("badges.title", locale)}</h2>
+              <h2 className="font-display text-2xl font-semibold tracking-tight">
+                {ui("badges.title", locale)}
+              </h2>
               <p className="mt-1 text-sm text-muted">
                 {locale === "tr"
                   ? "Toplanacak 12 rozet — her biri farklı bir alışkanlığı ödüllendiriyor."
@@ -178,14 +196,17 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </div>
             <Link
               href={`/${locale}/profile`}
-              className="text-sm font-semibold text-accent-2 hover:underline"
+              className="text-sm font-semibold text-accent transition hover:text-accent-2"
             >
               {ui("nav.profile", locale)} →
             </Link>
           </div>
           <ul className="grid gap-3 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-4">
             {badges.map((badge) => (
-              <li key={badge.id} className="flex items-center gap-3 rounded-xl bg-surface-2 p-3">
+              <li
+                key={badge.id}
+                className="flex items-center gap-3 rounded-xl border border-border/60 bg-surface-2/80 p-3 transition hover:border-accent/40"
+              >
                 <span className="text-2xl" aria-hidden>
                   {badge.icon}
                 </span>

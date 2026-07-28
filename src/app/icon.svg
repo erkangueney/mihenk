@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <defs>
+    <linearGradient id="stone" x1="20" y1="1" x2="20" y2="39" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1c1f2a"/>
+      <stop offset="1" stop-color="#07080d"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="14" y1="30" x2="28" y2="9" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#b98630"/>
+      <stop offset="0.5" stop-color="#d9a84e"/>
+      <stop offset="1" stop-color="#f0d795"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="38" height="38" rx="12" fill="url(#stone)"/>
+  <g stroke="url(#gold)" stroke-width="3.4" stroke-linecap="round" fill="none">
+    <path d="M12.6 28 L14.2 21.6"/>
+    <path d="M19.4 28 L21 16.5"/>
+    <path d="M26.2 28 L27.8 11.4"/>
+  </g>
+  <rect x="1" y="1" width="38" height="38" rx="12" fill="none" stroke="#d9a84e" stroke-opacity="0.5" stroke-width="1.3"/>
+</svg>

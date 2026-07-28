@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProfileView, type TrackProgressItem } from "@/components/profile-view";
-import { lessonKeyOf, projects, tracks } from "@/lib/content";
+import { lessonKeyOf } from "@/lib/content";
+import { getProjects, getTracks } from "@/lib/content-docs/resolve";
 import { isLocale, ui } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
 
@@ -23,6 +24,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
   if (!isLocale(raw)) notFound();
   const locale: Locale = raw;
 
+  const [tracks, projects] = await Promise.all([getTracks(), getProjects()]);
+
   const items: TrackProgressItem[] = tracks.map((track) => ({
     slug: track.slug,
     name: track.name,
@@ -35,7 +38,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
-      <h1 className="mb-8 text-3xl font-black tracking-tight sm:text-4xl">
+      <h1 className="mb-8 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
         {ui("profile.title", locale)}
       </h1>
       <ProfileView tracks={items} totalProjects={projects.length} locale={locale} />

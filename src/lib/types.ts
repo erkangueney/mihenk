@@ -15,7 +15,11 @@ export type TrackCategory =
   | "foundation" // İstatistik, veri okuryazarlığı
   | "advanced"; // ML, veri mühendisliği
 
-export type LevelId = "beginner" | "intermediate" | "advanced";
+/**
+ * Seviyeler bir kariyer merdiveni olarak okunur: sıfırdan başlayan biri
+ * "temel"den girer, "uzman" seviyesinde ekibe yön verecek konuları çalışır.
+ */
+export type LevelId = "foundation" | "junior" | "mid" | "senior" | "expert";
 
 export type CodeEngine = "python" | "sql";
 

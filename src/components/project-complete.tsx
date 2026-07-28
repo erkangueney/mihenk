@@ -39,7 +39,7 @@ export function ProjectComplete({
         className={`rounded-xl px-5 py-3 text-sm font-semibold transition ${
           done
             ? "border border-border bg-surface-2 text-muted"
-            : "bg-gradient-to-r from-accent to-accent-2 text-white"
+            : "bg-gradient-to-r from-accent to-accent-2 text-on-accent"
         }`}
       >
         {done

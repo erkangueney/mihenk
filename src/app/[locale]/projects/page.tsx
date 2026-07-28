@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProjectGrid, type ProjectCardData } from "@/components/project-grid";
-import { getTrack, projects } from "@/lib/content";
+import { getProjects, getTracks } from "@/lib/content-docs/resolve";
 import { isLocale, t, ui } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
 
@@ -29,8 +29,10 @@ export default async function ProjectsPage({
   if (!isLocale(raw)) notFound();
   const locale: Locale = raw;
 
+  const [projects, tracks] = await Promise.all([getProjects(), getTracks()]);
+
   const cards: ProjectCardData[] = projects.map((project) => {
-    const track = getTrack(project.trackSlug);
+    const track = tracks.find((item) => item.slug === project.trackSlug);
     return {
       slug: project.slug,
       title: t(project.title, locale),
@@ -48,7 +50,7 @@ export default async function ProjectsPage({
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
       <header className="mb-8">
-        <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
+        <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
           {ui("projects.title", locale)}
         </h1>
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted">

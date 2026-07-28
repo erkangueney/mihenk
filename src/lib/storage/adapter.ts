@@ -3,9 +3,9 @@ import type { ProgressState } from "../types";
 /**
  * İlerleme deposu arayüzü.
  *
- * Uygulamanın geri kalanı yalnızca bu arayüzü tanır. Bugün localStorage,
- * yarın Supabase — değişen tek şey `src/lib/storage/index.ts` içindeki seçim olur.
- * Supabase sürümünün hazır şablonu: `docs/supabase-adapter.md`
+ * Uygulamanın geri kalanı yalnızca bu arayüzü tanır; verinin localStorage'da mı
+ * Supabase'de mi durduğunu bilmez. Seçim `src/lib/storage/index.ts` içinde tek
+ * satırda yapılır. Ayrıntı: `docs/backend.md`
  */
 export interface ProgressAdapter {
   /** Depodan durumu okur; kayıt yoksa boş durum döner. */

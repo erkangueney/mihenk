@@ -33,16 +33,23 @@ npm run dev      # http://localhost:3000
 
 ```
 src/
+├── proxy.ts                          # Next 16'da middleware'in adı bu
 ├── app/
 │   ├── layout.tsx                    # kök: fontlar, tema betiği, sağlayıcılar
 │   ├── page.tsx                      # / → /tr yönlendirmesi
+│   ├── admin/                        # yönetim paneli (yalnızca yöneticiler)
+│   │   ├── uyeler/                   # üye listesi ve detayı
+│   │   ├── icerik/                   # patika/proje editörü
+│   │   └── kayitlar/                 # yönetim işlem dökümü
 │   └── [locale]/                     # tr | en
 │       ├── page.tsx                  # ana sayfa
 │       ├── learn/                    # patikalar → seviyeler → dersler
 │       ├── projects/                 # uçtan uca projeler
 │       ├── profile/                  # XP, rozet, seri, yedekleme
 │       ├── leaderboard/
-│       └── roadmap/                  # önerilen öğrenme sırası
+│       ├── roadmap/                  # önerilen öğrenme sırası
+│       ├── giris/ kayit/             # üyelik
+│       └── sifremi-unuttum/ sifre-yenile/
 ├── content/                          # TÜM EĞİTİM İÇERİĞİ BURADA
 │   ├── helpers.ts                    # içerik yazım yardımcıları
 │   ├── tracks/*.ts                   # patika başına bir dosya
@@ -56,8 +63,13 @@ src/
 │   ├── gamification.ts               # XP eğrisi, seri, rozetler, liderlik
 │   ├── highlight.ts                  # bağımlılıksız sözdizimi vurgulama
 │   ├── storage/                      # ilerleme deposu (adaptör deseni)
+│   ├── supabase/                     # dört istemci: tarayıcı, sunucu, anon, admin
+│   ├── auth/                         # oturum doğrulama (DAL) ve form action'ları
+│   ├── admin/                        # panel sorguları ve yönetim işlemleri
+│   ├── content-docs/                 # veritabanı içeriği: doğrulama + birleştirme
 │   └── engines/                      # Pyodide + sql.js worker'ları
-└── components/                       # arayüz
+├── components/                       # arayüz
+supabase/migrations/                  # veritabanı şeması ve RLS politikaları
 ```
 
 ### İki karar, gerisi buradan çıkıyor
@@ -66,9 +78,9 @@ src/
 Yeni ders eklemek için hiçbir bileşene dokunmazsın — dosyaya bir `lesson({...})` eklersin;
 sayfa, ilerleme, XP ve rozetler kendiliğinden çalışır.
 
-**2. İlerleme bir adaptörün arkasında.** `src/lib/storage/index.ts` tek satırlık bir seçim.
-Bugün `localStorage`, yarın Supabase — uygulamanın geri kalanı farkı görmez.
-Geçiş için hazır kod: [`docs/supabase-adapter.md`](docs/supabase-adapter.md).
+**2. İlerleme bir adaptörün arkasında.** `src/lib/storage/index.ts` tek satırlık bir seçim:
+Supabase anahtarları tanımlıysa bulut, değilse `localStorage`. Uygulamanın geri kalanı
+farkı görmez. Ayrıntı: [`docs/backend.md`](docs/backend.md).
 
 ## Yeni ders ekleme
 
@@ -133,24 +145,42 @@ node scripts/verify-sql.mjs      # sqlite3 CLI gerekir
 node scripts/verify-python.mjs   # python3 + pandas + numpy gerekir
 ```
 
-## Canlıya alma (Vercel)
+## Üyelik ve yönetim paneli
 
-```bash
-npm i -g vercel
-vercel            # ilk kurulum
-vercel --prod     # yayın
-```
+Supabase anahtarları tanımlıysa üyelik, cihazlar arası senkron ilerleme, gerçek liderlik
+tablosu ve `/admin` yönetim paneli açılır. Tanımlı değilse site tam olarak eskisi gibi
+çalışır — ilerleme tarayıcıda kalır, üyelik ve panel kapalıdır.
 
-Ya da GitHub deposunu Vercel'e bağla — her `main` push'unda otomatik yayınlanır.
-Ortam değişkeni gerekmiyor; ilerleme tarayıcıda saklanıyor.
+Panelde neler var:
+
+- **Üyeler** — arama, filtre, sayfalama; üye oluştur/sil, şifre belirle veya sıfırlama
+  e-postası gönder, rol ata, askıya al, liderlik tablosundan gizle
+- **Üye detayı** — XP, seri, rozetler, patika bazlı ilerleme; ilerlemeyi sıfırlama
+- **İçerik** — patika ve projeleri panelden düzenle; doğrulamalı JSON editörü,
+  taslak/yayın ayrımı, dosyadaki sürüme geri dönme
+- **Kayıtlar** — panelden yapılan yönetim işlemlerinin dökümü
+
+## Canlıya alma (ücretsiz)
+
+Supabase (veritabanı + üyelik) ve Vercel (barındırma) ücretsiz katmanlarıyla, adım adım:
+**[`docs/kurulum.md`](docs/kurulum.md)**
+
+Bulut hesabı açmadan denemek istersen `npm run db:start` yerel bir Postgres + Auth
+yığını kaldırır (Docker gerekir) — canlıdakiyle aynı şema, aynı davranış.
+
+Özetle: `supabase/migrations/0001_init.sql`'i Supabase SQL Editor'de çalıştır, üç
+anahtarı `.env.local`'e (ve Vercel'e) gir, `npm run create-admin` ile ilk yöneticiyi aç.
+
+Üyelik istemiyorsan hiçbir ortam değişkeni gerekmez; depoyu Vercel'e bağlaman yeter.
 
 Yayına almadan önce `src/app/layout.tsx` içindeki `metadataBase` değerini kendi alan
 adınla güncelle — Open Graph bağlantıları buna göre üretiliyor.
 
 ## Yol haritası (bu proje için)
 
-- [ ] Supabase ile giriş ve cihazlar arası senkron ilerleme ([`docs/supabase-adapter.md`](docs/supabase-adapter.md))
-- [ ] Gerçek liderlik tablosu (şu an yerel, sabit rakiplerle)
+- [x] Supabase ile giriş ve cihazlar arası senkron ilerleme
+- [x] Gerçek liderlik tablosu
+- [x] Yönetim paneli: üye, ilerleme ve içerik yönetimi
 - [ ] Ders içi arama
 - [ ] Daha fazla `sqlTask` / `pyTask` — Excel ve BI patikalarında şu an quiz ağırlıkta
 - [ ] PWA: çevrimdışı ders okuma

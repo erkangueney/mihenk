@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { BrandLockup } from "@/components/brand";
+import { BRAND_NAME } from "@/lib/brand";
+import { StorageNote } from "@/components/storage-note";
 import { ui } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
 
@@ -7,27 +10,26 @@ export function SiteFooter({ locale }: { locale: Locale }) {
   const link = (href: string) => `/${locale}${href}`;
 
   return (
-    <footer className="mt-16 border-t border-border bg-bg-soft/60">
-      <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-4">
+    <footer className="relative mt-20 border-t border-border bg-bg-soft/60">
+      {/* Üst kenarda incecik altın çizgi — kapanışa imza atar. */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent"
+      />
+      <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-4">
         <div className="md:col-span-2">
-          <div className="flex items-center gap-2 text-base font-bold">
-            <span
-              aria-hidden
-              className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-accent to-accent-2 text-sm font-black text-white"
-            >
-              VA
-            </span>
-            Veri Akademi
+          <div className="flex items-center gap-2.5">
+            <BrandLockup size={32} />
           </div>
-          <p className="mt-3 max-w-md text-sm leading-relaxed text-muted">
+          <p className="mt-4 max-w-md text-sm leading-relaxed text-muted">
             {locale === "tr"
-              ? "Veri analizi ve veri bilimi öğrenmenin oyunlaştırılmış yolu. Tarayıcıda çalışan gerçek kod, her seviyede uçtan uca projeler ve portföye dönüşen çıktılar."
-              : "The gamified way to learn data analytics and data science. Real code that runs in your browser, end-to-end projects at every level, and outputs that become your portfolio."}
+              ? "Mihenk taşı, altının ayarını sınamak için üzerine altın sürülen siyah taştır. Bu platform da veriyle çalışma becerini aynı şekilde sınar: tarayıcıda çalışan gerçek kod, her kademede uçtan uca projeler ve portföye dönüşen çıktılar."
+              : "A touchstone is the black stone against which gold is rubbed to prove its purity. This platform tests your data skills the same way: real code running in your browser, end-to-end projects at every stage, and outputs that become your portfolio."}
           </p>
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold">{ui("nav.learn", locale)}</h3>
+          <h3 className="eyebrow">{ui("nav.learn", locale)}</h3>
           <ul className="mt-3 space-y-2 text-sm text-muted">
             <li>
               <Link className="hover:text-text" href={link("/learn")}>
@@ -48,7 +50,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold">{ui("nav.profile", locale)}</h3>
+          <h3 className="eyebrow">{ui("nav.profile", locale)}</h3>
           <ul className="mt-3 space-y-2 text-sm text-muted">
             <li>
               <Link className="hover:text-text" href={link("/profile")}>
@@ -65,10 +67,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
       </div>
 
       <div className="border-t border-border px-4 py-5 text-center text-xs text-muted sm:px-6">
-        © {year} Veri Akademi ·{" "}
-        {locale === "tr"
-          ? "İlerlemen şu an bu cihazda saklanıyor."
-          : "Your progress is currently stored on this device."}
+        © {year} {BRAND_NAME} · <StorageNote locale={locale} />
       </div>
     </footer>
   );

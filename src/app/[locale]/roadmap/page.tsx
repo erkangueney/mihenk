@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { roadmap } from "@/content/roadmap";
-import { getTrack } from "@/lib/content";
+import { getTracks } from "@/lib/content-docs/resolve";
 import { isLocale, t, ui } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
 
@@ -26,10 +26,12 @@ export default async function RoadmapPage({ params }: { params: Promise<{ locale
   if (!isLocale(raw)) notFound();
   const locale: Locale = raw;
 
+  const tracks = await getTracks();
+
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
       <header className="mb-10">
-        <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
+        <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
           {ui("roadmap.title", locale)}
         </h1>
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted">
@@ -42,7 +44,7 @@ export default async function RoadmapPage({ params }: { params: Promise<{ locale
           <li key={phase.id} className="card overflow-hidden">
             <header className="border-b border-border p-5 sm:p-6">
               <div className="flex flex-wrap items-center gap-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-accent to-accent-2 text-sm font-black text-white">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-accent to-accent-2 text-sm font-black text-on-accent">
                   {phaseIndex + 1}
                 </span>
                 <h2 className="text-lg font-bold tracking-tight">{t(phase.title, locale)}</h2>
@@ -60,7 +62,7 @@ export default async function RoadmapPage({ params }: { params: Promise<{ locale
 
             <ul className="divide-y divide-border">
               {phase.stops.map((stop, stopIndex) => {
-                const track = getTrack(stop.trackSlug);
+                const track = tracks.find((item) => item.slug === stop.trackSlug);
                 if (!track) return null;
                 const color = track.color;
                 return (

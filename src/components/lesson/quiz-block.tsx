@@ -89,7 +89,7 @@ export function QuizBlock({
             type="button"
             onClick={check}
             disabled={selected === null}
-            className="rounded-lg bg-gradient-to-r from-accent to-accent-2 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+            className="rounded-lg bg-gradient-to-r from-accent to-accent-2 px-4 py-2 text-sm font-semibold text-on-accent disabled:opacity-40"
           >
             {ui("quiz.check", locale)}
           </button>

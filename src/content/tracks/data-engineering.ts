@@ -1,5 +1,5 @@
 import type { Track } from "@/lib/types";
-import { L, code, info, lesson, order, pitfall, quiz, text } from "../helpers";
+import { L, tip, code, info, lesson, order, pitfall, quiz, text } from "../helpers";
 
 export const dataEngineeringTrack: Track = {
   slug: "veri-muhendisligi",
@@ -14,8 +14,142 @@ export const dataEngineeringTrack: Track = {
   ),
   levels: [
     {
-      id: "beginner",
-      title: L("Başlangıç — ETL ve ELT", "Beginner — ETL and ELT"),
+      id: "foundation",
+      title: L("Veri mühendisliğine giriş", "Introduction to data engineering"),
+      description: L(
+        "Veri nereden gelir, nereye gider ve bu boruları kim döşer?",
+        "Where does data come from, where does it go, and who lays the pipes?",
+      ),
+      lessons: [
+        lesson({
+          slug: "veri-muhendisi-ne-yapar",
+          title: L("Veri mühendisi ne yapar?", "What does a data engineer do?"),
+          summary: L(
+            "Analistin sorgu yazdığı tablo oraya nasıl geldi? İşte o iş.",
+            "How did the table an analyst queries get there? That is the job.",
+          ),
+          minutes: 12,
+          blocks: [
+            text(
+              "Bir analist `SELECT * FROM satislar` yazdığında o tablonun orada, güncel ve temiz durması kendiliğinden olmaz. **Veri mühendisi**, veriyi kaynağından analiz edilebilir hâle getiren sistemleri kurar ve ayakta tutar.\n\nTipik bir günün işleri:\n\n- Kaynak sistemlerden (uygulama veritabanı, API, dosya) veriyi çekmek\n- Bozuk, eksik veya geç gelen veriyle başa çıkmak\n- Veriyi analiz için uygun şekle dönüştürmek\n- İşleri zamanlamak ve başarısız olduklarında haber vermek\n- Maliyeti ve performansı kontrol altında tutmak\n\n**Analist ile fark:** analist \"veri ne söylüyor?\" sorusunu, mühendis \"veri nasıl güvenilir şekilde buraya gelir?\" sorusunu yanıtlar.",
+              "When an analyst writes `SELECT * FROM sales`, that table being there, fresh and clean, does not happen by itself. A **data engineer** builds and maintains the systems that take data from its source to something analysable.\n\nA typical day involves:\n\n- pulling data from source systems (application databases, APIs, files)\n- coping with broken, missing or late-arriving data\n- reshaping data into a form fit for analysis\n- scheduling jobs and being told when they fail\n- keeping cost and performance under control\n\n**The difference from an analyst:** the analyst answers \"what is the data saying?\", the engineer answers \"how does the data reliably get here?\"",
+            ),
+            text(
+              "**Modern veri yığınının katmanları** — hemen her şirkette bu sıra vardır:\n\n1. **Kaynaklar** — Uygulama veritabanı, CRM, reklam platformları, dosyalar, olay akışları\n2. **Alma (ingestion)** — Veriyi kaynaktan çekip ham hâliyle depoya yazan araçlar (Fivetran, Airbyte, özel betikler)\n3. **Depolama** — Veri gölü (S3, ADLS) veya veri ambarı (Snowflake, BigQuery, Redshift)\n4. **Dönüştürme** — Ham veriyi iş mantığına çeviren katman (dbt, SQL, Spark)\n5. **Sunum** — Analistin ve BI aracının gördüğü temiz tablolar\n6. **Orkestrasyon** — Tüm bunları doğru sırada çalıştıran zamanlayıcı (Airflow, Dagster, Prefect)\n\nBu katmanları bilmek, bir iş ilanındaki araç listesini anlamlandırmanın da en hızlı yoludur.",
+              "**The layers of the modern data stack** — nearly every company has this order:\n\n1. **Sources** — application databases, CRM, ad platforms, files, event streams\n2. **Ingestion** — tools that pull data from sources and land it raw (Fivetran, Airbyte, custom scripts)\n3. **Storage** — a data lake (S3, ADLS) or a warehouse (Snowflake, BigQuery, Redshift)\n4. **Transformation** — the layer turning raw data into business logic (dbt, SQL, Spark)\n5. **Serving** — the clean tables analysts and BI tools see\n6. **Orchestration** — the scheduler running all of it in the right order (Airflow, Dagster, Prefect)\n\nKnowing these layers is also the fastest way to make sense of the tool list in a job advert.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Bir veri hattında \"orkestrasyon\" katmanı ne iş yapar?",
+                "What does the \"orchestration\" layer do in a data pipeline?",
+              ],
+              options: [
+                [
+                  "İşleri doğru sırada, doğru zamanda çalıştırır ve başarısızlıkları yönetir",
+                  "It runs jobs in the right order at the right time and handles failures",
+                ],
+                ["Veriyi depolar", "It stores the data"],
+                ["Grafik üretir", "It produces charts"],
+                ["Veriyi temizler", "It cleans the data"],
+              ],
+              answer: 0,
+              explain: [
+                "Orkestrasyon aracı işin kendisini yapmaz; **ne zaman ve hangi sırayla** yapılacağını yönetir. B işi A bitmeden başlamamalı, A başarısız olursa B hiç çalışmamalı ve birine haber gitmeli. Bu bağımlılık yönetimi, veri hatlarının en kritik ve en çok gözden kaçan parçasıdır.",
+                "An orchestrator does not do the work itself; it manages **when and in what order** it happens. Job B must not start before A finishes, and if A fails then B must not run at all and somebody must be told. This dependency management is the most critical and most overlooked part of a data pipeline.",
+              ],
+            }),
+          ],
+        }),
+        lesson({
+          slug: "depolama-secenekleri",
+          title: L("Veritabanı, veri ambarı, veri gölü", "Database, warehouse, lake"),
+          summary: L(
+            "Üçü de veri saklar ama üçü tamamen farklı iş için tasarlandı.",
+            "All three store data, and all three were designed for completely different jobs.",
+          ),
+          minutes: 14,
+          blocks: [
+            text(
+              "**İşlemsel veritabanı (OLTP)** — PostgreSQL, MySQL. Uygulamanın çalıştığı yer. Tek satırı çok hızlı okur ve yazar; **satır tabanlıdır**. \"1234 numaralı siparişi getir\" için mükemmeldir. \"Son üç yılın ciro toplamı\" için felakettir.\n\n**Veri ambarı (OLAP)** — Snowflake, BigQuery, Redshift. Analiz için tasarlanmıştır. **Sütun tabanlıdır**: yalnızca sorduğun sütunları okur, bu yüzden milyarlarca satırda toplama yapabilir. Tek satır güncellemede ise yavaştır.\n\n**Veri gölü** — S3, ADLS üzerinde dosyalar. Her formatta ham veriyi ucuza saklar: CSV, JSON, Parquet, görüntü, log. Şema **okuma anında** uygulanır. Ucuzdur ve esnektir; ama disiplin yoksa \"veri bataklığına\" döner.\n\n**Lakehouse** — Son yılların yaklaşımı. Veri gölünün ucuzluğunu ambarın güvenilirliğiyle birleştirir (Delta Lake, Iceberg). Fabric ve Databricks bunun üzerine kuruludur.",
+              "**Transactional database (OLTP)** — PostgreSQL, MySQL. Where the application runs. It reads and writes single rows very fast and is **row-oriented**. Perfect for \"fetch order 1234\". Disastrous for \"total revenue over three years\".\n\n**Data warehouse (OLAP)** — Snowflake, BigQuery, Redshift. Built for analysis. It is **columnar**: it reads only the columns you asked for, which is how it aggregates across billions of rows. It is slow at updating a single row.\n\n**Data lake** — files on S3 or ADLS. It stores raw data of any format cheaply: CSV, JSON, Parquet, images, logs. Schema is applied **on read**. Cheap and flexible; but without discipline it turns into a \"data swamp\".\n\n**Lakehouse** — the approach of recent years. It marries the lake's low cost with the warehouse's reliability (Delta Lake, Iceberg). Fabric and Databricks are built on it.",
+            ),
+            pitfall(
+              "Analitik sorguyu üretim veritabanında çalıştırma",
+              "Never run analytics on the production database",
+              "Analistlerin uygulama veritabanına doğrudan bağlanması, veri ekiplerinin klasik ilk günahıdır. Ağır bir `GROUP BY` sorgusu üretim veritabanını kilitler ve **müşteriye hizmet veren uygulama yavaşlar veya durur**.\n\nÇözüm bir okuma kopyası (read replica) veya — daha doğrusu — veriyi ambara aktarmaktır. Ambara aktarma ayrıca geçmişi saklamanı sağlar: üretim veritabanı yalnızca **bugünkü** durumu tutar, ambar ise değişimin tarihçesini.",
+              "Letting analysts connect straight to the application database is the classic original sin of data teams. One heavy `GROUP BY` locks the production database and **the customer-facing application slows down or stops**.\n\nThe answer is a read replica or — better — moving the data into a warehouse. Moving it also lets you keep history: the production database holds only **today's** state, while the warehouse holds how it changed.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Sütun tabanlı depolama analitik sorgularda neden hızlıdır?",
+                "Why is columnar storage fast for analytical queries?",
+              ],
+              options: [
+                [
+                  "Yalnızca sorguda geçen sütunları okur; 200 sütunlu tabloda 3 sütun için diskin %1,5'ini tarar",
+                  "It reads only the columns in the query; on a 200-column table it scans 1.5% of the disk for 3 columns",
+                ],
+                ["Veriyi sıkıştırmaz", "It does not compress the data"],
+                ["Daha fazla bellek kullanır", "It uses more memory"],
+                ["İndeks gerektirmez", "It needs no indexes"],
+              ],
+              answer: 0,
+              explain: [
+                "Satır tabanlı depolamada bir satırın tüm sütunları yan yana durur, bu yüzden üç sütun için bile tüm satırı diskten okursun. Sütun tabanlı depoda her sütun ayrı saklanır. Ayrıca aynı tipteki değerler bir arada olduğu için sıkıştırma da çok daha etkilidir — çift kazanç.",
+                "In row storage a row's columns sit together, so you read the whole row off disk even for three columns. In columnar storage each column is stored separately. And because values of the same type sit together, compression is far more effective too — a double win.",
+              ],
+            }),
+          ],
+        }),
+        lesson({
+          slug: "toplu-mu-akis-mi",
+          title: L("Toplu işleme mi, akış mı?", "Batch or streaming?"),
+          summary: L(
+            "Veriyi her gece mi yoksa saniye saniye mi işlemelisin? Karar maliyeti belirler.",
+            "Should you process data nightly or second by second? The decision drives the cost.",
+          ),
+          minutes: 14,
+          blocks: [
+            text(
+              "**Toplu işleme (batch)** — Veri belirli aralıklarla, gruplar hâlinde işlenir: her gece 02:00'de, her saat başı. Veri mühendisliğinin **%90'ı** budur.\n\n- ✅ Basit, ucuz, hata ayıklaması kolay\n- ✅ Başarısız olursa tekrar çalıştırırsın\n- ❌ Veri işlem aralığı kadar gecikmeli\n\n**Akış işleme (streaming)** — Veri geldiği anda işlenir (Kafka, Flink, Kinesis).\n\n- ✅ Saniyeler içinde güncel\n- ❌ Karmaşık: geç gelen olaylar, sıra bozulması, tekrarlanan mesajlar\n- ❌ Pahalı — hem altyapı hem insan zamanı\n- ❌ Hata ayıklaması zor; \"dün geceki veriyi tekrar işle\" demek kolay değil",
+              "**Batch** — data is processed in groups at intervals: every night at 02:00, every hour. This is **90%** of data engineering.\n\n- ✅ Simple, cheap, easy to debug\n- ✅ If it fails you just run it again\n- ❌ Data is as stale as the interval\n\n**Streaming** — data is processed the moment it arrives (Kafka, Flink, Kinesis).\n\n- ✅ Current within seconds\n- ❌ Complex: late-arriving events, out-of-order data, duplicate messages\n- ❌ Expensive — in infrastructure and in engineer time\n- ❌ Hard to debug; \"reprocess last night's data\" is not a simple request",
+            ),
+            tip(
+              "Gerçek zamanlı ihtiyacını sorgula",
+              "Interrogate the real-time requirement",
+              "\"Veri gerçek zamanlı olsun\" isteği neredeyse her projede duyulur ve neredeyse hiçbirinde gerçek bir ihtiyaç değildir. Doğru soru şudur: **\"Bu veriyle 5 dakika içinde bir karar veriyor musun?\"**\n\nCevap hayırsa (ki genelde hayırdır — rapor haftalık toplantıda bakılıyorsa) toplu işleme yeterlidir ve sana on kat daha ucuz, on kat daha güvenilir bir sistem verir.\n\nAkış gerçekten gereken durumlar dardır: dolandırıcılık tespiti, canlı operasyon panosu, öneri motoru, alarm sistemleri. Bunların ortak özelliği, **gecikmenin doğrudan para kaybettirmesidir**.",
+              "\"The data must be real-time\" is heard on nearly every project and is almost never a genuine requirement. The right question is: **\"do you make a decision on this data within five minutes?\"**\n\nIf the answer is no — and it usually is, if the report is reviewed in a weekly meeting — batch is enough and gives you a system ten times cheaper and ten times more reliable.\n\nThe cases that genuinely need streaming are narrow: fraud detection, live operations dashboards, recommendation engines, alerting. What they share is that **latency directly costs money**.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Yönetimin her sabah baktığı satış raporu için hangi yaklaşım doğrudur?",
+                "Which approach is right for a sales report management reads each morning?",
+              ],
+              options: [
+                [
+                  "Gecelik toplu işleme — rapor sabah bakılıyor, gece işlemek yeterli",
+                  "Nightly batch — the report is read in the morning, so overnight processing is enough",
+                ],
+                ["Akış işleme", "Streaming"],
+                ["Saniyelik yenileme", "Second-by-second refresh"],
+                ["Elle güncelleme", "Manual updates"],
+              ],
+              answer: 0,
+              explain: [
+                "Rapor sabah okunuyorsa gece 03:00'te çalışan bir iş yeterlidir ve akış altyapısının karmaşıklığını, maliyetini ve kırılganlığını tamamen ortadan kaldırır. Mühendislikte doğru karar çoğu zaman en gelişmiş olan değil, ihtiyaca **yeten en basit** olandır.",
+                "If the report is read in the morning, a job running at 03:00 is sufficient and removes all the complexity, cost and fragility of streaming infrastructure. In engineering the right decision is usually not the most advanced option but the **simplest one that suffices**.",
+              ],
+            }),
+          ],
+        }),
+      ],
+    },
+    {
+      id: "junior",
+      title: L("ETL ve ELT", "ETL and ELT"),
       description: L(
         "Veri akışının anatomisi ve modern veri yığınının parçaları.",
         "The anatomy of a data pipeline and the pieces of the modern data stack.",
@@ -64,8 +198,8 @@ export const dataEngineeringTrack: Track = {
       ],
     },
     {
-      id: "intermediate",
-      title: L("Orta — Modelleme ve orkestrasyon", "Intermediate — Modelling and orchestration"),
+      id: "mid",
+      title: L("Modelleme ve orkestrasyon", "Modelling and orchestration"),
       description: L(
         "Boyutsal modelleme, dbt ile dönüşüm ve Airflow ile zamanlama.",
         "Dimensional modelling, transformation with dbt and scheduling with Airflow.",
@@ -142,8 +276,8 @@ gunluk_satis()`,
       ],
     },
     {
-      id: "advanced",
-      title: L("İleri — Ölçek ve veri kalitesi", "Advanced — Scale and data quality"),
+      id: "senior",
+      title: L("Ölçek ve veri kalitesi", "Scale and data quality"),
       description: L(
         "Spark ile dağıtık işleme, akış verisi ve veri sözleşmeleri.",
         "Distributed processing with Spark, streaming data and data contracts.",
@@ -214,6 +348,136 @@ rapor.write.format("delta").mode("overwrite") \\
                 "Copying a small table (typically under a few hundred MB) to every node is far cheaper than reshuffling a large one across the network. If both sides are large, broadcasting blows up memory and the job dies.",
               ],
               xp: 25,
+            }),
+          ],
+        }),
+      ],
+    },
+    {
+      id: "expert",
+      title: L("Güvenilir veri platformu", "A reliable data platform"),
+      description: L(
+        "Gözlemlenebilirlik, sözleşmeler ve maliyet: hattı kurmak değil, yaşatmak.",
+        "Observability, contracts and cost: not building the pipeline but keeping it alive.",
+      ),
+      lessons: [
+        lesson({
+          slug: "veri-gozlemlenebilirligi",
+          title: L("Veri gözlemlenebilirliği", "Data observability"),
+          summary: L(
+            "Hat çalıştı ama veri yanlış. Bunu kullanıcıdan önce nasıl öğrenirsin?",
+            "The pipeline ran but the data is wrong. How do you find out before your users do?",
+          ),
+          minutes: 18,
+          blocks: [
+            text(
+              "Bir veri hattının \"başarılı\" bitmesi, verinin **doğru** olduğu anlamına gelmez. İş yeşil görünürken tablo boş olabilir, satır sayısı yarıya inmiş olabilir veya bir sütun tamamen `NULL` gelmiş olabilir.\n\n**Veri gözlemlenebilirliği** beş boyutu izler:\n\n1. **Tazelik (freshness)** — Tablo en son ne zaman güncellendi? Beklenenden geç mi?\n2. **Hacim (volume)** — Satır sayısı normal aralıkta mı? Ani düşüş kaynak sorununu, ani artış tekrar yüklemeyi gösterir.\n3. **Şema** — Sütun eklendi, silindi veya tipi değişti mi?\n4. **Dağılım** — Değerler beklenen aralıkta mı? `NULL` oranı arttı mı?\n5. **Soy ağacı (lineage)** — Bu tablo hangi tablolardan besleniyor, kimler kullanıyor?\n\nSon madde bir sorun çıktığında **etkiyi** ölçmeni sağlar: \"bu tablo bozuldu, hangi raporlar etkilendi?\"",
+              "A pipeline finishing \"successfully\" does not mean the data is **correct**. The job can be green while the table is empty, the row count has halved, or a column arrived entirely `NULL`.\n\n**Data observability** monitors five dimensions:\n\n1. **Freshness** — when was the table last updated? Later than expected?\n2. **Volume** — is the row count in its normal range? A sudden drop points to a source problem, a sudden rise to a double load.\n3. **Schema** — has a column been added, removed or had its type changed?\n4. **Distribution** — are values in the expected range? Has the `NULL` rate risen?\n5. **Lineage** — which tables feed this one, and who consumes it?\n\nThe last one lets you measure **blast radius** when something breaks: \"this table is bad — which reports are affected?\"",
+            ),
+            text(
+              "**Pratikte nasıl kurulur?** Her dönüşüm adımından sonra otomatik testler çalıştırırsın. dbt kullanıyorsan bunlar yapılandırma dosyasında birkaç satırdır:\n\n```yaml\nmodels:\n  - name: satislar\n    columns:\n      - name: siparis_id\n        tests: [unique, not_null]\n      - name: musteri_id\n        tests:\n          - relationships:\n              to: ref('musteriler')\n              field: id\n      - name: tutar\n        tests:\n          - dbt_utils.accepted_range:\n              min_value: 0\n```\n\nBu testler her çalıştırmada koşar ve başarısız olurlarsa hat **durur** — bozuk veri aşağı akmaz. Bu, veri kalitesini belgeden koda taşımanın en pratik yoludur.",
+              "**How is it built in practice?** You run automated tests after every transformation step. With dbt these are a few lines of configuration:\n\n```yaml\nmodels:\n  - name: sales\n    columns:\n      - name: order_id\n        tests: [unique, not_null]\n      - name: customer_id\n        tests:\n          - relationships:\n              to: ref('customers')\n              field: id\n      - name: amount\n        tests:\n          - dbt_utils.accepted_range:\n              min_value: 0\n```\n\nThese run on every execution and, if they fail, the pipeline **stops** — bad data does not flow downstream. This is the most practical way to move data quality out of a document and into code.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Gecelik iş başarılı bitti ama tablodaki satır sayısı 2 milyondan 40 bine düştü. Bunu ne yakalar?",
+                "The nightly job succeeded but the table's row count fell from 2 million to 40,000. What catches this?",
+              ],
+              options: [
+                [
+                  "Hacim izleme — satır sayısının beklenen aralıkta olduğunu sınayan kontrol",
+                  "Volume monitoring — a check asserting the row count is in its expected range",
+                ],
+                ["İşin başarı durumu", "The job's success status"],
+                ["Şema kontrolü", "The schema check"],
+                ["Hiçbir şey", "Nothing"],
+              ],
+              answer: 0,
+              explain: [
+                "İş teknik olarak başarılıdır — kod çalıştı, hata fırlatmadı. Ama kaynak sistem o gece verinin yalnızca bir kısmını verdiyse sonuç sessizce eksiktir. Hacim izleme, satır sayısını geçmiş ortalamayla karşılaştırıp belirgin sapmalarda alarm üretir ve bu tür sessiz hataların tek savunmasıdır.",
+                "The job is technically successful — the code ran and threw no error. But if the source only delivered part of the data that night, the result is quietly incomplete. Volume monitoring compares the row count against its historical average and alerts on significant deviation; it is the only defence against this kind of silent failure.",
+              ],
+            }),
+          ],
+        }),
+        lesson({
+          slug: "veri-sozlesmeleri",
+          title: L("Veri sözleşmeleri ve şema evrimi", "Data contracts and schema evolution"),
+          summary: L(
+            "Yazılım ekibi bir sütunu yeniden adlandırdı ve on rapor bozuldu. Bunu nasıl önlersin?",
+            "The engineering team renamed a column and ten reports broke. How do you prevent that?",
+          ),
+          minutes: 18,
+          blocks: [
+            text(
+              "Veri ekiplerinin en sık yaşadığı kriz şudur: uygulama ekibi kendi veritabanında masum bir değişiklik yapar — bir sütunu yeniden adlandırır, bir alanı `NULL` yapılabilir hâle getirir, bir enum değeri ekler — ve haberi olmadan aşağı akıştaki on raporu bozar.\n\nSuç kimsede değildir; **sorun arayüzün tanımsız olmasıdır.** Uygulama ekibi o sütunun kendi iç detayı olduğunu düşünür; veri ekibi onu bir API gibi kullanmaktadır.\n\n**Veri sözleşmesi (data contract)** bu arayüzü açık hâle getirir: hangi alanların, hangi tiplerle, hangi garantilerle sunulduğunu yazılı ve **otomatik denetlenebilir** biçimde tanımlar. Sözleşmeyi bozan bir değişiklik, uygulama ekibinin kendi CI hattında başarısız olur — üretime çıkmadan önce.",
+              "The crisis data teams live most often is this: the application team makes an innocent change in their own database — renames a column, makes a field nullable, adds an enum value — and unknowingly breaks ten downstream reports.\n\nNobody is at fault; **the problem is that the interface was never defined.** The application team thinks the column is their internal detail; the data team is using it like an API.\n\nA **data contract** makes that interface explicit: it defines which fields are exposed, with which types and which guarantees, in a written and **automatically enforceable** form. A change that breaks the contract fails in the application team's own CI — before it reaches production.",
+            ),
+            text(
+              "**Şema değişikliklerinin iki türü** ve nasıl ele alınacakları:\n\n**Geriye dönük uyumlu (güvenli):**\n- Yeni bir sütun eklemek\n- Bir alanı zorunludan isteğe bağlıya çevirmek\n- Enum'a yeni değer eklemek (tüketici bilmediği değeri tolere ediyorsa)\n\n**Kırıcı (tehlikeli):**\n- Sütun silmek veya yeniden adlandırmak\n- Tip daraltmak (`bigint` → `int`)\n- Alanı isteğe bağlıdan zorunluya çevirmek\n- Bir alanın **anlamını** değiştirmek — en sinsisi, çünkü şema aynı kalır ama sayılar değişir\n\nKırıcı değişiklik gerektiğinde doğru yol **genişlet-daralt (expand-contract)** desenidir: önce yeni alanı ekle, iki alanı bir süre birlikte yaz, tüketiciler geçince eskisini kaldır.",
+              "**Two kinds of schema change** and how to handle them:\n\n**Backward compatible (safe):**\n- adding a new column\n- making a required field optional\n- adding a value to an enum (if consumers tolerate unknown values)\n\n**Breaking (dangerous):**\n- dropping or renaming a column\n- narrowing a type (`bigint` → `int`)\n- making an optional field required\n- changing a field's **meaning** — the most insidious, because the schema stays identical while the numbers change\n\nWhen a breaking change is unavoidable, the right approach is the **expand-contract** pattern: add the new field first, write both for a period, and remove the old one once consumers have migrated.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "`durum` sütunundaki `\"aktif\"` değeri sessizce `\"ACTIVE\"` olarak değiştirildi. Şema aynı kaldı. Bu neden tehlikelidir?",
+                "The value `\"active\"` in a `status` column was quietly changed to `\"ACTIVE\"`. The schema is unchanged. Why is this dangerous?",
+              ],
+              options: [
+                [
+                  "Şema testleri geçer ama `WHERE durum = 'aktif'` yazan tüm sorgular sessizce sıfır satır döndürür",
+                  "Schema tests pass, yet every query saying `WHERE status = 'active'` silently returns zero rows",
+                ],
+                ["Sütun tipi bozulur", "The column type breaks"],
+                ["Tablo silinir", "The table is dropped"],
+                ["Tehlikeli değildir", "It is not dangerous"],
+              ],
+              answer: 0,
+              explain: [
+                "Şema düzeyindeki kontroller sütun adına ve tipine bakar; değerin içeriğine bakmaz. Bu yüzden değişiklik tüm testlerden geçer ve raporlar hata vermeden **sıfır** gösterir. Korunmanın yolu, kabul edilen değer kümesini de sözleşmeye yazmak (`accepted_values` testi) ve dağılım izlemesi kurmaktır.",
+                "Schema-level checks look at column names and types, not at the values inside. So the change passes every test and reports show **zero** without raising an error. The defence is to put the accepted value set into the contract too (an `accepted_values` test) and to monitor distributions.",
+              ],
+            }),
+          ],
+        }),
+        lesson({
+          slug: "maliyet-ve-olceklendirme",
+          title: L("Maliyet yönetimi ve ölçeklendirme", "Cost management and scaling"),
+          summary: L(
+            "Bulut faturası neden üç ayda beş katına çıkar — ve nasıl geri indirilir?",
+            "Why does a cloud bill quintuple in three months — and how do you bring it back down?",
+          ),
+          minutes: 18,
+          blocks: [
+            text(
+              "Bulut veri platformlarında maliyet, kimse bakmazsa **sessizce ve hızla** büyür. En yaygın dört sebep:\n\n1. **Gereksiz sık yenileme** — Haftalık bakılan bir rapor için saatlik yenileme kurmak, aynı işi 168 kat fazla yapmaktır.\n2. **Tam yenileme (full refresh)** — Her gece tüm tarihi yeniden işlemek. Oysa yalnızca değişenleri işlemek (artımlı / incremental) genelde yeterlidir.\n3. **Bölümlenmemiş tablolar** — Sorgu her seferinde tüm tabloyu tarar. Tarihe göre bölümleme (partitioning), taranan veriyi %99 azaltabilir.\n4. **Unutulmuş kaynaklar** — Kapatılmayan geliştirme kümeleri, kullanılmayan tablolar, silinmeyen ara çıktılar.",
+              "On cloud data platforms, cost grows **quietly and fast** when nobody watches. The four most common causes:\n\n1. **Refreshing more often than needed** — hourly refresh for a report read weekly does the same work 168 times over.\n2. **Full refresh** — reprocessing all history every night, when processing only what changed (incremental) is usually enough.\n3. **Unpartitioned tables** — every query scans the whole table. Partitioning by date can cut the data scanned by 99%.\n4. **Forgotten resources** — development clusters left running, unused tables, intermediate outputs never deleted.",
+            ),
+            text(
+              "**Ölçeklendirmede iki eksen** ve hangisinin ne zaman gerektiği:\n\n- **Dikey (vertical)** — Makineyi büyüt: daha çok CPU ve bellek. Basittir ve bir yere kadar en ucuz çözümdür. Çoğu şirketin verisi tek güçlü makineye sığar — \"büyük veri\" sandığın şey genelde büyük değildir.\n- **Yatay (horizontal)** — İşi çok makineye böl (Spark, dağıtık ambarlar). Gerçekten büyük veride şarttır ama karmaşıklık ve maliyet getirir.\n\n**Pratik sıra:** önce sorguyu iyileştir, sonra tabloyu bölümle, sonra makineyi büyüt, en son dağıt. İnsanların çoğu bu sırayı tersten uygular ve çözülebilecek bir sorgu problemine küme satın alır.\n\nÖlçmeden optimize etme: her modern ambar sorgu başına taranan bayt ve maliyet bilgisi verir. En pahalı on sorguyu bulmak, faturanın yarısını açıklar.",
+              "**Two axes of scaling**, and when each is needed:\n\n- **Vertical** — make the machine bigger: more CPU and memory. Simple, and up to a point the cheapest answer. Most companies' data fits on one powerful machine — what you think is \"big data\" usually is not.\n- **Horizontal** — split the work across many machines (Spark, distributed warehouses). Essential at genuinely large scale, but it brings complexity and cost.\n\n**The practical order:** improve the query, then partition the table, then grow the machine, and only then distribute. Most people apply this order backwards and buy a cluster for a problem a query rewrite would have solved.\n\nDo not optimise without measuring: every modern warehouse reports bytes scanned and cost per query. Finding the ten most expensive queries explains half the bill.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Ambar faturası hızla artıyor. İlk bakılacak yer neresidir?",
+                "The warehouse bill is rising fast. Where do you look first?",
+              ],
+              options: [
+                [
+                  "En çok veri tarayan sorgular ve yenileme sıklıkları",
+                  "The queries scanning the most data, and the refresh frequencies",
+                ],
+                ["Kullanıcı sayısı", "The number of users"],
+                ["Tablo sayısı", "The number of tables"],
+                ["Depolama boyutu", "The storage size"],
+              ],
+              answer: 0,
+              explain: [
+                "Modern ambarlarda depolama ucuzdur; asıl maliyet **işlem**dir, yani taranan veri miktarıdır. Bölümlenmemiş bir tabloyu her saat tam tarayan tek bir sorgu, faturanın yarısını tek başına oluşturabilir. Bu yüzden ilk iş en pahalı sorguları listelemektir.",
+                "In modern warehouses storage is cheap; the real cost is **compute**, meaning the volume of data scanned. A single query fully scanning an unpartitioned table every hour can account for half the bill on its own. So the first move is to list the most expensive queries.",
+              ],
             }),
           ],
         }),

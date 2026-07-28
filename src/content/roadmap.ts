@@ -32,7 +32,7 @@ export const roadmap: RoadmapPhase[] = [
     stops: [
       {
         trackSlug: "excel",
-        level: "beginner",
+        level: "junior",
         why: L(
           "Veriyi analiz edilebilir biçimde tutmayı burada öğrenirsin; bu alışkanlık her araca taşınır.",
           "This is where you learn to keep data in an analysable shape — a habit that carries into every tool.",
@@ -40,7 +40,7 @@ export const roadmap: RoadmapPhase[] = [
       },
       {
         trackSlug: "sql",
-        level: "beginner",
+        level: "junior",
         why: L(
           "Veriyi kaynağından çekmeden analiz başlamaz. SQL, analist ilanlarının neredeyse tamamında geçer.",
           "Analysis does not start until you can pull the data. SQL appears in almost every analyst job ad.",
@@ -48,7 +48,7 @@ export const roadmap: RoadmapPhase[] = [
       },
       {
         trackSlug: "istatistik",
-        level: "beginner",
+        level: "junior",
         why: L(
           "Ortalama ile medyan arasındaki farkı bilmeden çıkarılan her rapor yanıltıcıdır.",
           "Any report written without knowing mean from median is misleading.",
@@ -67,7 +67,7 @@ export const roadmap: RoadmapPhase[] = [
     stops: [
       {
         trackSlug: "sql",
-        level: "intermediate",
+        level: "mid",
         why: L(
           "Gerçek veri hiç tek tabloda durmaz; JOIN ve CTE günlük işin merkezindedir.",
           "Real data never sits in one table; JOINs and CTEs are the centre of daily work.",
@@ -75,7 +75,7 @@ export const roadmap: RoadmapPhase[] = [
       },
       {
         trackSlug: "python",
-        level: "beginner",
+        level: "junior",
         why: L(
           "SQL'in yapamadığı yerde Python devreye girer: tekrarlanabilir temizlik ve otomasyon.",
           "Python starts where SQL stops: reproducible cleaning and automation.",
@@ -83,7 +83,7 @@ export const roadmap: RoadmapPhase[] = [
       },
       {
         trackSlug: "veri-gorsellestirme",
-        level: "beginner",
+        level: "junior",
         why: L(
           "Doğru grafiği seçmek, aracı öğrenmekten önce gelir — yoksa her aracı yanlış kullanırsın.",
           "Choosing the right chart comes before learning a tool; otherwise you misuse every tool.",
@@ -91,7 +91,7 @@ export const roadmap: RoadmapPhase[] = [
       },
       {
         trackSlug: "power-bi",
-        level: "beginner",
+        level: "junior",
         why: L(
           "Kurumsal raporlamada en yaygın araç. Tableau'yu tercih ediyorsan onun başlangıç seviyesini al.",
           "The most common tool in enterprise reporting. If you prefer Tableau, take its beginner level instead.",
@@ -99,7 +99,7 @@ export const roadmap: RoadmapPhase[] = [
       },
       {
         trackSlug: "git-github",
-        level: "beginner",
+        level: "junior",
         why: L(
           "Çalışmanı sürümlemeden portföy olmaz. Bu adım seni 'gösterilebilir' hale getirir.",
           "No versioning, no portfolio. This step makes your work showable.",
@@ -118,7 +118,7 @@ export const roadmap: RoadmapPhase[] = [
     stops: [
       {
         trackSlug: "python",
-        level: "intermediate",
+        level: "mid",
         why: L(
           "pandas ile veri işleme, analistin en çok kullandığı beceridir.",
           "Wrangling with pandas is the analyst's most-used skill.",
@@ -126,7 +126,7 @@ export const roadmap: RoadmapPhase[] = [
       },
       {
         trackSlug: "sql",
-        level: "advanced",
+        level: "senior",
         why: L(
           "Pencere fonksiyonları, analist ile kıdemli analist arasındaki en görünür farktır.",
           "Window functions are the most visible gap between analyst and senior analyst.",
@@ -134,7 +134,7 @@ export const roadmap: RoadmapPhase[] = [
       },
       {
         trackSlug: "istatistik",
-        level: "advanced",
+        level: "senior",
         why: L(
           "A/B testi okumayı bilmeyen analist, ürün ekibiyle aynı dili konuşamaz.",
           "An analyst who cannot read an A/B test cannot speak the product team's language.",
@@ -142,7 +142,7 @@ export const roadmap: RoadmapPhase[] = [
       },
       {
         trackSlug: "power-bi",
-        level: "intermediate",
+        level: "mid",
         why: L(
           "Yıldız şema ve DAX, raporun doğru sayıyı göstermesinin ön koşuludur.",
           "A star schema and DAX are the precondition for a report showing the right number.",
@@ -161,7 +161,7 @@ export const roadmap: RoadmapPhase[] = [
     stops: [
       {
         trackSlug: "machine-learning",
-        level: "beginner",
+        level: "junior",
         why: L(
           "Önce hangi problemin ML problemi olduğunu ayırt etmeyi öğren.",
           "First learn to tell which problems are actually ML problems.",
@@ -169,7 +169,7 @@ export const roadmap: RoadmapPhase[] = [
       },
       {
         trackSlug: "machine-learning",
-        level: "intermediate",
+        level: "mid",
         why: L(
           "Doğru metriği seçmek, doğru algoritmayı seçmekten önemlidir.",
           "Choosing the right metric matters more than choosing the right algorithm.",
@@ -177,7 +177,7 @@ export const roadmap: RoadmapPhase[] = [
       },
       {
         trackSlug: "python",
-        level: "advanced",
+        level: "senior",
         why: L(
           "Not defterinden çıkıp test edilebilir, tekrarlanabilir kod yazmaya geçiş.",
           "Moving out of the notebook into testable, reproducible code.",
@@ -185,7 +185,7 @@ export const roadmap: RoadmapPhase[] = [
       },
       {
         trackSlug: "machine-learning",
-        level: "advanced",
+        level: "senior",
         why: L(
           "Üretime alınmayan model, yapılmamış model sayılır.",
           "A model that never ships is a model that was never built.",
@@ -204,7 +204,7 @@ export const roadmap: RoadmapPhase[] = [
     stops: [
       {
         trackSlug: "veri-muhendisligi",
-        level: "intermediate",
+        level: "mid",
         why: L(
           "Veriyi kendi çekebilen analist, kimseyi beklemez.",
           "An analyst who can pull their own data waits for no one.",
@@ -212,7 +212,7 @@ export const roadmap: RoadmapPhase[] = [
       },
       {
         trackSlug: "microsoft-fabric",
-        level: "intermediate",
+        level: "mid",
         why: L(
           "Microsoft ekosistemindeysen medallion mimarisi doğrudan işine yarar.",
           "If you are in the Microsoft ecosystem, the medallion architecture pays off immediately.",
@@ -220,7 +220,7 @@ export const roadmap: RoadmapPhase[] = [
       },
       {
         trackSlug: "veri-muhendisligi",
-        level: "advanced",
+        level: "senior",
         why: L(
           "Veri kalitesi testleri, güvenilir raporun tek gerçek garantisidir.",
           "Data quality tests are the only real guarantee behind a trustworthy report.",

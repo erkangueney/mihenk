@@ -9,8 +9,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { adapter, emptyProgress, normalize } from "@/lib/storage";
+import { adapter, emptyProgress, flushPendingProgress, normalize } from "@/lib/storage";
 import { badges, todayKey } from "@/lib/gamification";
+import { useSession } from "@/components/auth/session-provider";
 import type { ProgressState } from "@/lib/types";
 
 export interface Toast {
@@ -43,27 +44,47 @@ const ProgressContext = createContext<ProgressContextValue | null>(null);
 
 export function ProgressProvider({ children }: { children: React.ReactNode }) {
   const [progress, setProgress] = useState<ProgressState>(emptyProgress);
-  const [ready, setReady] = useState(false);
+  /** Eldeki `progress` hangi oturuma ait? null ise henüz hiçbir şey okunmadı. */
+  const [loadedKey, setLoadedKey] = useState<string | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const toastId = useRef(0);
 
+  const { user, ready: sessionReady } = useSession();
+  // Oturum değiştiğinde (giriş/çıkış) ilerleme yeniden okunmalı: girişte
+  // buluttaki kayıt, çıkışta cihazdaki kayıt geçerli olur.
+  const sessionKey = user?.id ?? "anon";
+
+  // `ready` ayrı bir durum değil, türetilmiş değer. Oturum değişir değişmez
+  // kendiliğinden false olur — efekt içinde senkron setState gerekmez.
+  const ready = sessionReady && loadedKey === sessionKey;
+
   useEffect(() => {
+    // Oturum bilinmeden okumaya başlarsak yanlış kaynaktan yükleriz.
+    if (!sessionReady) return;
+
     let cancelled = false;
     adapter.load().then((loaded) => {
       if (cancelled) return;
       setProgress(loaded);
-      setReady(true);
+      setLoadedKey(sessionKey);
     });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [sessionReady, sessionKey]);
 
   // Depo yazımı, ilk okuma bitmeden yapılmamalı; yoksa boş durum kaydı ezerdi.
   useEffect(() => {
     if (!ready) return;
     void adapter.save(progress);
   }, [progress, ready]);
+
+  // Bulut yazımı gecikmeli topaklanıyor; sekme kapanırken bekleyeni gönder.
+  useEffect(() => {
+    const flush = () => flushPendingProgress();
+    window.addEventListener("pagehide", flush);
+    return () => window.removeEventListener("pagehide", flush);
+  }, []);
 
   const pushToast = useCallback((toast: Omit<Toast, "id">) => {
     const id = (toastId.current += 1);

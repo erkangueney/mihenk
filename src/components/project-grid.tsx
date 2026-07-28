@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useProgress } from "@/components/progress-provider";
+import { levelOrder } from "@/lib/content";
 import { ui, type DictKey } from "@/lib/i18n";
 import type { LevelId, Locale } from "@/lib/types";
 
@@ -19,8 +20,6 @@ export interface ProjectCardData {
   xp: number;
 }
 
-const levelFilters: (LevelId | "all")[] = ["all", "beginner", "intermediate", "advanced"];
-
 export function ProjectGrid({
   projects,
   locale,
@@ -30,6 +29,13 @@ export function ProjectGrid({
 }) {
   const { progress, ready } = useProgress();
   const [level, setLevel] = useState<LevelId | "all">("all");
+
+  // Filtreler veriden türetilir: projesi olmayan bir kademe boş sekme olarak
+  // görünmez, içerik büyüdükçe yenisi kendiliğinden eklenir.
+  const levelFilters: (LevelId | "all")[] = [
+    "all",
+    ...levelOrder.filter((id) => projects.some((project) => project.level === id)),
+  ];
 
   const visible = level === "all" ? projects : projects.filter((p) => p.level === level);
 
@@ -44,7 +50,7 @@ export function ProjectGrid({
             aria-pressed={level === value}
             className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium whitespace-nowrap transition ${
               level === value
-                ? "border-accent bg-accent text-white"
+                ? "border-accent bg-accent text-on-accent"
                 : "border-border bg-surface text-muted hover:text-text"
             }`}
           >

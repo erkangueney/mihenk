@@ -18,7 +18,7 @@ export const LESSON_BONUS_XP = 25;
 /** Bir seviyenin kilidini açmak için önceki seviyede gereken tamamlanma oranı. */
 export const UNLOCK_RATIO = 0.7;
 
-export const levelOrder: LevelId[] = ["beginner", "intermediate", "advanced"];
+export const levelOrder: LevelId[] = ["foundation", "junior", "mid", "senior", "expert"];
 
 export const categoryOrder: TrackCategory[] = [
   "language",
@@ -89,11 +89,19 @@ function isTask(block: Block): block is Extract<Block, { id: string; xp: number 
   return block.type === "quiz" || block.type === "order" || block.type === "exercise";
 }
 
-/** Bir dersteki görev sayısı ve toplam XP. */
+/**
+ * Bir dersteki görev sayısı ve toplam XP.
+ *
+ * Ders, slug'a göre global listede değil verilen `track` nesnesinin içinde
+ * aranır: yayındaki patika veritabanından gelmiş olabilir ve o zaman
+ * dosyalarda karşılığı bulunmaz.
+ */
 export function lessonStats(track: Track, lessonSlug: string) {
-  const found = getLesson(track.slug, lessonSlug);
-  if (!found) return { tasks: 0, xp: 0 };
-  const taskBlocks = found.lesson.blocks.filter(isTask);
+  const lesson = track.levels
+    .flatMap((level) => level.lessons)
+    .find((item) => item.slug === lessonSlug);
+  if (!lesson) return { tasks: 0, xp: 0 };
+  const taskBlocks = lesson.blocks.filter(isTask);
   return {
     tasks: taskBlocks.length,
     xp: taskBlocks.reduce((sum, block) => sum + block.xp, LESSON_BONUS_XP),
@@ -114,16 +122,28 @@ export function trackStats(track: Track) {
   return { lessons, minutes, xp, levels: track.levels.length };
 }
 
-export function platformStats() {
+/**
+ * Verilen içerik kümesinin toplamları.
+ *
+ * Listeler parametre olarak alınır çünkü yayındaki içerik dosyalardakiyle
+ * aynı olmayabilir — veritabanındaki dokümanlar patika ekleyip
+ * değiştirebiliyor (bkz. src/lib/content-docs/resolve.ts).
+ */
+export function platformStatsOf(trackList: Track[], projectList: Project[]) {
   let lessons = 0;
   let xp = 0;
-  for (const track of tracks) {
+  for (const track of trackList) {
     const stats = trackStats(track);
     lessons += stats.lessons;
     xp += stats.xp;
   }
-  for (const project of projects) xp += project.xp;
-  return { lessons, xp, tracks: tracks.length, projects: projects.length };
+  for (const project of projectList) xp += project.xp;
+  return { lessons, xp, tracks: trackList.length, projects: projectList.length };
+}
+
+/** Yalnızca dosyadaki içeriğin toplamları. */
+export function platformStats() {
+  return platformStatsOf(tracks, projects);
 }
 
 /* ------------------------------------------------------------------ */

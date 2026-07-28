@@ -44,14 +44,12 @@ export function HeroCta({ locale, resume }: { locale: Locale; resume: ResumeTarg
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <Link
           href={`/${locale}/learn/${target.trackSlug}/${target.lessonSlug}`}
-          className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-accent to-accent-2 px-6 py-3.5 text-base font-semibold text-white shadow-[var(--shadow)] transition hover:brightness-110"
+          className="btn-gold px-7 py-3.5 text-base"
         >
           {started ? ui("home.cta.continue", locale) : ui("home.cta.start", locale)}
+          <span aria-hidden>→</span>
         </Link>
-        <Link
-          href={`/${locale}/roadmap`}
-          className="inline-flex items-center justify-center rounded-xl border border-border bg-surface px-6 py-3.5 text-base font-semibold transition hover:border-accent"
-        >
+        <Link href={`/${locale}/roadmap`} className="btn-ghost px-7 py-3.5 text-base">
           {ui("home.cta.roadmap", locale)}
         </Link>
       </div>

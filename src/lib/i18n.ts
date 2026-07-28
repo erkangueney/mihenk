@@ -44,8 +44,8 @@ const dictionary = {
   "home.cta.roadmap": { tr: "Yol haritasını gör", en: "See the roadmap" },
   "home.tracks.title": { tr: "Öğrenme patikaları", en: "Learning tracks" },
   "home.tracks.subtitle": {
-    tr: "Her patika başlangıçtan ileri seviyeye kadar kesintisiz ilerler ve her seviyenin sonunda bir uçtan uca proje bulunur.",
-    en: "Every track runs from beginner to advanced, and each level ends with a full end-to-end project.",
+    tr: "Her patika beş kademeden geçer — Temel, Junior, Orta seviye, Senior ve Uzman. Kademeler gerçek bir kariyer merdivenini izler ve her birinin sonunda uçtan uca bir proje bulunur.",
+    en: "Every track runs through five stages — Foundation, Junior, Mid-level, Senior and Expert. The stages follow a real career ladder, and each one ends with an end-to-end project.",
   },
   "home.how.title": { tr: "Nasıl çalışır?", en: "How it works" },
   "home.stats.lessons": { tr: "ders", en: "lessons" },
@@ -73,9 +73,11 @@ const dictionary = {
   "category.foundation": { tr: "Temeller", en: "Foundations" },
   "category.advanced": { tr: "İleri seviye", en: "Advanced" },
 
-  "level.beginner": { tr: "Başlangıç", en: "Beginner" },
-  "level.intermediate": { tr: "Orta", en: "Intermediate" },
-  "level.advanced": { tr: "İleri", en: "Advanced" },
+  "level.foundation": { tr: "Temel", en: "Foundation" },
+  "level.junior": { tr: "Junior", en: "Junior" },
+  "level.mid": { tr: "Orta seviye", en: "Mid-level" },
+  "level.senior": { tr: "Senior", en: "Senior" },
+  "level.expert": { tr: "Uzman", en: "Expert" },
 
   "lesson.minutes": { tr: "dk", en: "min" },
   "lesson.next": { tr: "Sonraki ders", en: "Next lesson" },
@@ -145,8 +147,8 @@ const dictionary = {
 
   "leaderboard.title": { tr: "Liderlik tablosu", en: "Leaderboard" },
   "leaderboard.subtitle": {
-    tr: "Sıralama şu an cihazında yerel olarak hesaplanıyor; rakipler bu hafta ortalama bir öğrencinin temposunu temsil ediyor.",
-    en: "Ranking is computed locally on your device; the rivals represent an average learner's pace this week.",
+    tr: "Giriş yapan herkesin kazandığı XP'ye göre canlı sıralama. İlerlemen birkaç saniye içinde tabloya yansır.",
+    en: "A live ranking by XP across everyone signed in. Your progress reaches the table within seconds.",
   },
   "leaderboard.you": { tr: "Sen", en: "You" },
   "leaderboard.rank": { tr: "Sıra", en: "Rank" },
@@ -177,6 +179,88 @@ const dictionary = {
   "common.soon": { tr: "Yakında", en: "Soon" },
   "common.search": { tr: "Ara", en: "Search" },
   "common.noResults": { tr: "Sonuç bulunamadı", en: "No results" },
+
+  /* Üyelik ---------------------------------------------------------- */
+  "auth.signIn": { tr: "Giriş yap", en: "Sign in" },
+  "auth.signUp": { tr: "Kayıt ol", en: "Sign up" },
+  "auth.signOut": { tr: "Çıkış yap", en: "Sign out" },
+  "auth.email": { tr: "E-posta", en: "Email" },
+  "auth.password": { tr: "Şifre", en: "Password" },
+  "auth.displayName": { tr: "Görünen ad", en: "Display name" },
+  "auth.displayNameHint": {
+    tr: "Liderlik tablosunda görünecek ad",
+    en: "The name shown on the leaderboard",
+  },
+  "auth.passwordHint": { tr: "En az 8 karakter", en: "At least 8 characters" },
+  "auth.forgot": { tr: "Şifremi unuttum", en: "Forgot password" },
+  "auth.createAccount": { tr: "Hesap oluştur", en: "Create account" },
+  "auth.haveAccount": { tr: "Zaten hesabın var mı?", en: "Already have an account?" },
+  "auth.pending": { tr: "Lütfen bekle…", en: "Please wait…" },
+  "auth.welcomeBack": { tr: "Tekrar hoş geldin", en: "Welcome back" },
+  "auth.welcomeBackSub": {
+    tr: "İlerlemen buluta kaydedilir; hangi cihazdan girersen gir kaldığın yerden devam edersin.",
+    en: "Your progress is saved to the cloud — pick up where you left off on any device.",
+  },
+  "auth.signUpSub": {
+    tr: "Ücretsiz. Tarayıcıda biriken ilerlemen ilk girişte hesabına taşınır.",
+    en: "Free. Progress already in your browser moves to your account on first sign-in.",
+  },
+  "auth.suspended": {
+    tr: "Bu hesap askıya alınmış. Yöneticiyle iletişime geç.",
+    en: "This account is suspended. Please contact an administrator.",
+  },
+  "auth.resetTitle": { tr: "Şifreni sıfırla", en: "Reset your password" },
+  "auth.resetSub": {
+    tr: "E-posta adresini gir; sıfırlama bağlantısını gönderelim.",
+    en: "Enter your email address and we'll send a reset link.",
+  },
+  "auth.resetSend": { tr: "Sıfırlama bağlantısı gönder", en: "Send reset link" },
+  "auth.backToSignIn": { tr: "Girişe dön", en: "Back to sign in" },
+  "auth.newPasswordTitle": { tr: "Yeni şifre belirle", en: "Set a new password" },
+  "auth.newPasswordSub": {
+    tr: "Bu sayfaya e-postandaki bağlantıyla geldiysen yeni şifreni kaydedebilirsin.",
+    en: "If you arrived here from the link in your email, you can save a new password.",
+  },
+  "auth.newPassword": { tr: "Yeni şifre", en: "New password" },
+  "auth.newPasswordAgain": { tr: "Yeni şifre (tekrar)", en: "New password (again)" },
+  "auth.updatePassword": { tr: "Şifreyi güncelle", en: "Update password" },
+  "auth.backToSite": { tr: "← Siteye dön", en: "← Back to site" },
+  "auth.disabledTitle": { tr: "Giriş bu kurulumda kapalı.", en: "Sign-in is disabled here." },
+  "auth.disabledBody": {
+    tr: "Üyelik için Supabase anahtarları tanımlanmalı. Adımlar: docs/kurulum.md",
+    en: "Membership requires Supabase keys. Setup steps: docs/kurulum.md",
+  },
+  "auth.adminPanel": { tr: "Yönetim paneli", en: "Admin panel" },
+  "auth.admin": { tr: "Yönetici", en: "Admin" },
+  "auth.member": { tr: "Üye", en: "Member" },
+  "auth.leaderboardCta": {
+    tr: "Tabloda yer almak için giriş yap — ilerlemen hesabına kaydedilmeye başlar.",
+    en: "Sign in to appear on the board — your progress starts saving to your account.",
+  },
+  "auth.leaderboardSample": {
+    tr: "Bu kurulumda üyelik kapalı; aşağıdaki tablo örnek verilerle gösteriliyor.",
+    en: "Membership is disabled here; the table below shows sample data.",
+  },
+  "auth.leaderboardEmpty": {
+    tr: "Henüz kimse XP kazanmamış. İlk dersini bitiren tablonun tepesine yerleşir.",
+    en: "Nobody has earned XP yet. Finish a lesson to take the top spot.",
+  },
+  "footer.storage.cloud": {
+    tr: "İlerlemen hesabına kaydediliyor.",
+    en: "Your progress is saved to your account.",
+  },
+  "footer.storage.device": {
+    tr: "İlerlemen şu an bu cihazda saklanıyor.",
+    en: "Your progress is currently stored on this device.",
+  },
+  "footer.storage.signIn": {
+    tr: "İlerlemen bu cihazda saklanıyor — giriş yaparsan hesabına taşınır.",
+    en: "Your progress is stored on this device — sign in to move it to your account.",
+  },
+  "auth.leaderboardError": {
+    tr: "Sıralama şu anda yüklenemedi. Sayfayı yenilemeyi dene.",
+    en: "The ranking could not be loaded. Try refreshing the page.",
+  },
 } as const satisfies Record<string, Localized>;
 
 export type DictKey = keyof typeof dictionary;

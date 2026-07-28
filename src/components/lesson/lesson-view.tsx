@@ -71,7 +71,7 @@ export function LessonView({
       </nav>
 
       <header className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-balance sm:text-4xl">
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
           {t(lesson.title, locale)}
         </h1>
         <p className="mt-3 text-base leading-relaxed text-muted">{t(lesson.summary, locale)}</p>
@@ -127,7 +127,7 @@ export function LessonView({
               type="button"
               disabled={!allDone}
               onClick={() => completeLesson(lessonKey, LESSON_BONUS_XP)}
-              className="w-full rounded-xl bg-gradient-to-r from-accent to-accent-2 px-6 py-3.5 text-base font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
+              className="w-full rounded-xl bg-gradient-to-r from-accent to-accent-2 px-6 py-3.5 text-base font-semibold text-on-accent transition disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
             >
               {ui("lesson.finish", locale)} · +{LESSON_BONUS_XP} XP
             </button>

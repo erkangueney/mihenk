@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LessonView } from "@/components/lesson/lesson-view";
-import { flatLessons, getLesson, getTrack, tracks } from "@/lib/content";
+import { flatLessons } from "@/lib/content";
+import { getLessonResolved, getTracks } from "@/lib/content-docs/resolve";
 import { isLocale, locales, t } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const tracks = await getTracks();
   return locales.flatMap((locale) =>
     tracks.flatMap((track) =>
       track.levels.flatMap((level) =>
@@ -25,7 +27,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; track: string; lesson: string }>;
 }): Promise<Metadata> {
   const { locale, track, lesson } = await params;
-  const found = getLesson(track, lesson);
+  const found = await getLessonResolved(track, lesson);
   if (!found || !isLocale(locale)) return {};
   return {
     title: `${t(found.lesson.title, locale)} · ${found.track.name}`,
@@ -42,9 +44,9 @@ export default async function LessonPage({
   if (!isLocale(raw)) notFound();
   const locale: Locale = raw;
 
-  const found = getLesson(trackSlug, lessonSlug);
-  const track = getTrack(trackSlug);
-  if (!found || !track) notFound();
+  const found = await getLessonResolved(trackSlug, lessonSlug);
+  if (!found) notFound();
+  const track = found.track;
 
   // Önceki/sonraki ders, patikanın düz ders listesindeki komşulardır.
   const list = flatLessons(track, locale);

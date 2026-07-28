@@ -31,14 +31,19 @@ export function TrackCard({ track, locale }: { track: TrackCardData; locale: Loc
   return (
     <Link
       href={`/${locale}/learn/${track.slug}`}
-      className="card group relative flex flex-col gap-4 p-5 transition hover:-translate-y-0.5 hover:border-[color:var(--track)] hover:shadow-[var(--shadow)] sm:p-6"
+      className="card group relative flex flex-col gap-4 overflow-hidden p-5 transition duration-300 hover:-translate-y-1 hover:border-[color:var(--track)] hover:shadow-[var(--shadow)] sm:p-6"
       style={{ ["--track" as string]: track.color }}
     >
+      {/* Üstte patika renginde incecik ışık çizgisi — sadece hover'da belirir. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[color:var(--track)] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+      />
       <div className="flex items-start gap-4">
         <span
           aria-hidden
-          className="grid h-12 w-12 shrink-0 place-items-center rounded-xl text-2xl"
-          style={{ backgroundColor: `color-mix(in oklab, ${track.color} 18%, transparent)` }}
+          className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-2xl ring-1 transition duration-300 group-hover:scale-105 ring-[color:color-mix(in_oklab,var(--track)_35%,transparent)]"
+          style={{ backgroundColor: `color-mix(in oklab, ${track.color} 16%, transparent)` }}
         >
           {track.icon}
         </span>

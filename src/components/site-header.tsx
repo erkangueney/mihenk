@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { BrandLockup } from "@/components/brand";
 import { levelInfo } from "@/lib/gamification";
 import { locales, ui } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
 import { useProgress } from "./progress-provider";
 import { ThemeToggle } from "./theme-toggle";
+import { AccountMenu, AccountMobileLinks } from "./auth/account-menu";
 
 interface NavItem {
   href: string;
@@ -46,19 +48,10 @@ export function SiteHeader({ locale }: { locale: Locale }) {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-bg/85 backdrop-blur-lg">
+    <header className="sticky top-0 z-40 border-b border-border/80 bg-bg/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center gap-3 px-4 sm:px-6">
-        <Link
-          href={withLocale("")}
-          className="flex shrink-0 items-center gap-2 text-base font-bold tracking-tight"
-        >
-          <span
-            aria-hidden
-            className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-accent to-accent-2 text-sm font-black text-white"
-          >
-            VA
-          </span>
-          <span className="hidden sm:inline">Veri Akademi</span>
+        <Link href={withLocale("")} className="flex shrink-0 items-center gap-2.5">
+          <BrandLockup size={32} hideWordmark />
         </Link>
 
         <nav className="ml-2 hidden items-center gap-1 md:flex">
@@ -82,9 +75,9 @@ export function SiteHeader({ locale }: { locale: Locale }) {
           {ready && progress.xp > 0 ? (
             <Link
               href={withLocale("/profile")}
-              className="hidden items-center gap-2 rounded-full border border-border bg-surface-2 py-1.5 pr-3 pl-2 text-xs font-semibold sm:flex"
+              className="hidden items-center gap-2 rounded-full border border-accent/30 bg-surface-2 py-1.5 pr-3 pl-2 text-xs font-semibold transition hover:border-accent/60 sm:flex"
             >
-              <span className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-accent to-accent-2 text-[10px] font-black text-white">
+              <span className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-accent-2 to-accent text-[10px] font-black text-on-accent">
                 {info.level}
               </span>
               <span>{progress.xp.toLocaleString(locale)} XP</span>
@@ -97,7 +90,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
                 key={code}
                 href={swapLocale(code)}
                 className={`rounded-md px-2 py-1 text-xs font-semibold uppercase transition ${
-                  code === locale ? "bg-accent text-white" : "text-muted hover:text-text"
+                  code === locale ? "bg-accent text-on-accent" : "text-muted hover:text-text"
                 }`}
               >
                 {code}
@@ -107,12 +100,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
 
           <ThemeToggle />
 
-          <Link
-            href={withLocale("/profile")}
-            className="hidden h-9 items-center rounded-lg bg-gradient-to-r from-accent to-accent-2 px-3 text-sm font-semibold text-white md:flex"
-          >
-            {ui("nav.profile", locale)}
-          </Link>
+          <AccountMenu locale={locale} />
 
           <button
             type="button"
@@ -145,6 +133,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
                 {ui(item.key, locale)}
               </Link>
             ))}
+            <AccountMobileLinks locale={locale} onNavigate={() => setOpen(false)} />
             <div className="mt-2 flex items-center gap-2 border-t border-border pt-3">
               {locales.map((code) => (
                 <Link
@@ -152,7 +141,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
                   href={swapLocale(code)}
                   onClick={() => setOpen(false)}
                   className={`rounded-lg px-3 py-2 text-sm font-semibold uppercase ${
-                    code === locale ? "bg-accent text-white" : "bg-surface-2 text-muted"
+                    code === locale ? "bg-accent text-on-accent" : "bg-surface-2 text-muted"
                   }`}
                 >
                   {code}
