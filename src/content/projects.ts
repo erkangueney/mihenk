@@ -1782,6 +1782,135 @@ print("MAE:", np.mean(hatalar).round(2), "±", np.std(hatalar).round(2))`,
     ],
   }),
 
+  project({
+    slug: "ml-musteri-segmentasyonu-kmeans",
+    track: "machine-learning",
+    level: "expert",
+    title: ["K-Means ile Müşteri Segmentasyonu", "Customer Segmentation with K-Means"],
+    stack: ["Python", "scikit-learn", "K-Means", "PCA"],
+    hours: 10,
+    xp: 600,
+    summary: [
+      "Etiketsiz müşteri verisini K-Means ile kümelere ayır, doğru küme sayısını seç, PCA ile görselleştir ve her segmente iş dünyasının anlayacağı bir isim ver.",
+      "Cluster unlabeled customer data with K-Means, choose the right number of clusters, visualize with PCA, and give each segment a name the business will understand.",
+    ],
+    dataset: [
+      "Kaggle \"Mall Customer Segmentation\" veya kendi müşteri verinden harcama/sıklık/yenilik (RFM benzeri) özellikleri.",
+      "Kaggle's \"Mall Customer Segmentation\" or spend/frequency/recency (RFM-like) features from your own customer data.",
+    ],
+    deliverables: [
+      ["Ölçeklendirilmiş özellikler ve dirsek (elbow) grafiğiyle seçilmiş küme sayısı", "Scaled features and a cluster count chosen via the elbow chart"],
+      ["PCA ile 2 boyuta indirgenmiş, kümelere göre renklendirilmiş dağılım grafiği", "A PCA-reduced 2D scatter plot colored by cluster"],
+      ["Her segment için profil tablosu (ortalama harcama, sıklık, vb.) ve iş dünyasına uygun bir isim (\"Sadık Yüksek Harcayanlar\" gibi)", "A profile table per segment (average spend, frequency, etc.) and a business-friendly name (like \"Loyal High Spenders\")"],
+      ["Her segment için 1 somut aksiyon önerisi", "One concrete action recommendation per segment"],
+    ],
+    steps: [
+      {
+        title: ["Özellikleri seç ve ölçeklendir", "Select and scale features"],
+        body: [
+          "3-5 sayısal özellik seç (harcama, sıklık, son alışverişten geçen gün gibi). K-Means'ten önce `StandardScaler` ile ölçeklendirmeyi unutma — aksi halde en büyük sayılı sütun kümelemeye tek başına hükmeder.",
+          "Pick 3-5 numeric features (spend, frequency, days since last purchase). Don't forget to scale with `StandardScaler` before K-Means — otherwise whichever column has the biggest numbers alone dictates the clustering.",
+        ],
+      },
+      {
+        title: ["Dirsek yöntemiyle küme sayısını seç", "Pick the cluster count with the elbow method"],
+        body: [
+          "K'yı 2'den 10'a kadar deneyip her birinde toplam küme-içi varyansı (`inertia_`) çiz. Eğrinin belirgin şekilde yavaşladığı (dirsek) noktayı seç — genelde 3-5 arası çıkar. Fazla küme, ayrımı anlamlı değil gürültülü kılar.",
+          "Try K from 2 to 10 and plot the total within-cluster variance (`inertia_`) for each. Pick the point where the curve clearly bends (the elbow) — this is usually 3-5. Too many clusters makes the split noisy, not meaningful.",
+        ],
+        lang: "python",
+        code: `from sklearn.cluster import KMeans
+
+inertialar = []
+for k in range(2, 11):
+    model = KMeans(n_clusters=k, random_state=42, n_init=10).fit(X_olcekli)
+    inertialar.append(model.inertia_)
+
+plt.plot(range(2, 11), inertialar, marker="o")
+plt.xlabel("k"); plt.ylabel("Inertia")`,
+      },
+      {
+        title: ["PCA ile görselleştir", "Visualize with PCA"],
+        body: [
+          "Seçtiğin K ile modeli kur, sonra ölçeklenmiş özellikleri PCA ile 2 boyuta indirip kümelere göre renklendirilmiş bir scatter plot çiz. Bu görsel, raporun en ikna edici parçasıdır — sayısal bir tablodan çok daha hızlı anlaşılır.",
+          "Fit the model with your chosen K, then reduce the scaled features to 2D with PCA and plot a scatter colored by cluster. This chart is the most persuasive part of the report — it lands far faster than a table of numbers.",
+        ],
+      },
+      {
+        title: ["Segmentleri isimlendir ve aksiyona bağla", "Name the segments and tie them to actions"],
+        body: [
+          "Her kümenin ortalama özelliklerine bak (`df.groupby(\"segment\").mean()`) ve iş dünyasının anlayacağı bir isim ver — \"Küme 2\" değil \"Nadir Ama Yüksek Harcayanlar\". Her segment için tek bir somut aksiyon yaz: kime, ne zaman, ne teklif edilecek.",
+          "Look at each cluster's average features (`df.groupby(\"segment\").mean()`) and give it a business-friendly name — not \"Cluster 2\" but \"Rare But High Spenders\". Write one concrete action per segment: who gets what offer, and when.",
+        ],
+      },
+      githubStep("musteri-segmentasyonu-kmeans"),
+    ],
+    premium: true,
+  }),
+
+  project({
+    slug: "ml-oneri-motoru",
+    track: "machine-learning",
+    level: "expert",
+    title: ["Basit Bir Öneri Motoru", "A Simple Recommendation Engine"],
+    stack: ["Python", "pandas", "Birlikte Satın Alma Analizi"],
+    hours: 9,
+    xp: 550,
+    summary: [
+      "Sipariş geçmişinden bir 'bunu alanlar şunu da aldı' öneri motoru kur; popülerlik yanlılığını düzelt ve öneri kalitesini ölç.",
+      "Build a \"customers who bought this also bought\" recommender from order history; correct for popularity bias and measure recommendation quality.",
+    ],
+    dataset: [
+      "Kaggle \"Instacart Market Basket\" veya kendi sipariş/sepet verinden en az birkaç bin sipariş.",
+      "Kaggle's \"Instacart Market Basket\" or at least a few thousand orders from your own order/basket data.",
+    ],
+    deliverables: [
+      ["Ham co-purchase sayımıyla üretilmiş öneri tablosu", "A recommendation table built from raw co-purchase counts"],
+      ["Popülerliğe göre normalize edilmiş (lift) öneri tablosu ve ikisinin karşılaştırması", "A popularity-normalized (lift) recommendation table and a comparison of the two"],
+      ["En az 5 ürün için üretilen top-3 öneri listesi", "A top-3 recommendation list generated for at least 5 products"],
+      ["Soğuk başlangıç (yeni/az satan ürün) sorununu anlatan 1 sayfalık not", "A one-page note on the cold-start problem (new/low-selling products)"],
+    ],
+    steps: [
+      {
+        title: ["Ham co-purchase sayımını çıkar", "Compute raw co-purchase counts"],
+        body: [
+          "Her sipariş için içindeki ürün çiftlerini say (`itertools.combinations`). Bu sana her ürün çifti için ham bir 'birlikte kaç kez görüldü' sayısı verir — öneri motorunun ilk, en basit versiyonu.",
+          "For every order, count the item pairs inside it (`itertools.combinations`). This gives a raw 'seen together N times' count for every item pair — the first, simplest version of a recommender.",
+        ],
+      },
+      {
+        title: ["Popülerlik yanlılığını lift ile düzelt", "Correct popularity bias with lift"],
+        body: [
+          "Ham sayım, popüler ürünleri her şeyle 'ilişkili' gösterir. **Lift** bunu düzeltir: `lift(A,B) = P(A ve B birlikte) / (P(A) × P(B))`. Lift > 1 gerçek bir ilişkiyi, ≈ 1 tesadüfi birlikteliği gösterir.",
+          "Raw counts make popular items look 'related' to everything. **Lift** corrects this: `lift(A,B) = P(A and B together) / (P(A) × P(B))`. Lift > 1 signals a real relationship, ≈ 1 signals coincidental co-occurrence.",
+        ],
+        lang: "python",
+        code: `toplam_siparis = len(siparisler)
+p_urun = {u: sayilar[u] / toplam_siparis for u in sayilar}
+
+def lift(a, b):
+    birlikte = cift_sayilari.get((a, b), 0) / toplam_siparis
+    return birlikte / (p_urun[a] * p_urun[b])`,
+      },
+      {
+        title: ["Ham ve lift-düzeltilmiş önerileri karşılaştır", "Compare raw vs lift-corrected recommendations"],
+        body: [
+          "En az 5 popüler ürün için hem ham sayımla hem lift ile top-3 öneri üret. İkisinin ne zaman aynı, ne zaman farklı çıktığını göster — fark, popülerlik yanlılığının somut kanıtıdır.",
+          "For at least 5 popular products, generate top-3 recommendations both by raw count and by lift. Show where they agree and where they diverge — the divergence is concrete evidence of popularity bias.",
+        ],
+      },
+      {
+        title: ["Soğuk başlangıç sınırını yaz", "Write down the cold-start limit"],
+        body: [
+          "Yeni eklenen veya nadir satan bir ürünün hiç (veya çok az) co-purchase verisi olur — bu yöntem ona öneri üretemez. Notunda bu sınırı ve gerçek sistemlerin bunu nasıl çözdüğünü (kategori benzerliği, içerik tabanlı öneri) kısaca yaz.",
+          "A newly added or rarely sold product has little or no co-purchase data — this method can't generate a recommendation for it. In your note, briefly describe this limit and how real systems work around it (category similarity, content-based recommendations).",
+        ],
+      },
+      githubStep("basit-oneri-motoru"),
+    ],
+    premium: true,
+  }),
+
   /* ------------------------------ R ----------------------------- */
   project({
     slug: "r-kesif-analizi",

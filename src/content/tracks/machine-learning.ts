@@ -3648,6 +3648,353 @@ print(f"Test puanı: {arama.best_estimator_.score(X_test, y_test):.3f}")`,
             }),
           ],
         }),
+        lesson({
+          slug: "kumeleme-k-means",
+          title: L("Kümeleme: K-Means ile örüntü bulma", "Clustering: finding patterns with K-Means"),
+          summary: L(
+            "Etiket yokken bile veri kendini gruplara ayırabilir — gözetimsiz öğrenmenin en temel algoritması.",
+            "Even with no labels, data can sort itself into groups — the most fundamental unsupervised learning algorithm.",
+          ),
+          minutes: 18,
+          premium: true,
+          blocks: [
+            text(
+              "Bu patikadaki her model şimdiye kadar **gözetimliydi**: bir `y` etiketin vardı (churn oldu mu, fiyat ne). **Gözetimsiz öğrenmede** etiket yoktur — amaç, verinin kendi içindeki doğal grupları bulmaktır. \"Müşterilerimi nasıl segmentlere ayırırım?\" sorusunun cevabı genelde budur.\n\n**K-Means** en yaygın kümeleme algoritmasıdır ve üç adımı tekrar eder:\n\n1. `k` tane rastgele merkez (centroid) seç\n2. Her noktayı **en yakın** merkeze ata\n3. Her merkezi, kendisine atanan noktaların **ortalamasına** taşı\n\nMerkezler artık yer değiştirmeyene kadar 2-3 tekrarlanır.",
+              "Every model in this track so far has been **supervised**: you had a `y` label (did they churn, what's the price). In **unsupervised learning** there is no label — the goal is to find the natural groups already inside the data. \"How do I segment my customers?\" is usually answered this way.\n\n**K-Means** is the most common clustering algorithm and repeats three steps:\n\n1. Pick `k` random centers (centroids)\n2. Assign every point to its **nearest** center\n3. Move each center to the **mean** of the points assigned to it\n\nSteps 2-3 repeat until the centers stop moving.",
+            ),
+            code(
+              "python",
+              `from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+X = df[["yillik_harcama", "ziyaret_sikligi"]]
+X_olcekli = StandardScaler().fit_transform(X)  # bkz. aşağıdaki tuzak
+
+model = KMeans(n_clusters=3, random_state=42, n_init=10)
+df["segment"] = model.fit_predict(X_olcekli)
+
+print(df.groupby("segment")[["yillik_harcama", "ziyaret_sikligi"]].mean())`,
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "K-Means'in \"gözetimsiz\" olması ne anlama gelir?",
+                "What does it mean that K-Means is \"unsupervised\"?",
+              ],
+              options: [
+                ["Veride doğru cevabı (etiket/y) gösteren bir sütun yoktur; algoritma grupları kendisi bulur", "There's no column showing the right answer (a label/y) in the data; the algorithm finds the groups itself"],
+                ["Algoritma hiç veri görmeden çalışır", "The algorithm runs without seeing any data"],
+                ["İnsan gözetimi olmadan asla çalıştırılamaz", "It can never be run without human supervision"],
+                ["Yalnızca metin verisinde çalışır", "It only works on text data"],
+              ],
+              answer: 0,
+              explain: [
+                "Gözetimli öğrenmede model, doğru cevabı (etiket) örneklerden görüp öğrenir. Gözetimsiz öğrenmede öyle bir etiket yoktur — K-Means yalnızca noktalar arası uzaklığa bakarak grupları kendisi keşfeder.",
+                "In supervised learning the model learns by seeing the right answer (label) in examples. In unsupervised learning there is no such label — K-Means discovers the groups itself, purely from distances between points.",
+              ],
+            }),
+            pyTask({
+              id: "t1",
+              prompt: [
+                "K-Means'in TEK bir adımını elle uygula. `noktalar` listesindeki her noktayı, en yakın `merkezler`e (Öklid uzaklığıyla) ata — sonucu `atamalar` listesine (her nokta için 0 veya 1) yaz. Sonra her grubun yeni merkezini (atanan noktaların ortalaması) hesapla ve `yeni_merkezler` listesine yaz.",
+                "Manually implement a SINGLE step of K-Means. Assign each point in `noktalar` to its nearest `merkezler` (by Euclidean distance) — write the result into `atamalar` (0 or 1 per point). Then compute each group's new center (the mean of its assigned points) into `yeni_merkezler`.",
+              ],
+              starter: `import math
+
+noktalar = [(1, 1), (1, 2), (8, 8), (9, 9)]
+merkezler = [(0, 0), (10, 10)]
+
+def uzaklik(a, b):
+    return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+
+atamalar = []
+for p in noktalar:
+    # en yakın merkezin indeksini (0 veya 1) atamalar'a ekle
+    pass
+
+yeni_merkezler = []
+for k in range(2):
+    grup = [noktalar[i] for i in range(len(noktalar)) if atamalar[i] == k]
+    # grup'un ortalamasını (x, y) olarak yeni_merkezler'e ekle
+    pass
+
+print(atamalar, yeni_merkezler)`,
+              solution: `import math
+
+noktalar = [(1, 1), (1, 2), (8, 8), (9, 9)]
+merkezler = [(0, 0), (10, 10)]
+
+def uzaklik(a, b):
+    return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+
+atamalar = []
+for p in noktalar:
+    uzakliklar = [uzaklik(p, m) for m in merkezler]
+    atamalar.append(uzakliklar.index(min(uzakliklar)))
+
+yeni_merkezler = []
+for k in range(2):
+    grup = [noktalar[i] for i in range(len(noktalar)) if atamalar[i] == k]
+    ort_x = sum(p[0] for p in grup) / len(grup)
+    ort_y = sum(p[1] for p in grup) / len(grup)
+    yeni_merkezler.append((ort_x, ort_y))
+
+print(atamalar, yeni_merkezler)`,
+              hint: [
+                "`uzakliklar = [uzaklik(p, m) for m in merkezler]` sonra `uzakliklar.index(min(uzakliklar))` en yakın merkezin indeksini verir.",
+                "`uzakliklar = [uzaklik(p, m) for m in merkezler]` then `uzakliklar.index(min(uzakliklar))` gives the nearest center's index.",
+              ],
+              checks: [
+                { code: "atamalar == [0, 0, 1, 1]", msg: ["İlk iki nokta merkez 0'a, son iki nokta merkez 1'e atanmalı", "The first two points must be assigned to center 0, the last two to center 1"] },
+                { code: "abs(yeni_merkezler[0][0] - 1.0) < 1e-9 and abs(yeni_merkezler[0][1] - 1.5) < 1e-9", msg: ["İlk grubun yeni merkezi (1.0, 1.5) olmalı", "The first group's new center must be (1.0, 1.5)"] },
+                { code: "abs(yeni_merkezler[1][0] - 8.5) < 1e-9 and abs(yeni_merkezler[1][1] - 8.5) < 1e-9", msg: ["İkinci grubun yeni merkezi (8.5, 8.5) olmalı", "The second group's new center must be (8.5, 8.5)"] },
+              ],
+              xp: 45,
+            }),
+            pitfall(
+              "Ölçeklendirmeden K-Means, büyük sayılı sütunun kölesi olur",
+              "Without scaling, K-Means becomes a slave to whichever column has bigger numbers",
+              "K-Means uzaklığa dayanır. \"Yıllık harcama\" 0-50.000 arasında, \"ziyaret sıklığı\" 0-30 arasındaysa, uzaklık hesabına neredeyse tamamen harcama hakim olur — ziyaret sıklığının kümelemeye hiç etkisi kalmaz. Kümelemeden ÖNCE her sütunu `StandardScaler` ile aynı ölçeğe getirmek zorunludur, isteğe bağlı değildir.",
+              "K-Means is distance-based. If \"annual spend\" ranges 0-50,000 and \"visit frequency\" ranges 0-30, the distance calculation is almost entirely dominated by spend — visit frequency barely affects the clustering at all. Scaling every column to the same range with `StandardScaler` BEFORE clustering is mandatory, not optional.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "boyut-indirgeme-pca",
+          title: L("Boyut indirgeme: PCA ile karmaşıklığı azaltmak", "Dimensionality reduction: simplifying with PCA"),
+          summary: L(
+            "50 sütunlu bir veri setini gözle görebileceğin 2 boyuta indirmenin (bilgiyi mümkün olduğunca koruyarak) yolu.",
+            "How to compress a 50-column dataset down to 2 dimensions you can actually see — while keeping as much information as possible.",
+          ),
+          minutes: 16,
+          premium: true,
+          blocks: [
+            text(
+              "Birçok gerçek veri setinde onlarca sayısal sütun vardır ve çoğu birbiriyle **korelasyonludur** (\"oda sayısı\" ile \"metrekare\" gibi) — yani gerçek bilgi, sütun sayısından daha az \"boyut\"ta gizlidir. **Temel Bileşen Analizi (PCA)**, orijinal sütunları, verideki **varyansın en çoğunu** taşıyan yeni birkaç sütuna (temel bileşenlere) sıkıştırır.\n\nBu iki işe yarar: (1) 50 boyutlu veriyi 2-3 temel bileşene indirip **gözle görebilirsin** (scatter plot), (2) modele vermeden önce gürültüyü ve fazlalığı (korelasyonlu sütunları) azaltabilirsin.\n\nPCA'dan önce **her zaman ölçeklendirme** yapılır (K-Means'teki gibi) — çünkü PCA da varyansa, dolayısıyla ölçeğe duyarlıdır.",
+              "Many real datasets have dozens of numeric columns, and most are **correlated** with each other (like \"number of rooms\" and \"square meters\") — meaning the real information hides in fewer \"dimensions\" than there are columns. **Principal Component Analysis (PCA)** compresses the original columns into a handful of new columns (principal components) that carry **most of the variance** in the data.\n\nThis is useful for two things: (1) you can shrink 50-dimensional data down to 2-3 principal components and actually **look at it** (a scatter plot), (2) you can reduce noise and redundancy (correlated columns) before feeding data to a model.\n\nPCA is **always preceded by scaling** (just like K-Means) — because PCA is also sensitive to variance, and therefore to scale.",
+            ),
+            code(
+              "python",
+              `from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
+X_olcekli = StandardScaler().fit_transform(df.select_dtypes("number"))
+
+pca = PCA(n_components=2)
+bilesenler = pca.fit_transform(X_olcekli)
+
+print("Açıklanan varyans oranı:", pca.explained_variance_ratio_)
+# örn. [0.62, 0.18] -> ilk 2 bileşen verinin %80'ini açıklıyor`,
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "PCA'nın \"açıklanan varyans oranı\" (explained variance ratio) sana ne söyler?",
+                "What does PCA's \"explained variance ratio\" tell you?",
+              ],
+              options: [
+                ["Her bir temel bileşenin, orijinal veedeki bilginin/varyansın ne kadarını taşıdığını", "How much of the original data's information/variance each principal component carries"],
+                ["Modelin doğruluğunu", "The model's accuracy"],
+                ["Kaç satır veri olduğunu", "How many rows of data there are"],
+                ["Hangi sütunun eksik değer içerdiğini", "Which column contains missing values"],
+              ],
+              answer: 0,
+              explain: [
+                "Her bileşenin açıkladığı varyans oranı, o bileşenin orijinal verideki 'ne kadar bilgi' taşıdığını gösterir. İlk birkaç bileşenin toplamı %80-90'a ulaşıyorsa, veriyi birkaç boyuta indirmek çok az bilgi kaybettirir demektir.",
+                "Each component's explained-variance ratio shows how much 'information' from the original data that component carries. If the first few components add up to 80-90%, reducing to just those dimensions loses very little information.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "PCA'dan önce sütunları neden ölçeklendirmen (StandardScaler) gerekir?",
+                "Why do you need to scale columns (StandardScaler) before PCA?",
+              ],
+              options: [
+                [
+                  "PCA en yüksek varyanslı yönleri arar; ölçeksiz veride bu yalnızca en büyük sayılı sütunun varyansı olurdu, gerçek örüntü değil",
+                  "PCA looks for the directions of highest variance; on unscaled data that would just be whichever column has the biggest numbers, not the real pattern",
+                ],
+                ["Ölçeklendirme yalnızca görselleştirme için gerekir", "Scaling is only needed for visualization"],
+                ["PCA metin sütunlarını sayıya çevirmek için ölçeklendirme ister", "PCA needs scaling to convert text columns to numbers"],
+                ["Aslında hiç gerekmez, isteğe bağlı bir adımdır", "It's actually never needed, it's an optional step"],
+              ],
+              answer: 0,
+              explain: [
+                "K-Means gibi PCA da varyansa/uzaklığa dayanır. Ölçeklenmemiş bir sütun (ör. 0-100.000 arası gelir) diğerlerini (ör. 0-10 arası puan) tamamen gölgede bırakır ve 'birinci bileşen' aslında yalnızca o tek sütunu yansıtır.",
+                "Like K-Means, PCA is variance/distance-based. An unscaled column (say, income ranging 0-100,000) drowns out others (a score ranging 0-10), and the 'first component' ends up reflecting just that one column.",
+              ],
+            }),
+            pyTask({
+              id: "t1",
+              prompt: [
+                "PCA'dan önceki zorunlu adımı uygula: `veri` sözlüğündeki her sütunu standartlaştır (`(x - ortalama) / standart_sapma`, popülasyon standart sapması). Sonucu `standart` sözlüğüne, her değeri 2 ondalığa yuvarlayarak yaz.",
+                "Do the mandatory step before PCA: standardize each column in `veri` (`(x - mean) / std`, population standard deviation). Write the result into `standart`, rounding each value to 2 decimals.",
+              ],
+              starter: `import statistics
+
+veri = {
+    "gelir": [10, 20, 30, 40],
+    "puan": [100, 300, 200, 400],
+}
+
+standart = {}
+for sutun, degerler in veri.items():
+    # ortalama ve standart sapmayı hesapla, standartlaştırılmış listeyi standart[sutun]'a yaz
+    pass
+
+print(standart)`,
+              solution: `import statistics
+
+veri = {
+    "gelir": [10, 20, 30, 40],
+    "puan": [100, 300, 200, 400],
+}
+
+standart = {}
+for sutun, degerler in veri.items():
+    ortalama = statistics.mean(degerler)
+    std = statistics.pstdev(degerler)
+    standart[sutun] = [round((x - ortalama) / std, 2) for x in degerler]
+
+print(standart)`,
+              hint: [
+                "`statistics.mean(degerler)` ve `statistics.pstdev(degerler)` (popülasyon standart sapması) kullan.",
+                "Use `statistics.mean(degerler)` and `statistics.pstdev(degerler)` (population standard deviation).",
+              ],
+              checks: [
+                { code: "standart['gelir'] == [-1.34, -0.45, 0.45, 1.34]", msg: ["'gelir' sütunu [-1.34, -0.45, 0.45, 1.34] olmalı", "'gelir' column must be [-1.34, -0.45, 0.45, 1.34]"] },
+              ],
+              xp: 40,
+            }),
+          ],
+        }),
+        lesson({
+          slug: "basit-oneri-sistemi",
+          title: L("Basit bir öneri sistemi: birlikte satın alınanlar", "A simple recommender: frequently bought together"),
+          summary: L(
+            "Kullanıcı puanı olmadan bile, hangi ürünlerin birlikte alındığını sayarak bir öneri motoru kurabilirsin.",
+            "Even without user ratings, you can build a recommender just by counting which items get bought together.",
+          ),
+          minutes: 15,
+          premium: true,
+          blocks: [
+            text(
+              "Öneri sistemlerinin \"gerçek\" hâli genelde kullanıcı-ürün puan matrisi ve kosinüs benzerliği gibi tekniklere dayanır. Ama en basit, en açıklanabilir ve genelde ilk kurulan versiyon **birlikte satın alma sayımı**dır (market basket): hangi ürünler aynı siparişte ne sıklıkla birlikte görünüyor?\n\nBir ürün için öneri üretmek şu kadar basittir: o ürünün geçtiği tüm siparişlere bak, aynı siparişlerde geçen diğer ürünleri say, en sık geçeni öner. Bu, Amazon'un \"bunu alanlar şunu da aldı\" özelliğinin ilkel ama gerçek bir versiyonudur.",
+              "The \"real\" version of recommender systems usually relies on a user-item rating matrix and techniques like cosine similarity. But the simplest, most explainable, and usually the first version anyone ships is **co-purchase counting** (market basket): how often do items show up together in the same order?\n\nGenerating a recommendation for an item is this simple: look at every order containing that item, count the other items appearing in those same orders, and recommend whichever appears most. This is a primitive but genuine version of Amazon's \"customers who bought this also bought\" feature.",
+            ),
+            code(
+              "python",
+              `from itertools import combinations
+from collections import Counter
+
+ciftler = Counter()
+for siparis in siparisler:                      # siparis: {"ekmek", "süt", ...}
+    for a, b in combinations(sorted(siparis), 2):
+        ciftler[(a, b)] += 1
+
+en_sik_ciftler = ciftler.most_common(10)
+print(en_sik_ciftler)`,
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Birlikte-satın-alma (co-purchase) tabanlı öneri, klasik kullanıcı-puanı tabanlı işbirlikçi filtrelemeden hangi açıdan farklıdır?",
+                "How does co-purchase-based recommendation differ from classic rating-based collaborative filtering?",
+              ],
+              options: [
+                [
+                  "Kullanıcı puanına ihtiyaç duymaz; yalnızca hangi ürünlerin aynı siparişte birlikte geçtiğini sayar",
+                  "It needs no user ratings; it only counts which items co-occur in the same order",
+                ],
+                ["Yalnızca tek bir kullanıcı için çalışır", "It only works for a single user"],
+                ["Yapay zeka kullanmaz, bu yüzden hiç öneri üretemez", "It doesn't use AI, so it can't produce recommendations at all"],
+                ["Yalnızca metin verisinde çalışır", "It only works on text data"],
+              ],
+              answer: 0,
+              explain: [
+                "Kullanıcı-puan matrisi genelde seyrektir (çoğu kullanıcı çoğu ürünü hiç puanlamamıştır) ve toplaması zordur. Sipariş verisi zaten var ve puan gerektirmez — bu yüzden co-purchase sayımı genelde ilk kurulan, en ucuz öneri sistemidir.",
+                "A rating matrix is usually sparse (most users never rate most items) and expensive to collect. Order data already exists and needs no ratings — which is why co-purchase counting is usually the first, cheapest recommender a team ships.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "Ham co-purchase sayımının en büyük zaafı nedir?",
+                "What's the biggest weakness of raw co-purchase counting?",
+              ],
+              options: [
+                [
+                  "Popülerlik yanlılığı — zaten çok satan bir ürün, gerçek bir ilişki olmasa bile her şeyle 'birlikte sık görülür'",
+                  "Popularity bias — an already best-selling item 'co-occurs often' with almost everything, even with no real relationship",
+                ],
+                ["Hiçbir zaafı yoktur, her zaman doğru öneri verir", "It has no weakness, it always gives the correct recommendation"],
+                ["Yalnızca 2 üründen fazlasında çalışmaz", "It doesn't work with more than 2 products"],
+                ["Kod olarak yazılamaz", "It cannot be written as code"],
+              ],
+              answer: 0,
+              explain: [
+                "Herkesin aldığı bir ürün (ör. poşet), hemen her siparişte geçtiği için neredeyse her şeyle 'en sık birlikte satın alınan' çıkar — bu bir ilişki değil, popülerliktir. Gerçek sistemler bunu düzeltmek için ortak geçme sayısını her iki ürünün ayrı ayrı popülerliğine göre normalize eder (ör. 'lift' ölçüsü).",
+                "An item everyone buys (like a bag) co-occurs with almost everything simply because it's in nearly every order — that's popularity, not a relationship. Real systems correct for this by normalizing the co-occurrence count against each item's individual popularity (e.g. the 'lift' measure).",
+              ],
+            }),
+            pyTask({
+              id: "t1",
+              prompt: [
+                "`sepetler` listesindeki her sepet, bir siparişte geçen ürün adlarından oluşan bir küme (`set`). `hedef` ürünüyle birlikte en sık geçen ürünü bul: sonucu `en_iyi_oneri` (ürün adı) ve `en_iyi_sayi` (kaç siparişte birlikte geçtiği) değişkenlerine yaz.",
+                "Each basket in `sepetler` is a `set` of item names from one order. Find the item that co-occurs most often with `hedef`: write the result into `en_iyi_oneri` (item name) and `en_iyi_sayi` (how many orders it co-occurred in).",
+              ],
+              starter: `sepetler = [
+    {"ekmek", "sut", "yumurta"},
+    {"ekmek", "sut"},
+    {"ekmek", "recel"},
+    {"sut", "yumurta"},
+    {"ekmek", "sut", "recel"},
+]
+hedef = "ekmek"
+
+sayac = {}
+for sepet in sepetler:
+    if hedef in sepet:
+        for urun in sepet:
+            if urun != hedef:
+                # sayac[urun]'u 1 artır (yoksa 0'dan başlat)
+                pass
+
+en_iyi_oneri =
+en_iyi_sayi =
+print(en_iyi_oneri, en_iyi_sayi)`,
+              solution: `sepetler = [
+    {"ekmek", "sut", "yumurta"},
+    {"ekmek", "sut"},
+    {"ekmek", "recel"},
+    {"sut", "yumurta"},
+    {"ekmek", "sut", "recel"},
+]
+hedef = "ekmek"
+
+sayac = {}
+for sepet in sepetler:
+    if hedef in sepet:
+        for urun in sepet:
+            if urun != hedef:
+                sayac[urun] = sayac.get(urun, 0) + 1
+
+en_iyi_oneri = max(sayac, key=sayac.get)
+en_iyi_sayi = sayac[en_iyi_oneri]
+print(en_iyi_oneri, en_iyi_sayi)`,
+              hint: [
+                "`sayac[urun] = sayac.get(urun, 0) + 1` ile sayaç sözlüğünü güncelle; en yüksek değerli anahtarı bulmak için `max(sayac, key=sayac.get)`.",
+                "Update the counter dict with `sayac[urun] = sayac.get(urun, 0) + 1`; find the highest-value key with `max(sayac, key=sayac.get)`.",
+              ],
+              checks: [
+                { code: "en_iyi_oneri == 'sut'", msg: ["En iyi öneri 'sut' olmalı", "The best recommendation must be 'sut'"] },
+                { code: "en_iyi_sayi == 3", msg: ["'sut', 'ekmek' ile 3 siparişte birlikte geçmeli", "'sut' must co-occur with 'ekmek' in 3 orders"] },
+              ],
+              xp: 40,
+            }),
+          ],
+        }),
       ],
     },
   ],
