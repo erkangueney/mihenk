@@ -2203,6 +2203,198 @@ shinyApp(ui, server)`,
             }),
           ],
         }),
+        lesson({
+          slug: "purrr-ile-fonksiyonel-yineleme",
+          title: L("purrr ile fonksiyonel yineleme: for yerine map()", "Functional iteration with purrr: map() instead of for"),
+          summary: L(
+            "10 dosyayı tek tek okuyan bir for döngüsü yerine, tek satırda 'her birine bunu uygula' demek.",
+            "Instead of a for loop reading 10 files one by one, saying 'apply this to each' in a single line.",
+          ),
+          minutes: 15,
+          premium: true,
+          blocks: [
+            text(
+              "\"Her bir X için Y yap\" işlemi R'da klasik olarak `for` döngüsüyle yazılır. Ama R'da (ve tidyverse felsefesinde) daha yaygın bir yol vardır: **`purrr::map()`**. `map(liste, fonksiyon)`, fonksiyonu listenin **her elemanına** uygular ve sonuçları yeni bir liste olarak döndürür — döngü yazmana, boş bir sonuç listesi açmana veya indeksle uğraşmana gerek kalmaz.\n\n```r\n# for döngüsüyle:\nsonuclar <- vector(\"list\", length(dosyalar))\nfor (i in seq_along(dosyalar)) {\n  sonuclar[[i]] <- read_csv(dosyalar[i])\n}\n\n# map() ile, aynı iş:\nsonuclar <- map(dosyalar, read_csv)\n```\n\nSonucun tipini garanti etmek istersen tip-özel sürümler kullanılır: `map_dbl()` (sayı listesi), `map_chr()` (metin listesi), `map_df()` (satırları birleştirip tek bir data frame).",
+              "\"Do Y for each X\" is classically written in R with a `for` loop. But R (and the tidyverse philosophy) has a more common way: **`purrr::map()`**. `map(list, function)` applies the function to **every element** of the list and returns the results as a new list — no loop to write, no empty result list to pre-allocate, no index bookkeeping.\n\n```r\n# with a for loop:\nresults <- vector(\"list\", length(files))\nfor (i in seq_along(files)) {\n  results[[i]] <- read_csv(files[i])\n}\n\n# with map(), the same job:\nresults <- map(files, read_csv)\n```\n\nIf you want to guarantee the result's type, type-specific versions exist: `map_dbl()` (a list of numbers), `map_chr()` (a list of text), `map_df()` (row-binds everything into a single data frame).",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "`map(dosyalar, read_csv)` ne yapar?",
+                "What does `map(dosyalar, read_csv)` do?",
+              ],
+              options: [
+                [
+                  "read_csv() fonksiyonunu dosyalar listesindeki her bir elemana uygular ve sonuçları bir liste olarak döndürür",
+                  "It applies the read_csv() function to every element of the dosyalar list and returns the results as a list",
+                ],
+                ["Yalnızca listedeki ilk dosyayı okur", "It only reads the first file in the list"],
+                ["Dosyaları paralel işlemcilerde okur", "It reads the files on parallel processors"],
+                ["dosyalar listesini değiştirmeden read_csv fonksiyonunu döndürür", "It returns the read_csv function itself, without touching the dosyalar list"],
+              ],
+              answer: 0,
+              explain: [
+                "map()'in temel deseni budur: birinci argüman (liste/vektör) üzerinde gezer, ikinci argümanı (fonksiyon) her elemana uygular, sonuçları bir liste hâlinde toplar — for döngüsünün yaptığı işin tek satırlık karşılığı.",
+                "This is map()'s core pattern: it walks the first argument (a list/vector), applies the second argument (a function) to each element, and collects the results into a list — a one-line equivalent of what a for loop does.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "`map_dbl()` gibi tip-özel bir map fonksiyonunu kullanmanın avantajı nedir?",
+                "What's the advantage of using a type-specific map function like `map_dbl()`?",
+              ],
+              options: [
+                [
+                  "Sonucun her zaman belirtilen tipte (ör. sayısal vektör) olacağını garanti eder; beklenmeyen bir tip dönerse hata verir",
+                  "It guarantees the result will always be the stated type (e.g. a numeric vector); it errors if an unexpected type comes back",
+                ],
+                ["Yalnızca map_dbl() paralel çalışır", "Only map_dbl() runs in parallel"],
+                ["map_dbl() diğerlerinden her zaman daha hızlıdır", "map_dbl() is always faster than the others"],
+                ["Tip belirtmenin hiçbir pratik faydası yoktur", "Specifying a type has no practical benefit"],
+              ],
+              answer: 0,
+              explain: [
+                "Düz `map()` her zaman bir liste döndürür — karışık tipte sonuçlar bile sessizce kabul edilir. `map_dbl()` gibi tip-özel bir sürüm, her sonucun tek bir sayı olmasını zorunlu kılar; biri beklenmedik bir şey (ör. NULL, metin) döndürürse anında hata verir, bu da hatayı sessizce geçiştirmek yerine erken yakalamanı sağlar.",
+                "Plain `map()` always returns a list — even mixed-type results are silently accepted. A type-specific version like `map_dbl()` enforces that every result is a single number; if one returns something unexpected (NULL, text), it errors immediately, catching the problem early instead of letting it pass silently.",
+              ],
+            }),
+            pitfall(
+              "map() de yan etkili (side-effect) kod için ideal değildir",
+              "map() also isn't ideal for side-effect code",
+              "Sonuç toplamak değil de yalnızca bir eylem yapmak istiyorsan (ör. her dosyayı diske yazdırmak, sonucu kullanmayacaksın), `map()` yerine `walk()` kullan — aynı iterasyonu yapar ama görünmez bir liste döndürmez, niyetini daha net ifade eder.",
+              "If you're not collecting a result but just performing an action (like printing each file to disk, with no use for the return value), use `walk()` instead of `map()` — it does the same iteration but doesn't return an invisible list, making your intent clearer.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "ggplot2-facet-ile-kucuk-coklular",
+          title: L("ggplot2'de facet ile küçük çoklular", "Small multiples with facets in ggplot2"),
+          summary: L(
+            "12 şehri tek renkli spagetti grafikte üst üste bindirmek yerine, aynı grafiği her şehir için ayrı ayrı çiz.",
+            "Instead of overlaying 12 cities on one tangled multi-colour chart, draw the same chart separately for each city.",
+          ),
+          minutes: 14,
+          premium: true,
+          blocks: [
+            text(
+              "ggplot2'nin \"dilbilgisi\" felsefesinde, bir grafiği kategoriye göre çoğaltmak ayrı bir kütüphane veya karmaşık kod gerektirmez — tek bir katman eklemek yeterlidir: **`facet_wrap()`**.\n\n```r\nggplot(satislar, aes(x = ay, y = ciro)) +\n  geom_line() +\n  facet_wrap(~ sehir)\n```\n\nBu tek satır, `sehir` sütunundaki her benzersiz değer için **ayrı bir panel** çizer — hepsi aynı eksen ölçeğinde, bir ızgarada yan yana. `facet_wrap()` panelleri otomatik olarak bir ızgaraya yerleştirirken, `facet_grid(satir ~ sutun)` iki boyutlu bir ızgara ister (ör. hem şehre hem ürün kategorisine göre).",
+              "In ggplot2's \"grammar\" philosophy, multiplying a chart by category needs no separate library or complex code — adding a single layer is enough: **`facet_wrap()`**.\n\n```r\nggplot(sales, aes(x = month, y = revenue)) +\n  geom_line() +\n  facet_wrap(~ city)\n```\n\nThis one line draws a **separate panel** for every unique value in the `city` column — all on the same axis scale, side by side in a grid. `facet_wrap()` arranges panels into a grid automatically, while `facet_grid(row ~ col)` asks for a two-dimensional grid (say, by both city and product category).",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "`facet_wrap(~ sehir)` eklemek bir ggplot grafiğine ne yapar?",
+                "What does adding `facet_wrap(~ sehir)` do to a ggplot chart?",
+              ],
+              options: [
+                [
+                  "sehir sütunundaki her benzersiz değer için ayrı bir panel çizer, aynı ızgarada yan yana",
+                  "It draws a separate panel for every unique value in the sehir column, side by side in the same grid",
+                ],
+                ["Yalnızca bir şehri filtreler, diğerlerini gizler", "It filters to just one city and hides the rest"],
+                ["Şehirleri renklere göre boyar, panel açmaz", "It colors cities differently, without opening any panels"],
+                ["Grafiği 3 boyutlu hâle getirir", "It turns the chart into 3D"],
+              ],
+              answer: 0,
+              explain: [
+                "facet_wrap, tek bir grafiği kategorik bir sütuna göre çoğaltıp her kategoriye kendi panelini verir — bu, 'küçük çoklu' (small multiples) tekniğinin ggplot2'deki karşılığıdır, tek satırlık kod ile elde edilir.",
+                "facet_wrap multiplies a single chart by a categorical column, giving each category its own panel — this is ggplot2's version of the \"small multiples\" technique, achieved with one line of code.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "`facet_wrap()` ile `facet_grid()` arasındaki fark nedir?",
+                "What's the difference between `facet_wrap()` and `facet_grid()`?",
+              ],
+              options: [
+                [
+                  "facet_wrap panelleri otomatik bir ızgaraya diziyor (tek değişken); facet_grid satır ve sütun için ayrı iki değişkenle iki boyutlu bir ızgara kurar",
+                  "facet_wrap arranges panels into a grid automatically from one variable; facet_grid builds a two-dimensional grid from two separate variables, one for rows and one for columns",
+                ],
+                ["İkisi birebir aynı şeyi yapar", "They do exactly the same thing"],
+                ["facet_grid yalnızca haritalarda çalışır", "facet_grid only works on maps"],
+                ["facet_wrap en fazla 2 panel çizebilir", "facet_wrap can only draw a maximum of 2 panels"],
+              ],
+              answer: 0,
+              explain: [
+                "facet_wrap(~sehir) tek bir kategorik değişkeni alıp panelleri kendi başına en iyi ızgaraya (satır × sütun) yerleştirir. facet_grid(bolge ~ urun) ise satırları bir değişkene, sütunları başka bir değişkene sabitleyerek tam iki boyutlu, düzenli bir ızgara üretir.",
+                "facet_wrap(~city) takes a single categorical variable and arranges panels into whatever grid (rows × columns) fits best on its own. facet_grid(region ~ product) instead pins rows to one variable and columns to another, producing a fully two-dimensional, regular grid.",
+              ],
+            }),
+            tip(
+              "Panellerin ekseni ortak tutulmalı — scales = \"free\" dikkatli kullanılmalı",
+              "Keep panel axes shared — use scales = \"free\" with care",
+              "Varsayılan olarak tüm paneller aynı eksen ölçeğini paylaşır, bu da karşılaştırmayı doğru kılar. `scales = \"free\"` her panele kendi ölçeğini verir — bazen okunabilirliği artırır ama panelller arası büyüklük karşılaştırmasını yanıltıcı hâle getirebilir. Hangi soruyu cevapladığına göre bilinçli seç.",
+              "By default all panels share the same axis scale, which is what makes the comparison valid. `scales = \"free\"` gives each panel its own scale — sometimes improving readability, but it can make comparing magnitudes across panels misleading. Choose deliberately based on which question you're answering.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "dbi-dbplyr-ile-veritabani-baglantisi",
+          title: L("DBI ve dbplyr ile R'dan veritabanına bağlanmak", "Connecting R to a database with DBI and dbplyr"),
+          summary: L(
+            "Veriyi CSV'ye dışa aktarıp R'a içe aktarmak yerine, dplyr sözdizimiyle doğrudan veritabanını sorgulamak.",
+            "Instead of exporting data to CSV and importing it into R, querying the database directly with dplyr syntax.",
+          ),
+          minutes: 16,
+          premium: true,
+          blocks: [
+            text(
+              "Veri bir veritabanındaysa, klasik yol onu bir CSV'ye aktarıp R'a okumaktır — ama veri güncellenince bu adım tekrar elle yapılmalıdır ve büyük tablolarda dışa aktarım kendisi yavaştır. **DBI** paketi R'dan bir veritabanına bağlanmanın standart yoludur; **dbplyr** ise bu bağlantı üzerinde **tanıdık dplyr sözdizimini** kullanmanı sağlar.\n\n```r\nlibrary(DBI)\nlibrary(dbplyr)\n\nbaglanti <- dbConnect(RPostgres::Postgres(), dbname = \"satis\", host = \"...\")\nsiparisler <- tbl(baglanti, \"orders\")\n\nozet <- siparisler |>\n  filter(durum == \"teslim\") |>\n  group_by(sehir) |>\n  summarise(toplam = sum(tutar))\n```\n\nBurada kritik nokta: bu kod **veriyi R'a hiç çekmez**. dbplyr, dplyr fiillerini arka planda SQL'e çevirir ve hesaplamayı **veritabanının kendisinde** yaptırır — yalnızca `collect()` çağrıldığında sonuç R'a iner.",
+              "When data lives in a database, the classic route is exporting it to a CSV and reading that into R — but this step must be repeated by hand every time the data updates, and the export itself is slow on large tables. The **DBI** package is R's standard way to connect to a database; **dbplyr** lets you use **familiar dplyr syntax** on top of that connection.\n\n```r\nlibrary(DBI)\nlibrary(dbplyr)\n\nconn <- dbConnect(RPostgres::Postgres(), dbname = \"sales\", host = \"...\")\norders <- tbl(conn, \"orders\")\n\nsummary <- orders |>\n  filter(status == \"delivered\") |>\n  group_by(city) |>\n  summarise(total = sum(amount))\n```\n\nThe critical point here: this code **never pulls the data into R**. dbplyr translates the dplyr verbs into SQL behind the scenes and runs the computation **inside the database itself** — the result only lands in R once you call `collect()`.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "dbplyr ile yazılan bir `filter() |> group_by() |> summarise()` zinciri arka planda ne olur?",
+                "What happens behind the scenes to a `filter() |> group_by() |> summarise()` chain written with dbplyr?",
+              ],
+              options: [
+                [
+                  "SQL'e çevrilir ve hesaplama veritabanının kendisinde çalışır — veri R'a çekilmez",
+                  "It's translated into SQL and the computation runs inside the database itself — the data is never pulled into R",
+                ],
+                ["Önce tüm tablo R'a indirilir, sonra dplyr fiilleri R'da çalışır", "The whole table is downloaded to R first, then the dplyr verbs run in R"],
+                ["dbplyr yalnızca yerel veri çerçevelerinde çalışır, veritabanına hiç bağlanamaz", "dbplyr only works on local data frames, it can never connect to a database"],
+                ["Her fiil, veritabanına ayrı bir bağlantı açar", "Each verb opens a separate connection to the database"],
+              ],
+              answer: 0,
+              explain: [
+                "dbplyr'ın bütün değeri budur: aynı dplyr sözdizimini yazarsın ama hesaplama veritabanının motorunda çalışır — milyarlarca satırlık bir tabloda bile R'ın belleğini hiç zorlamaz. Yalnızca sonucu (genelde küçük bir özet tablo) R'a çekersin.",
+                "This is dbplyr's whole value: you write the same dplyr syntax, but the computation runs on the database's own engine — even on a table with billions of rows, it never strains R's memory. You only pull the result (usually a small summary table) into R.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "`collect()` çağrısı ne zaman gereklidir?",
+                "When is calling `collect()` necessary?",
+              ],
+              options: [
+                [
+                  "Veritabanında hesaplanan sonucu gerçekten R'ın belleğine (bir data frame olarak) çekmek istediğinde",
+                  "When you actually want to pull the result computed in the database into R's memory as a data frame",
+                ],
+                ["Her dplyr fiilinden sonra, aksi hâlde kod çalışmaz", "After every dplyr verb, or the code won't run"],
+                ["Yalnızca bağlantıyı kapatmak için", "Only to close the connection"],
+                ["collect() hiçbir zaman gerekmez", "collect() is never necessary"],
+              ],
+              answer: 0,
+              explain: [
+                "dbplyr zinciri 'tembel' (lazy) çalışır — hesaplamayı hemen yapmaz, yalnızca ne isteneceğini SQL'e çevirir. `collect()` çağrıldığı an bu SQL veritabanında çalıştırılır ve sonuç gerçek bir R data frame'i olarak döner.",
+                "A dbplyr chain is \"lazy\" — it doesn't compute immediately, it only translates what's being asked into SQL. The moment `collect()` is called, that SQL actually runs in the database and the result comes back as a real R data frame.",
+              ],
+            }),
+            pitfall(
+              "collect() etmeden önce büyüklüğü tahmin et",
+              "Estimate the size before you collect()",
+              "`collect()`, veritabanındaki tüm sonucu R'ın belleğine çeker. Özetlenmemiş, milyonlarca satırlık ham bir sorguyu `collect()` edersen R çökebilir. `collect()`'ten önce `count()` ile kaç satır döneceğini kontrol etmek iyi bir alışkanlıktır.",
+              "`collect()` pulls the entire database result into R's memory. Calling `collect()` on an un-aggregated, raw query with millions of rows can crash R. Checking how many rows will come back with `count()` before calling `collect()` is a good habit.",
+            ),
+          ],
+        }),
       ],
     },
   ],

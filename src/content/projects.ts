@@ -2445,6 +2445,118 @@ def lift(a, b):
     ],
   }),
 
+  project({
+    slug: "r-purrr-coklu-dosya-hatti",
+    track: "r",
+    level: "expert",
+    title: ["purrr ile Çoklu Dosya İşleme Hattı", "A Multi-File Processing Pipeline with purrr"],
+    stack: ["R", "purrr", "dplyr", "ggplot2"],
+    hours: 8,
+    xp: 550,
+    summary: [
+      "Bir klasördeki onlarca CSV dosyasını for döngüsü yazmadan, map() ile okuyup birleştir ve her biri için ayrı bir küçük-çoklu grafik üret.",
+      "Read and combine dozens of CSVs in a folder without writing a for loop, using map(), and produce a small-multiples chart for each.",
+    ],
+    dataset: [
+      "Her biri bir aya/şubeye ait, aynı sütun yapısına sahip en az 10 CSV dosyası (kendi verinden veya sentetik üretilmiş).",
+      "At least 10 CSV files, one per month/branch, sharing the same column structure (from your own data or synthetically generated).",
+    ],
+    deliverables: [
+      ["Tüm dosyaları map() ile okuyup tek bir data frame'de birleştiren kod", "Code that reads all files with map() and combines them into a single data frame"],
+      ["Her dosya için üretilen bir özet istatistik tablosu (map_df ile)", "A summary statistics table produced per file (via map_df)"],
+      ["facet_wrap ile her şube/ay için ayrı panel gösteren bir grafik", "A chart showing a separate panel per branch/month via facet_wrap"],
+      ["for döngüsü ile map() sürümünün satır sayısı karşılaştırması", "A line-count comparison between the for-loop and map() versions"],
+    ],
+    steps: [
+      {
+        title: ["Dosya listesini al ve map() ile oku", "List the files and read them with map()"],
+        body: [
+          "`list.files()` ile klasördeki tüm CSV yollarını al, `map(dosyalar, read_csv)` ile hepsini oku. Sonucu `list_rbind()` veya `map_df()` ile tek bir data frame'de birleştir; her satıra hangi dosyadan geldiğini gösteren bir sütun ekle.",
+          "Use `list.files()` to get all CSV paths in the folder, then `map(files, read_csv)` to read them all. Combine the result into one data frame with `list_rbind()` or `map_df()`; add a column showing which file each row came from.",
+        ],
+      },
+      {
+        title: ["Aynı işi bilerek bir for döngüsüyle de yaz", "Deliberately write the same job with a for loop too"],
+        body: [
+          "Karşılaştırma için aynı okuma+birleştirme işini klasik bir `for` döngüsüyle de yaz (boş liste açma, indeksle doldurma, sonda birleştirme). İki sürümün satır sayısını ve okunabilirliğini karşılaştır.",
+          "For comparison, also write the same read+combine job with a classic `for` loop (pre-allocating an empty list, filling by index, combining at the end). Compare the two versions' line count and readability.",
+        ],
+      },
+      {
+        title: ["Dosya başına özet üret", "Produce a per-file summary"],
+        body: [
+          "`map_df()` ile her dosya için (birleştirmeden önce) bir özet satırı üret — satır sayısı, toplam tutar, en yüksek değer gibi. Bu, her kaynağın veri kalitesini hızlıca gözden geçirmeni sağlar.",
+          "With `map_df()`, produce one summary row per file (before combining) — row count, total amount, max value. This lets you quickly eyeball each source's data quality.",
+        ],
+      },
+      {
+        title: ["facet_wrap ile görselleştir", "Visualize with facet_wrap"],
+        body: [
+          "Birleştirilmiş veriden, her şube/ay için ayrı bir panel gösteren tek bir `facet_wrap` grafiği çiz. Aynı eksen ölçeğinde olduklarından emin ol — panellerin karşılaştırılabilir olması bu grafiğin asıl amacıdır.",
+          "From the combined data, draw a single `facet_wrap` chart showing a separate panel per branch/month. Make sure they share the same axis scale — comparability across panels is this chart's whole point.",
+        ],
+      },
+      githubStep("purrr-coklu-dosya-hatti"),
+    ],
+    premium: true,
+  }),
+
+  project({
+    slug: "r-dbplyr-veritabani-raporu",
+    track: "r",
+    level: "expert",
+    title: ["dbplyr ile Veritabanından Canlı Rapor", "A Live Report from the Database with dbplyr"],
+    stack: ["R", "DBI", "dbplyr", "Quarto"],
+    hours: 9,
+    xp: 600,
+    summary: [
+      "Veriyi CSV'ye dışa aktarmadan, dplyr sözdizimiyle doğrudan bir veritabanını sorgulayan ve Quarto ile yeniden üretilebilen bir rapor kur.",
+      "Build a report that queries a database directly with dplyr syntax — no CSV export — and rebuilds with Quarto.",
+    ],
+    dataset: [
+      "Yerel bir SQLite veritabanı (kendi oluşturabilirsin, `RSQLite` paketiyle) veya erişimin olan başka bir veritabanı.",
+      "A local SQLite database (you can create one yourself with the `RSQLite` package) or another database you have access to.",
+    ],
+    deliverables: [
+      ["DBI ile kurulan bir veritabanı bağlantısı", "A database connection set up with DBI"],
+      ["dbplyr ile yazılmış, veriyi R'a çekmeden çalışan en az 3 sorgu", "At least 3 queries written with dbplyr that run without pulling data into R"],
+      ["collect() ile yalnızca özetlenmiş sonucun R'a çekildiğini gösteren bir karşılaştırma", "A comparison showing that only the summarized result is pulled into R via collect()"],
+      ["Bu sorguları kullanan, tek komutla yeniden üretilebilir bir Quarto raporu", "A Quarto report using these queries, rebuildable with a single command"],
+    ],
+    steps: [
+      {
+        title: ["Veritabanını kur ve bağlan", "Set up the database and connect"],
+        body: [
+          "`RSQLite::SQLite()` ile yerel bir veritabanı dosyası oluştur, örnek verini `dbWriteTable()` ile içine yükle. Sonra `DBI::dbConnect()` ile bağlan ve `tbl()` ile bir tabloyu dplyr üzerinden erişilebilir hâle getir.",
+          "Create a local database file with `RSQLite::SQLite()`, load your sample data into it with `dbWriteTable()`. Then connect with `DBI::dbConnect()` and make a table accessible through dplyr with `tbl()`.",
+        ],
+      },
+      {
+        title: ["dbplyr ile sorgular yaz", "Write queries with dbplyr"],
+        body: [
+          "En az 3 farklı soruyu (aylık toplam, şehir başına ortalama, en yüksek 10 kayıt) dplyr fiilleriyle yaz. `show_query()` ile her birinin arka planda ürettiği gerçek SQL'i gör — bu, dbplyr'ın ne yaptığını somutlaştırır.",
+          "Write at least 3 different questions (monthly total, average per city, top 10 records) using dplyr verbs. Use `show_query()` to see the actual SQL each one generates behind the scenes — this makes what dbplyr is doing concrete.",
+        ],
+      },
+      {
+        title: ["collect() ile veri hacmini kontrol et", "Control the data volume with collect()"],
+        body: [
+          "`collect()` çağırmadan önce `count()` ile kaç satır döneceğini kontrol et. Yalnızca özetlenmiş, küçük sonucu `collect()` ile R'a çek — ham tabloyu asla tamamen çekme.",
+          "Before calling `collect()`, check how many rows will come back with `count()`. Only pull the small, summarized result into R with `collect()` — never pull the raw table in full.",
+        ],
+      },
+      {
+        title: ["Quarto raporuna bağla", "Wire it into a Quarto report"],
+        body: [
+          "Bu sorguları bir Quarto (`.qmd`) dosyasında birleştir; rapor çalıştırıldığında veritabanına yeniden bağlanıp sonuçları taze üretmeli. Böylece rapor, veri güncellendiğinde tek komutla (`quarto render`) yeniden üretilebilir kalır.",
+          "Combine these queries in a Quarto (`.qmd`) file; running the report should reconnect to the database and produce fresh results each time. This keeps the report rebuildable with a single command (`quarto render`) whenever the data updates.",
+        ],
+      },
+      githubStep("dbplyr-veritabani-raporu"),
+    ],
+    premium: true,
+  }),
+
   /* --------------------- Veri Mühendisliği ---------------------- */
   project({
     slug: "de-etl-pipeline",
