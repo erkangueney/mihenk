@@ -104,6 +104,22 @@ export type Check =
   | { kind: "contains"; needle: string; message: Localized }
   | { kind: "resultEquals"; message: Localized };
 
+/**
+ * Serbest deneme alanı ("Kendin Dene").
+ *
+ * `ExerciseBlock`'tan farkı: doğrulama yok, XP yok, doğru cevap yok.
+ * Kullanıcı kodu bozar, değiştirir, çalıştırır ve sonucu görür. Anlatımın
+ * hemen altına konur; referans ve nasıl-yapılır sayfalarında da kullanılır.
+ */
+export interface PlaygroundBlock {
+  type: "playground";
+  engine: CodeEngine;
+  code: string;
+  /** SQL için veri seti anahtarı (src/lib/engines/datasets.ts) */
+  dataset?: string;
+  title?: Localized;
+}
+
 export type Block =
   | TextBlock
   | HeadingBlock
@@ -111,7 +127,8 @@ export type Block =
   | CalloutBlock
   | QuizBlock
   | OrderBlock
-  | ExerciseBlock;
+  | ExerciseBlock
+  | PlaygroundBlock;
 
 /* ------------------------------------------------------------------ */
 /* Ders / seviye / patika                                              */
@@ -177,8 +194,143 @@ export interface Project {
 }
 
 /* ------------------------------------------------------------------ */
+/* Referans (sözlük)                                                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Referans girdisi — patikalardan bağımsız, tek bir sözdiziminin/fonksiyonun
+ * kartı. Kullanıcı buraya "SQL JOIN nasıl kullanılır" diye aradığında düşer;
+ * ders akışına girmeden cevabı alır.
+ */
+export interface ReferenceEntry {
+  slug: string;
+  /** Girdinin adı — kod olarak gösterilir: `GROUP BY`, `df.merge()`, `DÜŞEYARA`. */
+  name: string;
+  summary: Localized;
+  /** Sözdizimi satırı/satırları. */
+  syntax: string;
+  description?: Localized;
+  /** Parametre veya argüman açıklamaları. */
+  params?: { name: string; text: Localized }[];
+  returns?: Localized;
+  /** Kopyalanabilir örnek. */
+  example?: { code: string; note?: Localized };
+  /** "Kendin dene" — sayfada çalıştırılabilir editör. */
+  playground?: PlaygroundBlock;
+  /** `grup/slug` biçiminde ilgili girdiler. */
+  related?: string[];
+  /** Aramada yakalanması istenen ek kelimeler (TR + EN karışık olabilir). */
+  keywords?: string[];
+}
+
+export interface ReferenceSection {
+  id: string;
+  title: Localized;
+  entries: ReferenceEntry[];
+}
+
+export interface ReferenceGroup {
+  slug: string;
+  name: string;
+  icon: string;
+  color: string;
+  /** Vurgulanan kod dili — sözdizimi renklendirmesi için. */
+  lang: string;
+  tagline: Localized;
+  description: Localized;
+  /** Aynı konunun ders patikası — "patikada öğren" bağlantısı. */
+  trackSlug?: string;
+  sections: ReferenceSection[];
+}
+
+/* ------------------------------------------------------------------ */
+/* Nasıl yapılır? (how-to)                                             */
+/* ------------------------------------------------------------------ */
+
+export interface HowToStep {
+  title: Localized;
+  body: Localized;
+  code?: string;
+  lang?: string;
+}
+
+/**
+ * Tek bir senaryonun cevabı: "Power BI'da YoY nasıl hesaplanır?".
+ * Sayfa, arama sonucundan gelen kullanıcıyı önce **hızlı cevapla** karşılar,
+ * ayrıntı isteyene adımları verir.
+ */
+export interface HowTo {
+  slug: string;
+  title: Localized;
+  summary: Localized;
+  /** Hangi aracın sorusu — referans grubunun slug'ı. */
+  tool: string;
+  trackSlug?: string;
+  minutes: number;
+  /** Son güncelleme, ISO tarih (YYYY-AA-GG). */
+  updated: string;
+  /** Sayfanın tepesindeki tek paragraflık cevap. */
+  answer: { body: Localized; code?: string; lang?: string };
+  steps: HowToStep[];
+  /** Adımlardan sonra gelen serbest içerik (uyarı, kendin dene, ek kod). */
+  blocks?: Block[];
+  faq?: { q: Localized; a: Localized }[];
+  related?: string[];
+  keywords?: string[];
+}
+
+/* ------------------------------------------------------------------ */
+/* Kopya kâğıtları (cheatsheet)                                        */
+/* ------------------------------------------------------------------ */
+
+export interface CheatRow {
+  /** Sol sütun: komut, formül veya algoritma adı. */
+  code: string;
+  desc: Localized;
+  note?: Localized;
+}
+
+export interface CheatSection {
+  title: Localized;
+  /** Sütun başlıkları. Verilmezse "Sözdizimi / Ne yapar / Not" kullanılır. */
+  columns?: [Localized, Localized] | [Localized, Localized, Localized];
+  rows: CheatRow[];
+}
+
+export interface Cheatsheet {
+  slug: string;
+  title: Localized;
+  summary: Localized;
+  tool: string;
+  icon: string;
+  color: string;
+  lang: string;
+  updated: string;
+  sections: CheatSection[];
+}
+
+/* ------------------------------------------------------------------ */
 /* İlerleme & oyunlaştırma                                             */
 /* ------------------------------------------------------------------ */
+
+export type AvatarSlot = "base" | "outfit" | "accessory" | "effect";
+
+/**
+ * Kullanıcının avatarı.
+ *
+ * `spent`, özelleştirmeye harcanan XP'yi tutar; seviye hesabı ham `xp`
+ * üzerinden yapıldığı için harcama kimseyi seviye düşürmez — yalnızca
+ * harcanabilir bakiyeyi azaltır.
+ */
+export interface AvatarState {
+  base: string;
+  outfit: string;
+  accessory: string | null;
+  effect: string | null;
+  /** Açılmış/satın alınmış parça id'leri. */
+  unlocked: string[];
+  spent: number;
+}
 
 /** Tek bir görevin tamamlanma kaydı. Anahtar: `${trackSlug}/${lessonSlug}#${blockId}` */
 export type TaskKey = string;
@@ -198,6 +350,8 @@ export interface ProgressState {
   activeDays: string[];
   /** Kullanıcının görünen adı — liderlik tablosunda kullanılır. */
   displayName: string;
+  /** Avatar seçimi ve açılan parçalar. */
+  avatar: AvatarState;
   /** Şema sürümü; ileride göç için. */
   version: number;
 }

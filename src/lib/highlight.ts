@@ -101,6 +101,43 @@ const dax: LanguageSpec = {
   `),
 };
 
+/**
+ * Excel formülleri. Türkçe arayüzde fonksiyon adları da Türkçedir, bu yüzden
+ * iki dilin adları birlikte tanınıyor.
+ */
+const excel: LanguageSpec = {
+  lineComment: /\/\/[^\n]*/y,
+  strings: [/"(?:""|[^"])*"/y],
+  caseInsensitive: true,
+  keywords: words(`
+    tr en doğru yanlış true false
+  `),
+  builtins: words(`
+    düşeyara vlookup çaprazara xlookup indis index kaçıncı match eğer if eğerhata iferror
+    içokeğer ifs etopla sumif çoketopla sumifs eğersay countif çokeğersay countifs topla sum
+    ortalama average say count bağ_değ_dolu_say counta metinbirleştir textjoin birleştir concat
+    kırp trim temiz clean parçaal mid soldan left sağdan right uzunluk len bul find yerinekoy
+    substitute değiştir replace metneçevir text bugün today şimdi now tarih date seriay edate
+    yıl year ay month gün day filtre filter benzersiz unique sırala sort sıralaölçüt sortby
+    devrik transpose topla.çarpım sumproduct maksimum max minimum min yuvarla round eğerortalama
+    averageif dolaylı indirect kaydır offset satır row sütun column dolgu let lambda
+  `),
+};
+
+/** Terminal komutları — git ve kabuk örnekleri için. */
+const shell: LanguageSpec = {
+  lineComment: /#[^\n]*/y,
+  strings: [/"(?:\\.|[^"\\\n])*"/y, /'[^'\n]*'/y],
+  keywords: words(`
+    git npm npx node python pip cd ls mkdir rm cp mv echo export sudo curl if then else fi for
+    do done while case esac
+  `),
+  builtins: words(`
+    init clone add commit status log diff branch checkout switch merge rebase pull push fetch
+    remote reset revert stash tag restore cherry-pick blame show config
+  `),
+};
+
 const specs: Record<string, LanguageSpec> = {
   python: python,
   py: python,
@@ -113,10 +150,24 @@ const specs: Record<string, LanguageSpec> = {
   dax,
   m: dax,
   powerquery: dax,
+  excel,
+  shell,
+  bash: shell,
+  git: shell,
 };
 
-const IDENTIFIER = /[A-Za-z_][A-Za-z0-9_.]*/y;
+/** Türkçe harfler de kimliğin parçası: `DÜŞEYARA` tek parça olarak okunmalı. */
+const IDENTIFIER = /[A-Za-zÇĞİÖŞÜçğıöşü_][A-Za-zÇĞİÖŞÜçğıöşü0-9_.]*/y;
 const NUMBER = /\d+(?:\.\d+)?/y;
+
+/**
+ * Karşılaştırma için küçük harfe indirger.
+ *
+ * `toLowerCase()` Türkçe "İ"yi birleşik noktalı bir çifte çevirdiği için
+ * önce sadeleştiriliyor; `toLocaleLowerCase("tr")` ise SQL'in ASCII "I"sını
+ * "ı" yapıp anahtar kelimeleri kaçırırdı.
+ */
+const fold = (value: string) => value.replace(/İ/g, "i").toLowerCase();
 
 /** Kaynağı renklendirilebilir parçalara böler. */
 export function tokenize(source: string, lang: string): Token[] {
@@ -166,10 +217,10 @@ export function tokenize(source: string, lang: string): Token[] {
 
     const identifier = tryMatch(IDENTIFIER);
     if (identifier) {
-      const probe = spec.caseInsensitive ? identifier.toLowerCase() : identifier;
+      const probe = spec.caseInsensitive ? fold(identifier) : identifier;
       const type: TokenType = spec.keywords.has(probe)
         ? "keyword"
-        : spec.builtins.has(probe.toLowerCase())
+        : spec.builtins.has(fold(probe))
           ? "builtin"
           : "plain";
       if (type !== "plain") {

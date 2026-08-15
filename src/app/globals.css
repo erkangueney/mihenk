@@ -288,6 +288,38 @@ body::after {
   animation: va-pop 0.4s ease-out;
 }
 
+/* Avatar efektleri (halka, kıvılcım, yörünge) bu dönüşü paylaşır. */
+@keyframes va-avatar-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Kopya kâğıdı yazdırma: gezinme ve dekor gitsin, tablo tam genişlik alsın. */
+@media print {
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+  body::before,
+  body::after {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .card {
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    background: #fff !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

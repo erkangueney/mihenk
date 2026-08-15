@@ -1,3 +1,4 @@
+import { defaultAvatar, normalizeAvatar } from "../avatar";
 import type { ProgressState } from "../types";
 
 /**
@@ -27,6 +28,7 @@ export function emptyProgress(): ProgressState {
     badges: [],
     activeDays: [],
     displayName: "",
+    avatar: defaultAvatar(),
     version: PROGRESS_VERSION,
   };
 }
@@ -58,6 +60,7 @@ export function normalize(raw: unknown): ProgressState {
     badges: strings(r.badges),
     activeDays: strings(r.activeDays).sort(),
     displayName: typeof r.displayName === "string" ? r.displayName.slice(0, 40) : "",
+    avatar: normalizeAvatar(r.avatar),
     version: PROGRESS_VERSION,
   };
 }

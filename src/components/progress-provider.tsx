@@ -11,8 +11,9 @@ import {
 } from "react";
 import { adapter, emptyProgress, flushPendingProgress, normalize } from "@/lib/storage";
 import { badges, todayKey } from "@/lib/gamification";
+import { getAvatarPart, isFree, partStatus } from "@/lib/avatar";
 import { useSession } from "@/components/auth/session-provider";
-import type { ProgressState } from "@/lib/types";
+import type { AvatarSlot, ProgressState } from "@/lib/types";
 
 export interface Toast {
   id: number;
@@ -34,6 +35,10 @@ interface ProgressContextValue {
   isProjectDone: (slug: string) => boolean;
   toggleProject: (slug: string, xp: number) => void;
   setDisplayName: (name: string) => void;
+  /** Parçayı XP karşılığı açar. Kilitliyse veya bakiye yetmezse hiçbir şey yapmaz. */
+  unlockAvatarPart: (id: string) => void;
+  /** Açılmış bir parçayı kuşanır; `null` ise slotu boşaltır. */
+  equipAvatarPart: (slot: AvatarSlot, id: string | null) => void;
   replaceAll: (state: ProgressState) => void;
   reset: () => void;
   toasts: Toast[];
@@ -189,6 +194,56 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     setProgress((current) => ({ ...current, displayName: name.slice(0, 40) }));
   }, []);
 
+  /**
+   * Parça açma.
+   *
+   * Kilit ve bakiye kontrolü burada, güncel duruma göre yapılır — buton
+   * devre dışı olsa bile durum arayüzde eskimiş olabilir.
+   */
+  const unlockAvatarPart = useCallback(
+    (id: string) => {
+      const part = getAvatarPart(id);
+      if (!part) return;
+      setProgress((current) => {
+        const status = partStatus(part, current);
+        if (status.state !== "buyable") return current;
+        if (current.avatar.unlocked.includes(id)) return current;
+        return {
+          ...current,
+          avatar: {
+            ...current.avatar,
+            unlocked: [...current.avatar.unlocked, id],
+            spent: current.avatar.spent + status.cost,
+            // Açılan parça doğrudan kuşanılsın; ayrıca tıklamaya gerek kalmasın.
+            [part.slot]: id,
+          },
+        };
+      });
+      pushToast({
+        kind: "badge",
+        icon: "✨",
+        title: part.name.tr,
+        detail: part.cost > 0 ? `-${part.cost} XP` : undefined,
+      });
+    },
+    [pushToast],
+  );
+
+  const equipAvatarPart = useCallback((slot: AvatarSlot, id: string | null) => {
+    setProgress((current) => {
+      if (id === null) {
+        // Temel karakter ve kıyafet boş bırakılamaz.
+        if (slot === "base" || slot === "outfit") return current;
+        return { ...current, avatar: { ...current.avatar, [slot]: null } };
+      }
+      const part = getAvatarPart(id);
+      if (!part || part.slot !== slot) return current;
+      const owned = isFree(part) || current.avatar.unlocked.includes(id);
+      if (!owned) return current;
+      return { ...current, avatar: { ...current.avatar, [slot]: id } };
+    });
+  }, []);
+
   const replaceAll = useCallback((state: ProgressState) => {
     setProgress(normalize(state));
   }, []);
@@ -209,6 +264,8 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
       isProjectDone,
       toggleProject,
       setDisplayName,
+      unlockAvatarPart,
+      equipAvatarPart,
       replaceAll,
       reset,
       toasts,
@@ -224,6 +281,8 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
       isProjectDone,
       toggleProject,
       setDisplayName,
+      unlockAvatarPart,
+      equipAvatarPart,
       replaceAll,
       reset,
       toasts,

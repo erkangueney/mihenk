@@ -6,7 +6,12 @@ Oyunlaştırılmış veri analizi ve veri bilimi eğitim platformu. Türkçe ve 
 - **Her patikada 3 seviye** — başlangıç, orta, ileri
 - **24 uçtan uca proje** — gerçek veri seti, net teslimatlar, adım adım plan ve GitHub'da yayınlama adımı
 - **Tarayıcıda çalışan gerçek kod** — Python (Pyodide, pandas dahil) ve SQL (sql.js / SQLite), kurulum gerekmez
-- **Oyunlaştırma** — XP, seviye, günlük seri, 12 rozet, liderlik tablosu
+- **Oyunlaştırma** — XP, seviye, günlük seri, 12 rozet, liderlik tablosu, XP ile açılan avatar parçaları
+- **Alet çantası** — patikalardan bağımsız başvuru katmanı:
+  - **Referans sözlüğü** — 100+ girdi (SQL, pandas, Excel formülleri, DAX, Tableau, Git), çoğunda çalıştırılabilir örnek
+  - **Nasıl yapılır?** — nokta atışı senaryolara kısa cevaplar, adım adım anlatım ve SSS
+  - **Kopya kâğıtları** — tek sayfalık, yazdırılabilir özetler
+  - **Deneme alanı** — serbest Python/SQL editörü, hazır veri setleriyle
 
 ## Hızlı başlangıç
 
@@ -45,6 +50,11 @@ src/
 │       ├── page.tsx                  # ana sayfa
 │       ├── learn/                    # patikalar → seviyeler → dersler
 │       ├── projects/                 # uçtan uca projeler
+│       ├── reference/                # referans sözlüğü: grup → girdi
+│       ├── how-to/                   # nokta atışı rehberler
+│       ├── cheatsheets/              # yazdırılabilir kopya kâğıtları
+│       ├── playground/               # serbest Python/SQL editörü
+│       ├── avatar/                   # avatar stüdyosu
 │       ├── profile/                  # XP, rozet, seri, yedekleme
 │       ├── leaderboard/
 │       ├── roadmap/                  # önerilen öğrenme sırası
@@ -54,13 +64,19 @@ src/
 │   ├── helpers.ts                    # içerik yazım yardımcıları
 │   ├── tracks/*.ts                   # patika başına bir dosya
 │   ├── projects.ts                   # uçtan uca projeler
+│   ├── reference/*.ts                # referans sözlüğü, araç başına bir dosya
+│   ├── how-to/*.ts                   # nasıl-yapılır rehberleri
+│   ├── cheatsheets.ts                # kopya kâğıtları
 │   ├── roadmap.ts                    # yol haritası
 │   └── index.ts                      # patika sırası
 ├── lib/
 │   ├── types.ts                      # içerik ve ilerleme tipleri
 │   ├── i18n.ts                       # arayüz sözlüğü (TR/EN)
 │   ├── content.ts                    # içerik sorgulama + ilerleme hesapları
+│   ├── reference.ts                  # referans arama ve sorgulama
+│   ├── how-to.ts                     # rehber sorgulama ve arama
 │   ├── gamification.ts               # XP eğrisi, seri, rozetler, liderlik
+│   ├── avatar.ts                     # avatar kataloğu, kilit ve XP harcama kuralları
 │   ├── highlight.ts                  # bağımlılıksız sözdizimi vurgulama
 │   ├── storage/                      # ilerleme deposu (adaptör deseni)
 │   ├── supabase/                     # dört istemci: tarayıcı, sunucu, anon, admin
@@ -114,7 +130,53 @@ lesson({
 ```
 
 Blok türleri: `text`, `heading`, `code`, `tip` / `info` / `pitfall`, `quiz`, `order`,
-`pyTask` (gerçek Python), `sqlTask` (gerçek SQLite).
+`pyTask` (gerçek Python), `sqlTask` (gerçek SQLite), `trySql` / `tryPy` (kendin dene —
+doğrulaması ve XP'si olmayan serbest editör).
+
+## Referans, rehber ve kopya kâğıdı eklemek
+
+Üçü de ders içeriğiyle aynı mantıkta: düz veri, TR/EN zorunlu.
+
+```ts
+// src/content/reference/sql.ts → ilgili bölümün entries dizisine
+entry({
+  slug: "yeni-komut",
+  name: "KOMUT",
+  summary: ["Türkçe özet.", "English summary."],
+  syntax: "KOMUT ...;",
+  example: { code: `KOMUT tablo;` },
+  try: { engine: "sql", dataset: "shop", code: `SELECT 1;` },  // kendin dene
+  related: ["sql/select"],
+  keywords: ["arama", "için", "ek", "kelimeler"],
+})
+```
+
+`related` ve arama `grup/slug` anahtarıyla çalışır. Rehberler için
+`src/content/how-to/*.ts` içindeki `howTo({...})`, kopya kâğıtları için
+`src/content/cheatsheets.ts` aynı desende yazılır.
+
+## Avatar parçası eklemek
+
+Çizim tek bir SVG bileşenidir (`src/components/avatar/avatar.tsx`); katalog ise
+`src/lib/avatar.ts` içindeki düz bir dizidir. Mevcut bir `look` biçimini kullanan
+yeni bir parça eklemek için bileşene dokunmazsın:
+
+```ts
+{
+  id: "acc-yeni",
+  slot: "accessory",
+  name: L("Yeni", "New"),
+  description: L("Ne olduğu.", "What it is."),
+  rarity: "rare",
+  cost: 500,        // 0 = ücretsiz
+  level: 6,         // isteğe bağlı seviye kilidi
+  badge: "scholar", // isteğe bağlı rozet kilidi
+  look: { gear: "glasses", accent: "#22d3ee" },
+}
+```
+
+**Harcama seviyeyi düşürmez.** Seviye ham `xp`'den, harcanabilir bakiye
+`xp - avatar.spent`'ten hesaplanır.
 
 **Her metin iki dilde yazılır.** Tip sistemi bunu zorunlu tutar — TR yazıp EN unutursan
 `npm run typecheck` hata verir.
@@ -168,8 +230,9 @@ Supabase (veritabanı + üyelik) ve Vercel (barındırma) ücretsiz katmanlarıy
 Bulut hesabı açmadan denemek istersen `npm run db:start` yerel bir Postgres + Auth
 yığını kaldırır (Docker gerekir) — canlıdakiyle aynı şema, aynı davranış.
 
-Özetle: `supabase/migrations/0001_init.sql`'i Supabase SQL Editor'de çalıştır, üç
-anahtarı `.env.local`'e (ve Vercel'e) gir, `npm run create-admin` ile ilk yöneticiyi aç.
+Özetle: `supabase/migrations/` altındaki dosyaları numara sırasıyla Supabase SQL
+Editor'de çalıştır, üç anahtarı `.env.local`'e (ve Vercel'e) gir, `npm run create-admin`
+ile ilk yöneticiyi aç.
 
 Üyelik istemiyorsan hiçbir ortam değişkeni gerekmez; depoyu Vercel'e bağlaman yeter.
 
@@ -181,6 +244,9 @@ adınla güncelle — Open Graph bağlantıları buna göre üretiliyor.
 - [x] Supabase ile giriş ve cihazlar arası senkron ilerleme
 - [x] Gerçek liderlik tablosu
 - [x] Yönetim paneli: üye, ilerleme ve içerik yönetimi
+- [x] Referans sözlüğü, nasıl-yapılır kütüphanesi ve kopya kâğıtları
+- [x] Ders içinde ve referansta "kendin dene" editörleri, serbest deneme alanı
+- [x] XP ile açılan avatar sistemi
 - [ ] Ders içi arama
 - [ ] Daha fazla `sqlTask` / `pyTask` — Excel ve BI patikalarında şu an quiz ağırlıkta
 - [ ] PWA: çevrimdışı ders okuma

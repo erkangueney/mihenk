@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { HeroCta, type ResumeTarget } from "@/components/hero-cta";
+import { IconBook, IconClipboard, IconCompass, IconPlay } from "@/components/ui/icons";
 import { TrackCard } from "@/components/track-card";
+import { cheatsheets } from "@/content/cheatsheets";
 import { badges } from "@/lib/gamification";
 import { flatLessons, lessonKeyOf, trackStats } from "@/lib/content";
 import { getPlatformStats, getTracks } from "@/lib/content-docs/resolve";
+import { howTos } from "@/lib/how-to";
+import { totalReferenceEntries } from "@/lib/reference";
 import { isLocale, t, ui } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
 
@@ -51,6 +55,43 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     lessonTitle: first.title,
     order,
   };
+
+  /**
+   * Alet çantası kartları.
+   *
+   * Ders akışına girmeden gelen ziyaretçi için giriş noktası: aranan komut,
+   * nokta atışı bir soru, kopya kâğıdı ya da doğrudan editör.
+   */
+  const toolbox = [
+    {
+      href: "/reference",
+      icon: IconBook,
+      title: ui("reference.title", locale),
+      body: ui("reference.subtitle", locale),
+      meta: `${totalReferenceEntries()} ${ui("reference.entries", locale)}`,
+    },
+    {
+      href: "/how-to",
+      icon: IconCompass,
+      title: ui("howTo.title", locale),
+      body: ui("howTo.subtitle", locale),
+      meta: `${howTos.length} ${ui("howTo.count", locale)}`,
+    },
+    {
+      href: "/cheatsheets",
+      icon: IconClipboard,
+      title: ui("cheatsheet.title", locale),
+      body: ui("cheatsheet.subtitle", locale),
+      meta: `${cheatsheets.length} ${locale === "tr" ? "kâğıt" : "sheets"}`,
+    },
+    {
+      href: "/playground",
+      icon: IconPlay,
+      title: ui("playground.pageTitle", locale),
+      body: ui("playground.pageSubtitle", locale),
+      meta: "Python · SQL",
+    },
+  ];
 
   const howItWorks = [
     {
@@ -150,6 +191,38 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {cards.map((track) => (
             <TrackCard key={track.slug} track={track} locale={locale} />
+          ))}
+        </div>
+      </section>
+
+      {/* -------------------------- Alet çantası ------------------------- */}
+      <section className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
+        <div className="mb-8 max-w-2xl">
+          <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+            {ui("toolbox.title", locale)}
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-muted">
+            {ui("toolbox.subtitle", locale)}
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {toolbox.map((item) => (
+            <Link
+              key={item.href}
+              href={`/${locale}${item.href}`}
+              className="card group flex flex-col p-6 transition hover:border-accent"
+            >
+              <span
+                aria-hidden
+                className="grid h-11 w-11 place-items-center rounded-xl bg-accent/10 text-accent"
+              >
+                <item.icon size={22} />
+              </span>
+              <span className="mt-4 font-bold tracking-tight">{item.title}</span>
+              <span className="mt-2 text-sm leading-relaxed text-muted">{item.body}</span>
+              <span className="mt-4 text-xs font-semibold text-accent">{item.meta}</span>
+            </Link>
           ))}
         </div>
       </section>

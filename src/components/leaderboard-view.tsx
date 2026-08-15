@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Avatar } from "@/components/avatar/avatar";
 import { useProgress } from "@/components/progress-provider";
 import { useSession } from "@/components/auth/session-provider";
+import { defaultAvatar, normalizeAvatar } from "@/lib/avatar";
 import { leaderboard, levelInfo, rankTitle } from "@/lib/gamification";
 import { t, ui } from "@/lib/i18n";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
-import type { Locale } from "@/lib/types";
+import type { AvatarState, Locale } from "@/lib/types";
 
 interface Row {
   rank: number;
@@ -15,6 +17,7 @@ interface Row {
   xp: number;
   level: number;
   isYou: boolean;
+  avatar: AvatarState;
 }
 
 /**
@@ -55,6 +58,7 @@ export function LeaderboardView({ locale }: { locale: Locale }) {
           xp: row.xp,
           level: levelInfo(row.xp).level,
           isYou: Boolean(row.is_you),
+          avatar: normalizeAvatar(row.avatar),
         })),
       );
       setState("done");
@@ -66,10 +70,14 @@ export function LeaderboardView({ locale }: { locale: Locale }) {
     // Kendi XP'miz değiştiğinde sıralama tazelensin.
   }, [sessionReady, user?.id, progress.xp]);
 
+  // Örnek tabloda yalnızca kendi avatarımız gerçek; rakipler varsayılanla çizilir.
   const sampleRows: Row[] = leaderboard({
     name: progress.displayName.trim() || ui("leaderboard.you", locale),
     xp: ready ? progress.xp : 0,
-  });
+  }).map((row) => ({
+    ...row,
+    avatar: row.isYou ? progress.avatar : defaultAvatar(),
+  }));
 
   const rows = enabled ? (remote ?? []) : sampleRows;
 
@@ -140,12 +148,15 @@ export function LeaderboardView({ locale }: { locale: Locale }) {
                       </span>
                     </td>
                     <td className="px-4 py-3 font-medium sm:px-6">
-                      {row.name}
-                      {row.isYou ? (
-                        <span className="ml-2 rounded-md bg-accent px-1.5 py-0.5 text-[10px] font-bold text-on-accent">
-                          {ui("leaderboard.you", locale)}
-                        </span>
-                      ) : null}
+                      <span className="flex items-center gap-2.5">
+                        <Avatar state={row.avatar} size={32} animated={false} />
+                        <span>{row.name}</span>
+                        {row.isYou ? (
+                          <span className="rounded-md bg-accent px-1.5 py-0.5 text-[10px] font-bold text-on-accent">
+                            {ui("leaderboard.you", locale)}
+                          </span>
+                        ) : null}
+                      </span>
                     </td>
                     <td className="px-4 py-3 text-muted sm:px-6">
                       {row.level} · {t(rankTitle(row.level), locale)}

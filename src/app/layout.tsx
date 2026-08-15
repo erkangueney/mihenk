@@ -70,6 +70,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="tr"
+      // Tema sınıfı boyamadan önce betikle yazılır; sunucu HTML'i ile fark
+      // beklenen bir durumdur ve React'in uyarısı bilinçli olarak susturulur.
+      suppressHydrationWarning
       className={`${sans.variable} ${mono.variable} ${display.variable} h-full antialiased`}
     >
       <head>

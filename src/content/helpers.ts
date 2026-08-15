@@ -2,11 +2,13 @@ import type {
   CalloutBlock,
   Check,
   CodeBlock,
+  CodeEngine,
   ExerciseBlock,
   HeadingBlock,
   Lesson,
   Localized,
   OrderBlock,
+  PlaygroundBlock,
   QuizBlock,
   TextBlock,
 } from "@/lib/types";
@@ -48,6 +50,32 @@ export const pitfall = (titleTr: string, titleEn: string, bodyTr: string, bodyEn
 
 export const info = (titleTr: string, titleEn: string, bodyTr: string, bodyEn: string) =>
   callout("info", titleTr, titleEn, bodyTr, bodyEn);
+
+/**
+ * "Kendin dene" bloğu — doğrulaması ve XP'si olmayan serbest editör.
+ * Anlatımın hemen altına konur; kullanıcı kodu bozup çalıştırarak öğrenir.
+ */
+export function playground(config: {
+  engine: CodeEngine;
+  code: string;
+  dataset?: string;
+  title?: [string, string];
+}): PlaygroundBlock {
+  return {
+    type: "playground",
+    engine: config.engine,
+    code: config.code.replace(/^\n/, "").trimEnd(),
+    dataset: config.dataset,
+    title: config.title ? L(...config.title) : undefined,
+  };
+}
+
+/** SQL için kısayol — veri seti varsayılan olarak e-ticaret şeması. */
+export const trySql = (code: string, dataset = "shop") =>
+  playground({ engine: "sql", code, dataset });
+
+/** Python için kısayol. */
+export const tryPy = (code: string) => playground({ engine: "python", code });
 
 export function quiz(config: {
   id: string;

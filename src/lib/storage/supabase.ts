@@ -18,6 +18,14 @@ function merge(a: ProgressState, b: ProgressState): ProgressState {
   }
   const union = (x: string[], y: string[]) => Array.from(new Set([...x, ...y]));
 
+  // Avatar: açılan parçalar birleşir, harcama yükseği tutulur (aynı parça iki
+  // yerde açıldıysa iki kez ödettirmemek için), kuşanılan seçim buluttan gelir.
+  const avatar = {
+    ...b.avatar,
+    unlocked: union(a.avatar?.unlocked ?? [], b.avatar?.unlocked ?? []),
+    spent: Math.max(a.avatar?.spent ?? 0, b.avatar?.spent ?? 0),
+  };
+
   return normalize({
     // XP görevlerden yeniden türetilemez (ders bonusu ve proje XP'si de var),
     // bu yüzden iki taraftan yüksek olanı esas alıyoruz.
@@ -28,6 +36,7 @@ function merge(a: ProgressState, b: ProgressState): ProgressState {
     badges: union(a.badges, b.badges),
     activeDays: union(a.activeDays, b.activeDays),
     displayName: b.displayName || a.displayName,
+    avatar,
   });
 }
 
@@ -50,6 +59,7 @@ async function writeRemote(state: ProgressState): Promise<void> {
       badges: state.badges,
       active_days: state.activeDays,
       display_name: state.displayName,
+      avatar: state.avatar,
     },
     { onConflict: "user_id" },
   );
@@ -78,7 +88,7 @@ export const supabaseAdapter: ProgressAdapter = {
 
     const { data, error } = await supabase
       .from("progress")
-      .select("xp, tasks, lessons, projects, badges, active_days, display_name")
+      .select("xp, tasks, lessons, projects, badges, active_days, display_name, avatar")
       .eq("user_id", user.id)
       .maybeSingle();
 
@@ -96,6 +106,7 @@ export const supabaseAdapter: ProgressAdapter = {
       badges: data.badges,
       activeDays: data.active_days,
       displayName: data.display_name,
+      avatar: data.avatar,
     });
 
     // İlk girişte cihazda birikmiş ilerleme varsa buluta katılır.

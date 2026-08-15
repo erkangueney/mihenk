@@ -3,7 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Avatar } from "@/components/avatar/avatar";
 import { BrandLockup } from "@/components/brand";
+import {
+  IconBook,
+  IconClipboard,
+  IconClose,
+  IconCompass,
+  IconMenu,
+  IconPlay,
+} from "@/components/ui/icons";
 import { levelInfo } from "@/lib/gamification";
 import { locales, ui } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
@@ -14,6 +23,7 @@ import { AccountMenu, AccountMobileLinks } from "./auth/account-menu";
 interface NavItem {
   href: string;
   key: Parameters<typeof ui>[0];
+  icon?: React.ComponentType<{ size?: number; className?: string }>;
 }
 
 const navItems: NavItem[] = [
@@ -21,6 +31,19 @@ const navItems: NavItem[] = [
   { href: "/projects", key: "nav.projects" },
   { href: "/roadmap", key: "nav.roadmap" },
   { href: "/leaderboard", key: "nav.leaderboard" },
+];
+
+/**
+ * Ders akışından bağımsız başvuru bölümleri.
+ *
+ * Dördü de tek tek üst çubuğa sığmadığı için "Alet Çantası" başlığı altında
+ * toplanıyor; mobil menüde ise düz liste olarak açılıyor.
+ */
+const toolboxItems: NavItem[] = [
+  { href: "/reference", key: "nav.reference", icon: IconBook },
+  { href: "/how-to", key: "nav.howTo", icon: IconCompass },
+  { href: "/cheatsheets", key: "nav.cheatsheets", icon: IconClipboard },
+  { href: "/playground", key: "nav.playground", icon: IconPlay },
 ];
 
 export function SiteHeader({ locale }: { locale: Locale }) {
@@ -68,17 +91,58 @@ export function SiteHeader({ locale }: { locale: Locale }) {
               {ui(item.key, locale)}
             </Link>
           ))}
+
+          {/* Alet çantası: hover ve klavye odağıyla açılan menü. `group` +
+              focus-within sayesinde JS durumu tutmaya gerek kalmıyor. */}
+          <div className="group relative">
+            <Link
+              href={withLocale("/reference")}
+              className={`flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                toolboxItems.some((item) => isActive(item.href))
+                  ? "bg-surface-2 text-text"
+                  : "text-muted hover:bg-surface-2 hover:text-text"
+              }`}
+            >
+              {ui("nav.toolbox", locale)}
+              <span aria-hidden className="text-[10px]">
+                ▾
+              </span>
+            </Link>
+            <div className="invisible absolute top-full left-0 w-60 pt-2 opacity-0 transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+              <ul className="card overflow-hidden p-1.5 shadow-[var(--shadow)]">
+                {toolboxItems.map((item) => (
+                  <li key={item.href}>
+                    <Link
+                      href={withLocale(item.href)}
+                      className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                        isActive(item.href)
+                          ? "bg-surface-2 text-text"
+                          : "text-muted hover:bg-surface-2 hover:text-text"
+                      }`}
+                    >
+                      {item.icon ? <item.icon size={17} className="shrink-0 text-accent" /> : null}
+                      {ui(item.key, locale)}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          {/* XP rozeti — ilerleme okunmadan gösterilmez, aksi halde 0 XP titrer. */}
+          {/* XP rozeti — ilerleme okunmadan gösterilmez, aksi halde 0 XP titrer.
+              Avatar da buradan görünür: her sayfada kullanıcının kendisi. */}
           {ready && progress.xp > 0 ? (
             <Link
-              href={withLocale("/profile")}
-              className="hidden items-center gap-2 rounded-full border border-accent/30 bg-surface-2 py-1.5 pr-3 pl-2 text-xs font-semibold transition hover:border-accent/60 sm:flex"
+              href={withLocale("/avatar")}
+              className="hidden items-center gap-2 rounded-full border border-accent/30 bg-surface-2 py-1 pr-3 pl-1 text-xs font-semibold transition hover:border-accent/60 sm:flex"
             >
-              <span className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-accent-2 to-accent text-[10px] font-black text-on-accent">
-                {info.level}
+              <span className="relative">
+                <Avatar state={progress.avatar} size={28} animated={false} />
+                <span className="absolute -right-1 -bottom-1 grid h-4 w-4 place-items-center rounded-full bg-gradient-to-br from-accent-2 to-accent text-[9px] font-black text-on-accent">
+                  {info.level}
+                </span>
               </span>
               <span>{progress.xp.toLocaleString(locale)} XP</span>
             </Link>
@@ -109,9 +173,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
             aria-label={open ? ui("nav.close", locale) : ui("nav.menu", locale)}
             className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface-2 md:hidden"
           >
-            <span aria-hidden className="text-lg leading-none">
-              {open ? "✕" : "☰"}
-            </span>
+            {open ? <IconClose size={18} /> : <IconMenu size={18} />}
           </button>
         </div>
       </div>
@@ -119,7 +181,11 @@ export function SiteHeader({ locale }: { locale: Locale }) {
       {open ? (
         <div className="border-t border-border bg-bg md:hidden">
           <nav className="mx-auto flex w-full max-w-7xl flex-col gap-1 px-4 py-3">
-            {[...navItems, { href: "/profile", key: "nav.profile" as const }].map((item) => (
+            {[
+              ...navItems,
+              { href: "/avatar", key: "nav.avatar" as const },
+              { href: "/profile", key: "nav.profile" as const },
+            ].map((item) => (
               <Link
                 key={item.href}
                 href={withLocale(item.href)}
@@ -130,6 +196,23 @@ export function SiteHeader({ locale }: { locale: Locale }) {
                   isActive(item.href) ? "bg-surface-2 text-text" : "text-muted"
                 }`}
               >
+                {ui(item.key, locale)}
+              </Link>
+            ))}
+
+            <p className="mt-3 px-3 text-xs font-semibold tracking-wide text-muted uppercase">
+              {ui("nav.toolbox", locale)}
+            </p>
+            {toolboxItems.map((item) => (
+              <Link
+                key={item.href}
+                href={withLocale(item.href)}
+                onClick={() => setOpen(false)}
+                className={`flex items-center gap-2.5 rounded-lg px-3 py-3 text-base font-medium transition ${
+                  isActive(item.href) ? "bg-surface-2 text-text" : "text-muted"
+                }`}
+              >
+                {item.icon ? <item.icon size={18} className="shrink-0 text-accent" /> : null}
                 {ui(item.key, locale)}
               </Link>
             ))}

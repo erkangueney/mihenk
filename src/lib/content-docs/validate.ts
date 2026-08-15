@@ -70,7 +70,16 @@ function optionalLocalized(value: unknown, path: string): Localized | undefined 
 /* Bloklar                                                             */
 /* ------------------------------------------------------------------ */
 
-const BLOCK_TYPES = ["text", "heading", "code", "callout", "quiz", "order", "exercise"] as const;
+const BLOCK_TYPES = [
+  "text",
+  "heading",
+  "code",
+  "callout",
+  "quiz",
+  "order",
+  "exercise",
+  "playground",
+] as const;
 
 function block(value: unknown, path: string): Block {
   const record = obj(value, path);
@@ -173,6 +182,20 @@ function block(value: unknown, path: string): Block {
         dataset: record.dataset === undefined ? undefined : str(record.dataset, `${path}.dataset`),
         checks,
         xp: num(record.xp, `${path}.xp`, { min: 0 }),
+      };
+    }
+
+    case "playground": {
+      const engine = str(record.engine, `${path}.engine`);
+      if (!["python", "sql"].includes(engine)) {
+        bad(`${path}.engine`, "python veya sql olmalı");
+      }
+      return {
+        type: "playground",
+        engine: engine as "python" | "sql",
+        code: str(record.code, `${path}.code`, { allowEmpty: true }),
+        dataset: record.dataset === undefined ? undefined : str(record.dataset, `${path}.dataset`),
+        title: optionalLocalized(record.title, `${path}.title`),
       };
     }
 

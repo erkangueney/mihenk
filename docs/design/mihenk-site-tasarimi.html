@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mihenk — Veriyle çalışmayı oynayarak öğren</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#040810; --bg-soft:#070d1a; --surface:#0a1120; --surface-2:#101a2e;
+    --border:#1c2a44; --border-strong:#2b3f63; --text:#e8eefb; --muted:#8ea0bf;
+    --accent:#38bdf8; --accent-2:#7dd3fc; --on-accent:#04121f;
+    --success:#34d399; --warning:#fbbf24;
+    --gold-deep:#b98630; --gold:#d9a84e; --gold-light:#f0d795;
+    --shadow: 0 24px 70px -24px rgba(0,0,0,.9);
+    --radius-card: 1.25rem;
+    --sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--bg); color:var(--text); font-family:var(--sans);
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  body::before{
+    content:""; position:fixed; inset:0; z-index:-2; pointer-events:none;
+    background:
+      radial-gradient(55rem 38rem at 18% -12%, color-mix(in oklab, var(--accent) 13%, transparent), transparent 62%),
+      radial-gradient(48rem 34rem at 92% -4%, color-mix(in oklab, #818cf8 9%, transparent), transparent 58%),
+      radial-gradient(70rem 50rem at 50% 115%, color-mix(in oklab, var(--accent) 6%, transparent), transparent 60%);
+  }
+  body::after{
+    content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background-image:
+      linear-gradient(color-mix(in oklab, var(--accent) 6%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklab, var(--accent) 6%, transparent) 1px, transparent 1px);
+    background-size:44px 44px;
+    -webkit-mask-image: linear-gradient(180deg, black, transparent 46%);
+    mask-image: linear-gradient(180deg, black, transparent 46%);
+  }
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
+  .eyebrow{font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;}
+  .gradient-text{
+    background:linear-gradient(100deg, var(--text) 10%, var(--accent-2) 55%, var(--gold-light) 95%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .card{
+    border:1px solid var(--border); background:var(--surface); border-radius:var(--radius-card);
+  }
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:13px 24px; border-radius:12px; font-weight:700; font-size:14.5px;
+    border:1px solid transparent; cursor:pointer; transition:.15s ease;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    color:var(--on-accent); box-shadow:0 14px 32px -12px color-mix(in oklab, var(--accent) 55%, transparent);
+  }
+  .btn-primary:hover{filter:brightness(1.08); transform:translateY(-1px);}
+  .btn-ghost{
+    background:var(--surface-2); border-color:var(--border-strong); color:var(--text);
+  }
+  .btn-ghost:hover{border-color:var(--accent); color:var(--accent-2);}
+  section{padding:76px 0;}
+  h1,h2,h3{font-family:var(--display); letter-spacing:-0.02em; margin:0;}
+
+  /* ---------------- Header ---------------- */
+  header.site{
+    position:sticky; top:0; z-index:40; backdrop-filter: blur(20px);
+    background:color-mix(in oklab, var(--bg) 82%, transparent);
+    border-bottom:1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  }
+  .nav-row{display:flex; align-items:center; gap:18px; height:68px;}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700;}
+  .brand span{font-family:var(--display); font-size:16px; letter-spacing:.18em;}
+  nav.links{display:flex; align-items:center; gap:4px; margin-left:8px;}
+  nav.links a{
+    padding:9px 13px; border-radius:9px; font-size:14px; font-weight:600; color:var(--muted);
+    transition:.15s;
+  }
+  nav.links a:hover{background:var(--surface-2); color:var(--text);}
+  nav.links a.active{background:var(--surface-2); color:var(--text);}
+  .header-right{margin-left:auto; display:flex; align-items:center; gap:10px;}
+  .lang-pill{
+    display:flex; border:1px solid var(--border); background:var(--surface-2); border-radius:9px; padding:2px;
+  }
+  .lang-pill span{
+    padding:5px 9px; border-radius:7px; font-size:11.5px; font-weight:700; color:var(--muted);
+  }
+  .lang-pill span.on{background:var(--accent); color:var(--on-accent);}
+  .icon-btn{
+    width:36px; height:36px; display:grid; place-items:center; border-radius:9px;
+    border:1px solid var(--border); background:var(--surface-2); color:var(--muted); font-size:15px;
+  }
+
+  /* ---------------- Hero ---------------- */
+  .hero{padding:72px 0 40px;}
+  .hero-grid{display:grid; grid-template-columns:1.08fr 0.92fr; gap:52px; align-items:center;}
+  .badge-pill{
+    display:inline-flex; align-items:center; gap:9px; border-radius:999px; padding:7px 16px;
+    border:1px solid color-mix(in oklab, var(--accent) 35%, transparent); background:color-mix(in oklab, var(--surface) 65%, transparent);
+  }
+  .dot{width:6px; height:6px; border-radius:999px; background:var(--accent); box-shadow:0 0 10px 2px var(--accent);}
+  .hero h1{font-size:60px; line-height:1.04; font-weight:700; margin-top:22px;}
+  .hero p.lead{margin-top:22px; max-width:600px; color:var(--muted); font-size:17.5px; line-height:1.65;}
+  .hero-cta{display:flex; gap:12px; margin-top:32px; flex-wrap:wrap;}
+  .hero-note{margin-top:18px; font-size:13px; color:var(--muted); display:flex; align-items:center; gap:8px;}
+
+  /* Stat strip */
+  .stat-strip{
+    margin-top:64px; display:grid; grid-template-columns:repeat(4, 1fr); overflow:hidden;
+  }
+  .stat-item{padding:22px 26px; border-top:1px solid var(--border); border-right:1px solid var(--border);}
+  .stat-item:last-child{border-right:none;}
+  .stat-item b{
+    display:block; font-family:var(--mono); font-size:30px; font-weight:600; color:var(--accent-2);
+    font-variant-numeric:tabular-nums;
+  }
+  .stat-item span{display:block; margin-top:5px; font-size:12.5px; color:var(--muted);}
+
+  /* Hero visual mock */
+  .hero-visual{position:relative;}
+  .panel{
+    border-radius:18px; border:1px solid var(--border); background:linear-gradient(180deg, var(--surface-2), var(--surface));
+    box-shadow:var(--shadow); overflow:hidden;
+  }
+  .panel-bar{
+    display:flex; align-items:center; gap:8px; padding:12px 16px; border-bottom:1px solid var(--border);
+    background:color-mix(in oklab, var(--surface-2) 70%, transparent);
+  }
+  .panel-bar i{width:10px; height:10px; border-radius:999px; background:var(--border-strong);}
+  .panel-bar .fname{margin-left:8px; font-family:var(--mono); font-size:12px; color:var(--muted);}
+  .panel-code{padding:18px 20px; font-family:var(--mono); font-size:13px; line-height:1.85;}
+  .kw{color:#c084fc;} .fn{color:var(--accent-2);} .str{color:var(--gold-light);} .cm{color:var(--muted);}
+  .panel-table{margin:0 20px 18px; border:1px solid var(--border); border-radius:10px; overflow:hidden; font-size:12.5px;}
+  .panel-table table{width:100%; border-collapse:collapse; font-family:var(--mono);}
+  .panel-table th{background:var(--surface-2); text-align:left; padding:7px 12px; color:var(--muted); font-weight:600; border-bottom:1px solid var(--border);}
+  .panel-table td{padding:7px 12px; border-bottom:1px solid color-mix(in oklab, var(--border) 60%, transparent); color:var(--text);}
+  .panel-table tr:last-child td{border-bottom:none;}
+
+  .float-toast{
+    position:absolute; display:flex; align-items:center; gap:10px; padding:11px 16px;
+    border-radius:12px; border:1px solid color-mix(in oklab, var(--gold) 45%, transparent);
+    background:linear-gradient(135deg, color-mix(in oklab, var(--gold) 16%, var(--surface)), var(--surface));
+    box-shadow:0 18px 40px -16px rgba(0,0,0,.7); font-size:13px; font-weight:700;
+  }
+  .float-toast.xp{ top:-18px; right:-14px; color:var(--gold-light); }
+  .float-toast .lvl{
+    width:30px; height:30px; border-radius:999px; display:grid; place-items:center;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:var(--on-accent); font-size:12px;
+  }
+  .float-toast.level{ bottom:-16px; left:-16px; color:var(--text); }
+  .float-toast.level b{color:var(--accent-2);}
+
+  /* ---------------- Section head ---------------- */
+  .sec-head{display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:36px;}
+  .sec-head h2{font-size:34px; font-weight:700;}
+  .sec-head p{margin-top:10px; max-width:620px; color:var(--muted); font-size:14.5px; line-height:1.65;}
+  .sec-link{font-size:14px; font-weight:700; color:var(--accent); white-space:nowrap;}
+  .sec-link:hover{color:var(--accent-2);}
+
+  /* ---------------- Track grid ---------------- */
+  .track-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:14px;}
+  .track-card{
+    padding:22px; position:relative; overflow:hidden; transition:.18s ease;
+  }
+  .track-card:hover{border-color:var(--tc); transform:translateY(-2px); box-shadow:0 20px 40px -22px var(--tc);}
+  .track-card .glow{
+    position:absolute; inset:-40% -40% auto auto; width:140px; height:140px; border-radius:999px;
+    background:var(--tc); opacity:.16; filter:blur(30px); pointer-events:none;
+  }
+  .track-top{display:flex; align-items:center; justify-content:space-between;}
+  .track-icon{
+    width:44px; height:44px; border-radius:13px; display:grid; place-items:center; font-size:20px;
+    background:color-mix(in oklab, var(--tc) 18%, var(--surface-2)); border:1px solid color-mix(in oklab, var(--tc) 35%, var(--border));
+  }
+  .track-lvl{font-size:11px; font-weight:700; color:var(--muted); font-family:var(--mono);}
+  .track-card h3{margin-top:14px; font-size:17px; font-weight:700;}
+  .track-card p{margin-top:6px; font-size:13px; color:var(--muted); line-height:1.55;}
+  .track-meta{margin-top:16px; display:flex; gap:14px; font-size:11.5px; color:var(--muted); font-family:var(--mono);}
+  .track-meta b{color:var(--text);}
+
+  /* ---------------- Toolbox / how-it-works grid ---------------- */
+  .grid-4{display:grid; grid-template-columns:repeat(4, 1fr); gap:14px;}
+  .tool-card{padding:24px; transition:.15s;}
+  .tool-card:hover{border-color:var(--accent);}
+  .tool-icon{
+    width:48px; height:48px; border-radius:14px; display:grid; place-items:center; font-size:22px;
+    background:color-mix(in oklab, var(--accent) 12%, transparent); border:1px solid color-mix(in oklab, var(--accent) 25%, transparent);
+  }
+  .tool-card h4{margin-top:16px; font-size:15px; font-weight:700;}
+  .tool-card p{margin-top:8px; font-size:13px; color:var(--muted); line-height:1.6;}
+  .tool-meta{margin-top:16px; font-size:12px; font-weight:700; color:var(--accent);}
+
+  .how-card{padding:24px;}
+  .how-top{display:flex; align-items:center; justify-content:space-between;}
+  .how-num{font-family:var(--display); font-size:13px; font-weight:700; color:color-mix(in oklab, var(--muted) 60%, transparent);}
+  .how-card h4{margin-top:16px; font-size:15px; font-weight:700;}
+  .how-card p{margin-top:8px; font-size:13px; color:var(--muted); line-height:1.6;}
+
+  /* ---------------- Badges ---------------- */
+  .badge-panel{overflow:hidden;}
+  .badge-head{
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px;
+    padding:22px 26px; border-bottom:1px solid var(--border);
+  }
+  .badge-head h2{font-size:24px; font-weight:700;}
+  .badge-head p{margin-top:4px; color:var(--muted); font-size:13.5px;}
+  .badge-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; padding:22px 26px;}
+  .badge-item{
+    display:flex; align-items:center; gap:11px; padding:12px; border-radius:12px;
+    border:1px solid color-mix(in oklab, var(--border) 80%, transparent); background:var(--surface-2);
+  }
+  .badge-item .ic{font-size:21px;}
+  .badge-item b{display:block; font-size:13px; font-weight:700;}
+  .badge-item span{display:block; font-size:11.5px; color:var(--muted); margin-top:1px; line-height:1.35;}
+
+  /* ---------------- CTA banner ---------------- */
+  .cta-banner{
+    border-radius:24px; padding:56px 48px; position:relative; overflow:hidden;
+    background:linear-gradient(120deg, var(--surface-2), var(--surface));
+    border:1px solid var(--border-strong);
+    display:flex; align-items:center; justify-content:space-between; gap:32px; flex-wrap:wrap;
+  }
+  .cta-banner::before{
+    content:""; position:absolute; inset:0; opacity:.5; pointer-events:none;
+    background:radial-gradient(40rem 24rem at 90% -20%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 60%);
+  }
+  .cta-banner h2{font-size:30px; font-weight:700; max-width:480px; position:relative;}
+  .cta-banner p{margin-top:10px; color:var(--muted); font-size:14.5px; max-width:440px; position:relative;}
+  .cta-actions{position:relative; display:flex; gap:12px; flex-wrap:wrap;}
+
+  /* ---------------- Footer ---------------- */
+  footer{border-top:1px solid var(--border); padding:48px 0 36px; margin-top:20px;}
+  .foot-grid{display:grid; grid-template-columns:1.4fr repeat(3, 1fr); gap:32px;}
+  .foot-brand p{margin-top:12px; color:var(--muted); font-size:13px; max-width:280px; line-height:1.6;}
+  .foot-col h5{font-size:12px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); font-weight:700; margin-bottom:14px;}
+  .foot-col a{display:block; font-size:13.5px; color:var(--text); opacity:.8; margin-bottom:10px;}
+  .foot-col a:hover{opacity:1; color:var(--accent-2);}
+  .foot-bottom{
+    margin-top:40px; padding-top:22px; border-top:1px solid var(--border);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; font-size:12.5px; color:var(--muted);
+  }
+
+  @media (max-width: 980px){
+    .hero-grid{grid-template-columns:1fr;}
+    .track-grid{grid-template-columns:repeat(2,1fr);}
+    .grid-4{grid-template-columns:repeat(2,1fr);}
+    .badge-grid{grid-template-columns:repeat(2,1fr);}
+    .stat-strip{grid-template-columns:repeat(2,1fr);}
+    .foot-grid{grid-template-columns:1fr 1fr;}
+    nav.links{display:none;}
+    .hero h1{font-size:42px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================ HEADER ============================ -->
+<header class="site">
+  <div class="wrap nav-row">
+    <a href="#" class="brand">
+      <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+        <defs>
+          <linearGradient id="hbg" x1="20" y1="1" x2="20" y2="39" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#101a2e"/><stop offset="1" stop-color="#040810"/>
+          </linearGradient>
+          <linearGradient id="hbars" x1="10" y1="30" x2="30" y2="8" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#38bdf8"/><stop offset="0.55" stop-color="#7dd3fc"/><stop offset="1" stop-color="#f0d795"/>
+          </linearGradient>
+        </defs>
+        <rect x="1" y="1" width="38" height="38" rx="12" fill="url(#hbg)"/>
+        <rect x="10.5" y="21" width="5" height="9" rx="2" fill="url(#hbars)"/>
+        <rect x="17.5" y="15" width="5" height="15" rx="2" fill="url(#hbars)"/>
+        <rect x="24.5" y="9" width="5" height="21" rx="2" fill="url(#hbars)"/>
+        <circle cx="27" cy="9" r="2.6" fill="#f0d795"/>
+      </svg>
+      <span>MİHENK</span>
+    </a>
+    <nav class="links">
+      <a class="active" href="#patikalar">Patikalar</a>
+      <a href="#">Projeler</a>
+      <a href="#">Yol haritası</a>
+      <a href="#">Lider tablosu</a>
+      <a href="#araclar">Alet çantası ▾</a>
+    </nav>
+    <div class="header-right">
+      <div class="lang-pill"><span class="on">TR</span><span>EN</span></div>
+      <button class="icon-btn" title="Tema">◐</button>
+      <a href="#" class="btn btn-ghost" style="padding:9px 16px;">Giriş yap</a>
+      <a href="#" class="btn btn-primary" style="padding:9px 18px;">Ücretsiz başla</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============================ HERO ============================ -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <span class="badge-pill"><span class="dot"></span><span class="eyebrow" style="color:var(--accent-2);">Oyunlaştırılmış veri analizi eğitimi</span></span>
+        <h1 class="gradient-text">Veriyle çalışmayı<br/>oynayarak öğren</h1>
+        <p class="lead">
+          Python, SQL, Tableau, Power BI, Microsoft Fabric ve daha fazlası. Her seviyede
+          uçtan uca gerçek projeler, tarayıcıda çalışan kod ve XP kazandıran görevler.
+        </p>
+        <div class="hero-cta">
+          <a href="#" class="btn btn-primary">Öğrenmeye başla →</a>
+          <a href="#" class="btn btn-ghost">Yol haritasını gör</a>
+        </div>
+        <p class="hero-note">🔒 Kurulum yok · kredi kartı yok · tarayıcıda gerçek Python ve SQL çalışır</p>
+      </div>
+
+      <div class="hero-visual">
+        <div class="panel">
+          <div class="panel-bar">
+            <i style="background:#f87171;"></i><i style="background:#fbbf24;"></i><i style="background:#34d399;"></i>
+            <span class="fname">sql/pencere-fonksiyonlari.sql</span>
+          </div>
+          <div class="panel-code"><span class="cm">-- her müşterinin en yüksek 2 siparişi</span><br/>
+<span class="kw">SELECT</span> customer_id, order_total,<br/>
+&nbsp;&nbsp;<span class="fn">RANK</span>() <span class="kw">OVER</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">PARTITION BY</span> customer_id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">ORDER BY</span> order_total <span class="kw">DESC</span><br/>
+&nbsp;&nbsp;) <span class="kw">AS</span> rnk<br/>
+<span class="kw">FROM</span> orders;</div>
+          <div class="panel-table">
+            <table>
+              <thead><tr><th>customer_id</th><th>order_total</th><th>rnk</th></tr></thead>
+              <tbody>
+                <tr><td>1042</td><td>1,280</td><td>1</td></tr>
+                <tr><td>1042</td><td>860</td><td>2</td></tr>
+                <tr><td>1077</td><td>2,140</td><td>1</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="float-toast xp">✨ +40 XP</div>
+        <div class="float-toast level"><span class="lvl">7</span> Seviye atladın · <b>SQL Kıdemli</b></div>
+      </div>
+    </div>
+
+    <dl class="stat-strip card">
+      <div class="stat-item"><b>12</b><span>öğrenme patikası</span></div>
+      <div class="stat-item"><b>24</b><span>uçtan uca proje</span></div>
+      <div class="stat-item"><b>5</b><span>kademe — Temel → Uzman</span></div>
+      <div class="stat-item"><b>100+</b><span>referans girdisi</span></div>
+    </dl>
+  </div>
+</section>
+
+<!-- ============================ PATİKALAR ============================ -->
+<section id="patikalar">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <h2>Öğrenme patikaları</h2>
+        <p>Her patika beş kademeden geçer — Temel, Junior, Orta seviye, Senior ve Uzman.
+           Kademeler gerçek bir kariyer merdivenini izler ve her birinin sonunda uçtan uca bir proje bulunur.</p>
+      </div>
+      <a href="#" class="sec-link">Tüm patikalar →</a>
+    </div>
+
+    <div class="track-grid">
+      <div class="track-card card" style="--tc:#38bdf8;"><div class="glow"></div>
+        <div class="track-top"><span class="track-icon">🗄️</span><span class="track-lvl">5 KADEME</span></div>
+        <h3>SQL</h3><p>Veriyi kaynağından çekmenin dili</p>
+        <div class="track-meta"><span><b>22</b> ders</span><span><b>3</b> proje</span></div>
+      </div>
+      <div class="track-card card" style="--tc:#facc15;"><div class="glow"></div>
+        <div class="track-top"><span class="track-icon">🐍</span><span class="track-lvl">5 KADEME</span></div>
+        <h3>Python</h3><p>Veri biliminin ana dili</p>
+        <div class="track-meta"><span><b>26</b> ders</span><span><b>3</b> proje</span></div>
+      </div>
+      <div class="track-card card" style="--tc:#eab308;"><div class="glow"></div>
+        <div class="track-top"><span class="track-icon">📈</span><span class="track-lvl">5 KADEME</span></div>
+        <h3>Power BI</h3><p>Kurumsal raporlamanın standardı</p>
+        <div class="track-meta"><span><b>18</b> ders</span><span><b>2</b> proje</span></div>
+      </div>
+      <div class="track-card card" style="--tc:#f97316;"><div class="glow"></div>
+        <div class="track-top"><span class="track-icon">📊</span><span class="track-lvl">5 KADEME</span></div>
+        <h3>Tableau</h3><p>Veriyi görsel hikâyeye çevir</p>
+        <div class="track-meta"><span><b>16</b> ders</span><span><b>2</b> proje</span></div>
+      </div>
+      <div class="track-card card" style="--tc:#10b981;"><div class="glow"></div>
+        <div class="track-top"><span class="track-icon">🧮</span><span class="track-lvl">5 KADEME</span></div>
+        <h3>Excel</h3><p>Hâlâ en yaygın veri aracı</p>
+        <div class="track-meta"><span><b>19</b> ders</span><span><b>2</b> proje</span></div>
+      </div>
+      <div class="track-card card" style="--tc:#22c55e;"><div class="glow"></div>
+        <div class="track-top"><span class="track-icon">🧩</span><span class="track-lvl">5 KADEME</span></div>
+        <h3>Microsoft Fabric</h3><p>Uçtan uca tek veri platformu</p>
+        <div class="track-meta"><span><b>14</b> ders</span><span><b>2</b> proje</span></div>
+      </div>
+      <div class="track-card card" style="--tc:#a78bfa;"><div class="glow"></div>
+        <div class="track-top"><span class="track-icon">📐</span><span class="track-lvl">5 KADEME</span></div>
+        <h3>İstatistik</h3><p>Sayıların ardındaki akıl yürütme</p>
+        <div class="track-meta"><span><b>17</b> ders</span><span><b>2</b> proje</span></div>
+      </div>
+      <div class="track-card card" style="--tc:#fb7185;"><div class="glow"></div>
+        <div class="track-top"><span class="track-icon">🎨</span><span class="track-lvl">5 KADEME</span></div>
+        <h3>Veri Görselleştirme</h3><p>Sayıyı anlaşılır kılmak</p>
+        <div class="track-meta"><span><b>13</b> ders</span><span><b>2</b> proje</span></div>
+      </div>
+      <div class="track-card card" style="--tc:#f472b6;"><div class="glow"></div>
+        <div class="track-top"><span class="track-icon">🤖</span><span class="track-lvl">5 KADEME</span></div>
+        <h3>Makine Öğrenmesi</h3><p>Tahmin eden modeller kurmak</p>
+        <div class="track-meta"><span><b>15</b> ders</span><span><b>2</b> proje</span></div>
+      </div>
+      <div class="track-card card" style="--tc:#2dd4bf;"><div class="glow"></div>
+        <div class="track-top"><span class="track-icon">⚙️</span><span class="track-lvl">5 KADEME</span></div>
+        <h3>Veri Mühendisliği</h3><p>Veriyi güvenilir şekilde taşımak</p>
+        <div class="track-meta"><span><b>12</b> ders</span><span><b>2</b> proje</span></div>
+      </div>
+      <div class="track-card card" style="--tc:#60a5fa;"><div class="glow"></div>
+        <div class="track-top"><span class="track-icon">📉</span><span class="track-lvl">5 KADEME</span></div>
+        <h3>R</h3><p>İstatistikçilerin dili</p>
+        <div class="track-meta"><span><b>14</b> ders</span><span><b>1</b> proje</span></div>
+      </div>
+      <div class="track-card card" style="--tc:#94a3b8;"><div class="glow"></div>
+        <div class="track-top"><span class="track-icon">🔀</span><span class="track-lvl">5 KADEME</span></div>
+        <h3>Git &amp; GitHub</h3><p>Çalışmanı sürümle ve yayınla</p>
+        <div class="track-meta"><span><b>10</b> ders</span><span><b>1</b> proje</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ ALET ÇANTASI ============================ -->
+<section id="araclar">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <h2>Alet çantası</h2>
+        <p>Ders akışına girmeden ihtiyacın olanı bul: referans sözlüğü, nokta atışı rehberler, kopya kâğıtları ve serbest deneme alanı.</p>
+      </div>
+    </div>
+    <div class="grid-4">
+      <div class="tool-card card">
+        <span class="tool-icon">📖</span>
+        <h4>Referans sözlüğü</h4>
+        <p>Komut, fonksiyon ve formüllerin sözdizimi, ne işe yaradığı ve çalıştırılabilir örneği — tek sayfada.</p>
+        <div class="tool-meta">100+ girdi</div>
+      </div>
+      <div class="tool-card card">
+        <span class="tool-icon">🧭</span>
+        <h4>Nasıl yapılır?</h4>
+        <p>Veri dünyasının nokta atışı soruları ve kısa, uygulanabilir cevapları — önce kısa cevap, sonra adım adım.</p>
+        <div class="tool-meta">30+ rehber</div>
+      </div>
+      <div class="tool-card card">
+        <span class="tool-icon">📋</span>
+        <h4>Kopya kâğıtları</h4>
+        <p>Tek sayfalık özetler. Yer imlerine ekle, yazdır, ekranın kenarında tut — takıldığın anda bak.</p>
+        <div class="tool-meta">12 kâğıt</div>
+      </div>
+      <div class="tool-card card">
+        <span class="tool-icon">▶</span>
+        <h4>Deneme alanı</h4>
+        <p>Serbest Python ve SQL editörü. Hazır veri setleriyle, doğrulama veya XP baskısı olmadan dene.</p>
+        <div class="tool-meta">Python · SQL</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ NASIL ÇALIŞIR ============================ -->
+<section>
+  <div class="wrap">
+    <div class="sec-head"><div><h2>Nasıl çalışır?</h2></div></div>
+    <div class="grid-4">
+      <div class="how-card card">
+        <div class="how-top"><span class="tool-icon">🎯</span><span class="how-num">01</span></div>
+        <h4>Görevlerle öğren</h4>
+        <p>Her ders quiz, kod sıralama ve gerçek kodlama alıştırmaları içerir. Okuyup geçmek yok; her adımda uygularsın.</p>
+      </div>
+      <div class="how-card card">
+        <div class="how-top"><span class="tool-icon">⚡</span><span class="how-num">02</span></div>
+        <h4>Tarayıcıda çalıştır</h4>
+        <p>Python (pandas dahil) ve SQL kodun gerçek motorlarda çalışır. Kurulum, sanal ortam, sürüm derdi yok.</p>
+      </div>
+      <div class="how-card card">
+        <div class="how-top"><span class="tool-icon">🏆</span><span class="how-num">03</span></div>
+        <h4>XP, seri ve rozetler</h4>
+        <p>Her doğru cevap XP kazandırır, her gün seriyi büyütür. İlerlemen görünür olduğunda devam etmek kolaylaşır.</p>
+      </div>
+      <div class="how-card card">
+        <div class="how-top"><span class="tool-icon">💼</span><span class="how-num">04</span></div>
+        <h4>Portföye dönüşür</h4>
+        <p>Her seviyenin sonunda gerçek veriyle uçtan uca bir proje var — GitHub'da yayınlama adımıyla birlikte.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ ROZETLER ============================ -->
+<section>
+  <div class="wrap">
+    <div class="badge-panel card">
+      <div class="badge-head">
+        <div><h2>Rozetler</h2><p>Toplanacak 12 rozet — her biri farklı bir alışkanlığı ödüllendiriyor.</p></div>
+        <a href="#" class="sec-link">Profilim →</a>
+      </div>
+      <div class="badge-grid">
+        <div class="badge-item"><span class="ic">🌱</span><span><b>İlk Adım</b><span>İlk dersini tamamla.</span></span></div>
+        <div class="badge-item"><span class="ic">🔍</span><span><b>Sorgu Ustası</b><span>SQL'de 5 ders tamamla.</span></span></div>
+        <div class="badge-item"><span class="ic">🐍</span><span><b>Pythonista</b><span>Python'da 5 ders tamamla.</span></span></div>
+        <div class="badge-item"><span class="ic">🎨</span><span><b>Görselleştirici</b><span>Tableau/Power BI'da 3 ders.</span></span></div>
+        <div class="badge-item"><span class="ic">🔥</span><span><b>Yedi Gün</b><span>7 gün üst üste çalış.</span></span></div>
+        <div class="badge-item"><span class="ic">⚡</span><span><b>Otuz Gün</b><span>30 gün üst üste çalış.</span></span></div>
+        <div class="badge-item"><span class="ic">🏗️</span><span><b>İnşaatçı</b><span>İlk uçtan uca projeni bitir.</span></span></div>
+        <div class="badge-item"><span class="ic">💼</span><span><b>Portföy Sahibi</b><span>5 uçtan uca proje tamamla.</span></span></div>
+        <div class="badge-item"><span class="ic">🌍</span><span><b>Çok Yönlü</b><span>4 farklı patikada ders tamamla.</span></span></div>
+        <div class="badge-item"><span class="ic">💎</span><span><b>Azimli</b><span>2.000 XP topla.</span></span></div>
+        <div class="badge-item"><span class="ic">🎓</span><span><b>Bilgin</b><span>30 ders tamamla.</span></span></div>
+        <div class="badge-item"><span class="ic">🤖</span><span><b>Makine Zihni</b><span>ML'de 3 ders tamamla.</span></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ CTA ============================ -->
+<section>
+  <div class="wrap">
+    <div class="cta-banner">
+      <div>
+        <h2>Kaldığın yerden değil, <span class="gradient-text">bugünden</span> başla.</h2>
+        <p>Kayıt ücretsiz, kredi kartı gerekmez. İlk dersin 5 dakikanı alır.</p>
+      </div>
+      <div class="cta-actions">
+        <a href="#" class="btn btn-primary">Öğrenmeye başla →</a>
+        <a href="#" class="btn btn-ghost">Yol haritasını gör</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FOOTER ============================ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#" class="brand">
+          <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+            <rect x="1" y="1" width="38" height="38" rx="12" fill="url(#hbg)"/>
+            <rect x="10.5" y="21" width="5" height="9" rx="2" fill="url(#hbars)"/>
+            <rect x="17.5" y="15" width="5" height="15" rx="2" fill="url(#hbars)"/>
+            <rect x="24.5" y="9" width="5" height="21" rx="2" fill="url(#hbars)"/>
+            <circle cx="27" cy="9" r="2.6" fill="#f0d795"/>
+          </svg>
+          <span>MİHENK</span>
+        </a>
+        <p>Oyunlaştırılmış veri analizi ve veri bilimi eğitim platformu. Türkçe ve İngilizce; web ve mobil uyumlu.</p>
+      </div>
+      <div class="foot-col">
+        <h5>Öğren</h5>
+        <a href="#">Patikalar</a><a href="#">Projeler</a><a href="#">Yol haritası</a><a href="#">Lider tablosu</a>
+      </div>
+      <div class="foot-col">
+        <h5>Alet çantası</h5>
+        <a href="#">Referans sözlüğü</a><a href="#">Nasıl yapılır?</a><a href="#">Kopya kâğıtları</a><a href="#">Deneme alanı</a>
+      </div>
+      <div class="foot-col">
+        <h5>Hesap</h5>
+        <a href="#">Giriş yap</a><a href="#">Kayıt ol</a><a href="#">Profil</a><a href="#">Avatar</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Mihenk. Kişisel kullanım.</span>
+      <span>Türkçe · English</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

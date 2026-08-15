@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mihenk — Logo Konseptleri</title>
+<style>
+  :root{
+    --bg:#040810; --bg-soft:#070d1a; --surface:#0a1120; --surface-2:#101a2e;
+    --border:#1c2a44; --border-strong:#2b3f63; --text:#e8eefb; --muted:#8ea0bf;
+    --accent:#38bdf8; --accent-2:#7dd3fc;
+    --gold-deep:#b98630; --gold:#d9a84e; --gold-light:#f0d795;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI',ui-sans-serif,system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background:
+      radial-gradient(50rem 34rem at 15% -10%, color-mix(in oklab, var(--accent) 12%, transparent), transparent 60%),
+      radial-gradient(42rem 30rem at 90% 0%, color-mix(in oklab, var(--gold) 8%, transparent), transparent 55%);
+  }
+  .wrap{max-width:1180px; margin:0 auto; padding:64px 24px 120px;}
+  header.page{max-width:720px; margin-bottom:56px;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:700;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--accent-2);
+    border:1px solid color-mix(in oklab, var(--accent) 35%, transparent);
+    background:color-mix(in oklab, var(--surface) 70%, transparent);
+    padding:6px 14px; border-radius:999px;
+  }
+  h1{font-size:38px; line-height:1.1; letter-spacing:-0.02em; margin:20px 0 14px; font-weight:700;}
+  header.page p{color:var(--muted); font-size:16px; line-height:1.65; margin:0;}
+
+  .concept{
+    border:1px solid var(--border); border-radius:24px; background:var(--surface);
+    margin-bottom:36px; overflow:hidden;
+  }
+  .concept-head{
+    display:flex; flex-wrap:wrap; gap:20px; justify-content:space-between; align-items:flex-start;
+    padding:28px 30px; border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg, var(--surface-2), var(--surface));
+  }
+  .concept-tag{font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted);}
+  .concept-head h2{font-size:24px; margin:6px 0 8px; letter-spacing:-0.01em;}
+  .concept-head p{color:var(--muted); font-size:14.5px; line-height:1.6; max-width:520px; margin:0;}
+  .badge-num{
+    width:38px; height:38px; border-radius:50%; display:grid; place-items:center;
+    background:var(--surface-2); border:1px solid var(--border-strong); font-weight:800; font-size:14px;
+    color:var(--accent-2); flex:none;
+  }
+
+  .concept-body{display:grid; grid-template-columns:1.1fr 1fr; gap:0;}
+  @media (max-width:860px){ .concept-body{grid-template-columns:1fr;} }
+
+  .stage{
+    padding:44px 30px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:22px; border-right:1px solid var(--border);
+  }
+  @media (max-width:860px){ .stage{border-right:none; border-bottom:1px solid var(--border);} }
+  .stage .mark-96{filter:drop-shadow(0 18px 34px rgba(0,0,0,.55));}
+  .lockup{display:flex; align-items:center; gap:12px;}
+  .wordmark{
+    font-size:20px; font-weight:700; letter-spacing:.2em; color:var(--text);
+  }
+
+  .sizes{padding:26px 30px 30px;}
+  .sizes h3{font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); margin:0 0 16px; font-weight:700;}
+  .size-row{display:flex; align-items:center; gap:22px; flex-wrap:wrap; margin-bottom:16px;}
+  .size-item{display:flex; flex-direction:column; align-items:center; gap:8px;}
+  .size-item span{font-size:11px; color:var(--muted);}
+  .chip-dark, .chip-light{
+    display:grid; place-items:center; border-radius:10px;
+  }
+  .chip-dark{background:var(--surface-2); border:1px solid var(--border);}
+  .chip-light{background:#f4f6fb; border:1px solid #dde3ee;}
+
+  .rationale{
+    margin-top:6px; padding-top:16px; border-top:1px dashed var(--border);
+  }
+  .rationale ul{margin:0; padding-left:18px; color:var(--muted); font-size:13.5px; line-height:1.7;}
+  .rationale li{margin-bottom:4px;}
+  .rationale li b{color:var(--text); font-weight:600;}
+
+  .verdict{
+    max-width:820px; margin:56px auto 0; padding:26px 28px; border-radius:18px;
+    border:1px solid color-mix(in oklab, var(--gold) 35%, var(--border));
+    background:linear-gradient(180deg, color-mix(in oklab, var(--gold) 6%, var(--surface)), var(--surface));
+  }
+  .verdict h3{margin:0 0 10px; font-size:15px; letter-spacing:.02em; color:var(--gold-light);}
+  .verdict p{margin:0; color:var(--muted); font-size:14px; line-height:1.7;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <span class="eyebrow">Mihenk · Logo Konseptleri</span>
+    <h1>Mevcut taş + altın izi amblemine alternatif üç yön</h1>
+    <p>
+      Üçü de mevcut ad ve markanın anlamını (Mihenk = altının ayarını sınayan taş) korur,
+      ama farklı bir görsel dil kullanır: veri/grafik, oyunlaştırma rozeti ve mücevher kesimi.
+      Her biri favicon boyutunda (16px) okunabilir olacak şekilde tasarlandı — mevcut amblemin
+      en büyük zayıflığı buydu, ince çizgiler küçük boyutta kayboluyordu.
+    </p>
+  </header>
+
+  <!-- ============================ KONSEPT A ============================ -->
+  <div class="concept">
+    <div class="concept-head">
+      <div style="display:flex; gap:16px; align-items:flex-start;">
+        <span class="badge-num">A</span>
+        <div>
+          <span class="concept-tag">Yükselen Çubuklar</span>
+          <h2>Veri + ilerleme çubuğu</h2>
+          <p>Bar-chart çubukları, artan yükseklikte — üstte küçük bir "XP düğümü". Platformun
+             özünü (veri analizi + seviye ilerlemesi) tek bakışta anlatır.</p>
+        </div>
+      </div>
+    </div>
+    <div class="concept-body">
+      <div class="stage">
+        <svg class="mark-96" width="96" height="96" viewBox="0 0 40 40" fill="none">
+          <defs>
+            <linearGradient id="a-bg" x1="20" y1="1" x2="20" y2="39" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#101a2e"/><stop offset="1" stop-color="#040810"/>
+            </linearGradient>
+            <linearGradient id="a-bars" x1="10" y1="30" x2="30" y2="8" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#38bdf8"/><stop offset="0.55" stop-color="#7dd3fc"/><stop offset="1" stop-color="#f0d795"/>
+            </linearGradient>
+          </defs>
+          <rect x="1" y="1" width="38" height="38" rx="12" fill="url(#a-bg)"/>
+          <rect x="1" y="1" width="38" height="38" rx="12" fill="none" stroke="#2b3f63" stroke-width="1"/>
+          <rect x="10.5" y="21" width="5" height="9" rx="2" fill="url(#a-bars)"/>
+          <rect x="17.5" y="15" width="5" height="15" rx="2" fill="url(#a-bars)"/>
+          <rect x="24.5" y="9"  width="5" height="21" rx="2" fill="url(#a-bars)"/>
+          <circle cx="27" cy="9" r="2.6" fill="#f0d795"/>
+          <circle cx="27" cy="9" r="2.6" fill="none" stroke="#040810" stroke-width="1"/>
+        </svg>
+        <div class="lockup">
+          <svg width="30" height="30" viewBox="0 0 40 40" fill="none">
+            <rect x="1" y="1" width="38" height="38" rx="12" fill="url(#a-bg)"/>
+            <rect x="10.5" y="21" width="5" height="9" rx="2" fill="url(#a-bars)"/>
+            <rect x="17.5" y="15" width="5" height="15" rx="2" fill="url(#a-bars)"/>
+            <rect x="24.5" y="9"  width="5" height="21" rx="2" fill="url(#a-bars)"/>
+            <circle cx="27" cy="9" r="2.6" fill="#f0d795"/>
+          </svg>
+          <span class="wordmark">MİHENK</span>
+        </div>
+      </div>
+      <div class="sizes">
+        <h3>Boyut testi</h3>
+        <div class="size-row">
+          <div class="size-item">
+            <div class="chip-dark" style="width:44px;height:44px;">
+              <svg width="32" height="32" viewBox="0 0 40 40"><rect x="1" y="1" width="38" height="38" rx="12" fill="url(#a-bg)"/><rect x="10.5" y="21" width="5" height="9" rx="2" fill="url(#a-bars)"/><rect x="17.5" y="15" width="5" height="15" rx="2" fill="url(#a-bars)"/><rect x="24.5" y="9" width="5" height="21" rx="2" fill="url(#a-bars)"/><circle cx="27" cy="9" r="2.6" fill="#f0d795"/></svg>
+            </div>
+            <span>32px</span>
+          </div>
+          <div class="size-item">
+            <div class="chip-dark" style="width:32px;height:32px;">
+              <svg width="20" height="20" viewBox="0 0 40 40"><rect x="1" y="1" width="38" height="38" rx="12" fill="url(#a-bg)"/><rect x="10.5" y="21" width="5" height="9" rx="2" fill="url(#a-bars)"/><rect x="17.5" y="15" width="5" height="15" rx="2" fill="url(#a-bars)"/><rect x="24.5" y="9" width="5" height="21" rx="2" fill="url(#a-bars)"/><circle cx="27" cy="9" r="2.6" fill="#f0d795"/></svg>
+            </div>
+            <span>20px</span>
+          </div>
+          <div class="size-item">
+            <div class="chip-dark" style="width:26px;height:26px;">
+              <svg width="16" height="16" viewBox="0 0 40 40"><rect x="1" y="1" width="38" height="38" rx="12" fill="url(#a-bg)"/><rect x="10.5" y="21" width="5" height="9" rx="2" fill="url(#a-bars)"/><rect x="17.5" y="15" width="5" height="15" rx="2" fill="url(#a-bars)"/><rect x="24.5" y="9" width="5" height="21" rx="2" fill="url(#a-bars)"/><circle cx="27" cy="9" r="2.6" fill="#f0d795"/></svg>
+            </div>
+            <span>16px favicon</span>
+          </div>
+          <div class="size-item">
+            <div class="chip-light" style="width:44px;height:44px;">
+              <svg width="32" height="32" viewBox="0 0 40 40"><rect x="1" y="1" width="38" height="38" rx="12" fill="url(#a-bg)"/><rect x="10.5" y="21" width="5" height="9" rx="2" fill="url(#a-bars)"/><rect x="17.5" y="15" width="5" height="15" rx="2" fill="url(#a-bars)"/><rect x="24.5" y="9" width="5" height="21" rx="2" fill="url(#a-bars)"/><circle cx="27" cy="9" r="2.6" fill="#f0d795"/></svg>
+            </div>
+            <span>açık zemin</span>
+          </div>
+        </div>
+        <div class="rationale">
+          <ul>
+            <li><b>Anlatım gücü:</b> Kalın şekiller sade siluet — 16px'te bile "bar chart" olarak okunuyor.</li>
+            <li><b>Marka köprüsü:</b> Gradyan camgöbeğinden (site vurgu rengi) altına geçiyor — eski amblemin altın kimliğini yeni sitenin camgöbeğiyle birleştiriyor.</li>
+            <li><b>Ölçeklenebilirlik:</b> En az detay bu üçü arasında — favicon ve app ikonu için en güvenli seçim.</li>
+            <li><b>Risk:</b> Bar-chart motifi kategori genelinde sık kullanılıyor; düğüm noktası bu klişeyi kırıyor ama tamamen özgün değil.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ KONSEPT B ============================ -->
+  <div class="concept">
+    <div class="concept-head">
+      <div style="display:flex; gap:16px; align-items:flex-start;">
+        <span class="badge-num">B</span>
+        <div>
+          <span class="concept-tag">Rozet Yolu</span>
+          <h2>Altıgen rozet + ilerleme düğümleri</h2>
+          <p>Bir başarı rozeti (altıgen) içinde büyüyen üç düğümü birbirine bağlayan bir
+             yol. Oyunlaştırma (rozet, XP) ile öğrenme patikası fikrini birleştirir.</p>
+        </div>
+      </div>
+    </div>
+    <div class="concept-body">
+      <div class="stage">
+        <svg class="mark-96" width="96" height="96" viewBox="0 0 40 40" fill="none">
+          <defs>
+            <linearGradient id="b-bg" x1="20" y1="2" x2="20" y2="38" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#101a2e"/><stop offset="1" stop-color="#040810"/>
+            </linearGradient>
+            <linearGradient id="b-path" x1="10" y1="27" x2="30" y2="12" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#38bdf8"/><stop offset="1" stop-color="#f0d795"/>
+            </linearGradient>
+          </defs>
+          <path d="M20 2 L35.8 11 V29 L20 38 L4.2 29 V11 Z" fill="url(#b-bg)" stroke="#2b3f63" stroke-width="1"/>
+          <path d="M12.5 27 L20 21 L28.5 14" stroke="url(#b-path)" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+          <circle cx="12.5" cy="27" r="2.4" fill="#38bdf8"/>
+          <circle cx="20" cy="21" r="2.9" fill="#7dd3fc"/>
+          <circle cx="28.5" cy="14" r="3.6" fill="#f0d795"/>
+        </svg>
+        <div class="lockup">
+          <svg width="30" height="30" viewBox="0 0 40 40">
+            <path d="M20 2 L35.8 11 V29 L20 38 L4.2 29 V11 Z" fill="url(#b-bg)" stroke="#2b3f63" stroke-width="1"/>
+            <path d="M12.5 27 L20 21 L28.5 14" stroke="url(#b-path)" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+            <circle cx="12.5" cy="27" r="2.4" fill="#38bdf8"/>
+            <circle cx="20" cy="21" r="2.9" fill="#7dd3fc"/>
+            <circle cx="28.5" cy="14" r="3.6" fill="#f0d795"/>
+          </svg>
+          <span class="wordmark">MİHENK</span>
+        </div>
+      </div>
+      <div class="sizes">
+        <h3>Boyut testi</h3>
+        <div class="size-row">
+          <div class="size-item">
+            <div class="chip-dark" style="width:44px;height:44px;">
+              <svg width="32" height="32" viewBox="0 0 40 40"><path d="M20 2 L35.8 11 V29 L20 38 L4.2 29 V11 Z" fill="url(#b-bg)" stroke="#2b3f63" stroke-width="1"/><path d="M12.5 27 L20 21 L28.5 14" stroke="url(#b-path)" stroke-width="2.4" stroke-linecap="round" fill="none"/><circle cx="12.5" cy="27" r="2.4" fill="#38bdf8"/><circle cx="20" cy="21" r="2.9" fill="#7dd3fc"/><circle cx="28.5" cy="14" r="3.6" fill="#f0d795"/></svg>
+            </div>
+            <span>32px</span>
+          </div>
+          <div class="size-item">
+            <div class="chip-dark" style="width:32px;height:32px;">
+              <svg width="20" height="20" viewBox="0 0 40 40"><path d="M20 2 L35.8 11 V29 L20 38 L4.2 29 V11 Z" fill="url(#b-bg)" stroke="#2b3f63" stroke-width="1"/><path d="M12.5 27 L20 21 L28.5 14" stroke="url(#b-path)" stroke-width="2.4" stroke-linecap="round" fill="none"/><circle cx="12.5" cy="27" r="2.4" fill="#38bdf8"/><circle cx="20" cy="21" r="2.9" fill="#7dd3fc"/><circle cx="28.5" cy="14" r="3.6" fill="#f0d795"/></svg>
+            </div>
+            <span>20px</span>
+          </div>
+          <div class="size-item">
+            <div class="chip-dark" style="width:26px;height:26px;">
+              <svg width="16" height="16" viewBox="0 0 40 40"><path d="M20 2 L35.8 11 V29 L20 38 L4.2 29 V11 Z" fill="url(#b-bg)" stroke="#2b3f63" stroke-width="1"/><path d="M12.5 27 L20 21 L28.5 14" stroke="url(#b-path)" stroke-width="2.4" stroke-linecap="round" fill="none"/><circle cx="12.5" cy="27" r="2.4" fill="#38bdf8"/><circle cx="20" cy="21" r="2.9" fill="#7dd3fc"/><circle cx="28.5" cy="14" r="3.6" fill="#f0d795"/></svg>
+            </div>
+            <span>16px favicon</span>
+          </div>
+          <div class="size-item">
+            <div class="chip-light" style="width:44px;height:44px;">
+              <svg width="32" height="32" viewBox="0 0 40 40"><path d="M20 2 L35.8 11 V29 L20 38 L4.2 29 V11 Z" fill="url(#b-bg)" stroke="#2b3f63" stroke-width="1"/><path d="M12.5 27 L20 21 L28.5 14" stroke="url(#b-path)" stroke-width="2.4" stroke-linecap="round" fill="none"/><circle cx="12.5" cy="27" r="2.4" fill="#38bdf8"/><circle cx="20" cy="21" r="2.9" fill="#7dd3fc"/><circle cx="28.5" cy="14" r="3.6" fill="#f0d795"/></svg>
+            </div>
+            <span>açık zemin</span>
+          </div>
+        </div>
+        <div class="rationale">
+          <ul>
+            <li><b>Anlatım gücü:</b> Altıgen anında "rozet/başarı" çağrışımı yapıyor — kategoride (Duolingo, Codecademy vb.) beklenen ama farklı bir silüetle ayrışıyor.</li>
+            <li><b>Hikaye:</b> Büyüyen üç düğüm = platformun 5 kademe / XP mantığının doğrudan görsel karşılığı.</li>
+            <li><b>Uygulama alanı:</b> Rozet sayfası, seviye atlama animasyonu gibi oyunlaştırma yüzeylerinde amblemi tekrar kullanmak kolay.</li>
+            <li><b>Risk:</b> Altıgen çerçeve dar açılarda ince kenarlar oluşturuyor; 16px'te köşe netliği için stroke kalınlığı sabit tutulmalı.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ KONSEPT C ============================ -->
+  <div class="concept">
+    <div class="concept-head">
+      <div style="display:flex; gap:16px; align-items:flex-start;">
+        <span class="badge-num">C</span>
+        <div>
+          <span class="concept-tag">Mihenk Elması</span>
+          <h2>Kesme taş + yükselen ok</h2>
+          <p>"Mihenk" adının anlamını (ayar/kalite sınama taşı) obsidyen bloktan çok daha
+             modern bir dille, kesme bir mücevher olarak yeniden yorumlar. İçindeki ok,
+             büyümeyi ve doğrulanmış ilerlemeyi anlatır.</p>
+        </div>
+      </div>
+    </div>
+    <div class="concept-body">
+      <div class="stage">
+        <svg class="mark-96" width="96" height="96" viewBox="0 0 40 40" fill="none">
+          <defs>
+            <linearGradient id="c-bg" x1="20" y1="1" x2="20" y2="39" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#101a2e"/><stop offset="1" stop-color="#040810"/>
+            </linearGradient>
+            <linearGradient id="c-gem" x1="10" y1="26" x2="30" y2="10" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#38bdf8"/><stop offset="1" stop-color="#7dd3fc"/>
+            </linearGradient>
+          </defs>
+          <rect x="1" y="1" width="38" height="38" rx="12" fill="url(#c-bg)"/>
+          <rect x="1" y="1" width="38" height="38" rx="12" fill="none" stroke="#2b3f63" stroke-width="1"/>
+          <path d="M20 8 L30 15 L26 29 L14 29 L10 15 Z" fill="none" stroke="url(#c-gem)" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M14 15 H26 M17 15 L14 29 M23 15 L26 29 M20 8 V15" stroke="url(#c-gem)" stroke-width="1" stroke-opacity="0.55"/>
+          <path d="M16 22 L20 16 L24 22" stroke="#f0d795" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        <div class="lockup">
+          <svg width="30" height="30" viewBox="0 0 40 40">
+            <rect x="1" y="1" width="38" height="38" rx="12" fill="url(#c-bg)"/>
+            <path d="M20 8 L30 15 L26 29 L14 29 L10 15 Z" fill="none" stroke="url(#c-gem)" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M16 22 L20 16 L24 22" stroke="#f0d795" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+          <span class="wordmark">MİHENK</span>
+        </div>
+      </div>
+      <div class="sizes">
+        <h3>Boyut testi</h3>
+        <div class="size-row">
+          <div class="size-item">
+            <div class="chip-dark" style="width:44px;height:44px;">
+              <svg width="32" height="32" viewBox="0 0 40 40"><rect x="1" y="1" width="38" height="38" rx="12" fill="url(#c-bg)"/><path d="M20 8 L30 15 L26 29 L14 29 L10 15 Z" fill="none" stroke="url(#c-gem)" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 22 L20 16 L24 22" stroke="#f0d795" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+            </div>
+            <span>32px</span>
+          </div>
+          <div class="size-item">
+            <div class="chip-dark" style="width:32px;height:32px;">
+              <svg width="20" height="20" viewBox="0 0 40 40"><rect x="1" y="1" width="38" height="38" rx="12" fill="url(#c-bg)"/><path d="M20 8 L30 15 L26 29 L14 29 L10 15 Z" fill="none" stroke="url(#c-gem)" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 22 L20 16 L24 22" stroke="#f0d795" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+            </div>
+            <span>20px</span>
+          </div>
+          <div class="size-item">
+            <div class="chip-dark" style="width:26px;height:26px;">
+              <svg width="16" height="16" viewBox="0 0 40 40"><rect x="1" y="1" width="38" height="38" rx="12" fill="url(#c-bg)"/><path d="M20 8 L30 15 L26 29 L14 29 L10 15 Z" fill="none" stroke="url(#c-gem)" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 22 L20 16 L24 22" stroke="#f0d795" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+            </div>
+            <span>16px favicon</span>
+          </div>
+          <div class="size-item">
+            <div class="chip-light" style="width:44px;height:44px;">
+              <svg width="32" height="32" viewBox="0 0 40 40"><rect x="1" y="1" width="38" height="38" rx="12" fill="url(#c-bg)"/><path d="M20 8 L30 15 L26 29 L14 29 L10 15 Z" fill="none" stroke="url(#c-gem)" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 22 L20 16 L24 22" stroke="#f0d795" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+            </div>
+            <span>açık zemin</span>
+          </div>
+        </div>
+        <div class="rationale">
+          <ul>
+            <li><b>Anlatım gücü:</b> Kesim çizgileri "test edilmiş / doğrulanmış kalite" hissi veriyor — Mihenk adının anlamını korurken obsidyen taş kadar karanlık değil.</li>
+            <li><b>Ayrışma:</b> Mücevher/kesim taş motifi rakip veri-eğitimi platformlarında neredeyse hiç kullanılmıyor.</li>
+            <li><b>Zayıf yön:</b> İnce kesim çizgileri 16px'te silikleşiyor; favicon'da sadece dış hat + ok net kalıyor, iç çizgiler kaldırılmalı.</li>
+            <li><b>En iyi kullanım:</b> Büyük yüzeyler — giriş ekranı, sertifika, sosyal medya kapak görseli.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="verdict">
+    <h3>Öneri</h3>
+    <p>
+      Favicon/app-ikonu gibi küçük alanlarda en güvenli ve en açık okunan seçenek
+      <b style="color:var(--text)">A — Yükselen Çubuklar</b>. Oyunlaştırma sayfalarında (rozet,
+      seviye atlama) ikinci bir amblem olarak <b style="color:var(--text)">B — Rozet Yolu</b>
+      kullanılabilir. <b style="color:var(--text)">C — Mihenk Elması</b> adın anlamına en sadık
+      olan ama en riskli seçenek; büyük yüzeylerde (giriş ekranı, sertifika) güçlü.
+      Site tasarım mockup'ında A kullanıldı.
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

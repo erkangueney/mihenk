@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useRef, useState } from "react";
+import { Avatar } from "@/components/avatar/avatar";
 import { useProgress } from "@/components/progress-provider";
-import { ProgressBar, ProgressRing } from "@/components/ui/progress";
+import { ProgressBar } from "@/components/ui/progress";
+import { spendableXp, unlockedCount, avatarParts } from "@/lib/avatar";
 import { badges, currentStreak, lastWeek, levelInfo, rankTitle } from "@/lib/gamification";
 import { t, ui } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
@@ -68,7 +70,16 @@ export function ProfileView({
       <section className="card overflow-hidden">
         <div className="flex flex-col gap-6 p-5 sm:flex-row sm:items-center sm:p-6">
           <div className="flex items-center gap-4">
-            <ProgressRing value={info.ratio} size={80} stroke={6} />
+            <Link
+              href={`/${locale}/avatar`}
+              className="relative shrink-0 rounded-full transition hover:opacity-90"
+              title={ui("avatar.cta", locale)}
+            >
+              <Avatar state={progress.avatar} size={80} />
+              <span className="absolute -right-1 -bottom-1 grid h-7 w-7 place-items-center rounded-full border-2 border-surface bg-gradient-to-br from-accent-2 to-accent text-[11px] font-black text-on-accent">
+                {info.level}
+              </span>
+            </Link>
             <div className="min-w-0">
               <p className="text-xs font-semibold tracking-wide text-muted uppercase">
                 {ui("xp.level", locale)} {info.level} · {t(rank, locale)}
@@ -130,6 +141,24 @@ export function ProfileView({
           </div>
         ))}
       </div>
+
+      {/* --------------------------- Avatar --------------------------- */}
+      <Link
+        href={`/${locale}/avatar`}
+        className="card flex items-center gap-4 p-5 transition hover:border-accent sm:p-6"
+      >
+        <Avatar state={progress.avatar} size={64} />
+        <div className="min-w-0">
+          <p className="font-bold">{ui("avatar.cta", locale)}</p>
+          <p className="mt-1 text-sm text-muted">
+            {spendableXp(progress).toLocaleString(locale)} XP {ui("avatar.balance", locale)} ·{" "}
+            {unlockedCount(progress)}/{avatarParts.length} {ui("avatar.parts", locale)}
+          </p>
+        </div>
+        <span aria-hidden className="ml-auto text-muted">
+          →
+        </span>
+      </Link>
 
       {/* ---------------------------- Seri ---------------------------- */}
       <section className="card p-5 sm:p-6">

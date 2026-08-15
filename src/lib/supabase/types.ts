@@ -27,6 +27,8 @@ export type ProgressRow = {
   badges: string[];
   active_days: string[];
   display_name: string;
+  /** Avatar seçimi ve açılan parçalar — `AvatarState` şeklinde jsonb. */
+  avatar: unknown;
   updated_at: string;
 };
 
@@ -55,6 +57,8 @@ export type LeaderboardRow = {
   display_name: string;
   xp: number;
   is_you: boolean;
+  /** `AvatarState` şeklinde jsonb — `normalizeAvatar` ile güvene alınır. */
+  avatar: unknown;
 };
 
 /** Gösterge panelindeki sayılar — `admin_overview()` fonksiyonunun çıktısı. */

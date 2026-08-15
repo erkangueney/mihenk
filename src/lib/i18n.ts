@@ -27,6 +27,12 @@ const dictionary = {
   "nav.leaderboard": { tr: "Liderlik", en: "Leaderboard" },
   "nav.profile": { tr: "Profilim", en: "My Profile" },
   "nav.roadmap": { tr: "Yol Haritası", en: "Roadmap" },
+  "nav.reference": { tr: "Referans", en: "Reference" },
+  "nav.howTo": { tr: "Nasıl Yapılır?", en: "How To" },
+  "nav.cheatsheets": { tr: "Kopya Kâğıtları", en: "Cheatsheets" },
+  "nav.playground": { tr: "Deneme Alanı", en: "Playground" },
+  "nav.avatar": { tr: "Avatarım", en: "My Avatar" },
+  "nav.toolbox": { tr: "Alet Çantası", en: "Toolbox" },
   "nav.menu": { tr: "Menü", en: "Menu" },
   "nav.close": { tr: "Kapat", en: "Close" },
 
@@ -179,6 +185,128 @@ const dictionary = {
   "common.soon": { tr: "Yakında", en: "Soon" },
   "common.search": { tr: "Ara", en: "Search" },
   "common.noResults": { tr: "Sonuç bulunamadı", en: "No results" },
+  "common.copy": { tr: "Kopyala", en: "Copy" },
+  "common.copied": { tr: "Kopyalandı", en: "Copied" },
+  "common.all": { tr: "Tümü", en: "All" },
+  "common.updated": { tr: "Güncellendi", en: "Updated" },
+  "common.clear": { tr: "Temizle", en: "Clear" },
+
+  /* Kendin dene ------------------------------------------------------ */
+  "playground.title": { tr: "Kendin dene", en: "Try it yourself" },
+  "playground.engine": { tr: "Motor", en: "Engine" },
+  "playground.dataset": { tr: "Veri seti", en: "Dataset" },
+  "playground.noOutput": {
+    tr: "Kod hatasız çalıştı ama bir çıktı üretmedi.",
+    en: "The code ran without errors but produced no output.",
+  },
+  "playground.pageTitle": { tr: "Deneme alanı", en: "Playground" },
+  "playground.pageSubtitle": {
+    tr: "Kurulum yok, hesap yok. Tarayıcında gerçek Python ve gerçek SQLite çalışıyor — yaz, boz, çalıştır.",
+    en: "No setup, no account. Real Python and real SQLite run in your browser — write it, break it, run it.",
+  },
+  "playground.samples": { tr: "Hazır örnekler", en: "Sample snippets" },
+  "playground.tip": {
+    tr: "Motor ilk çalıştırmada indirilir; sonraki çalıştırmalar anında başlar.",
+    en: "The engine downloads on first run; later runs start instantly.",
+  },
+
+  /* Referans --------------------------------------------------------- */
+  "reference.title": { tr: "Referans sözlüğü", en: "Reference" },
+  "reference.subtitle": {
+    tr: "Patikalardan bağımsız başvuru kaynağı. Komut, fonksiyon ve formüllerin sözdizimi, ne işe yaradığı ve çalıştırılabilir örneği — tek sayfada.",
+    en: "A reference hub independent of the tracks. Syntax, purpose and a runnable example for every command, function and formula — on one page.",
+  },
+  "reference.searchPlaceholder": {
+    tr: "Komut, fonksiyon veya formül ara — JOIN, merge, DÜŞEYARA…",
+    en: "Search a command, function or formula — JOIN, merge, VLOOKUP…",
+  },
+  "reference.entries": { tr: "girdi", en: "entries" },
+  "reference.syntax": { tr: "Sözdizimi", en: "Syntax" },
+  "reference.params": { tr: "Parametreler", en: "Parameters" },
+  "reference.returns": { tr: "Döndürür", en: "Returns" },
+  "reference.example": { tr: "Örnek", en: "Example" },
+  "reference.related": { tr: "İlgili girdiler", en: "Related entries" },
+  "reference.openTrack": { tr: "Bu konuyu patikada öğren", en: "Learn this in a track" },
+  "reference.all": { tr: "Tüm referanslar", en: "All references" },
+  "reference.onThisPage": { tr: "Bu sayfada", en: "On this page" },
+  "reference.inGroup": { tr: "Bu referansta", en: "In this reference" },
+  "reference.noteEntries": {
+    tr: "Aradığını bulamadıysan arama kutusuna başka bir kelime yaz — girdi adları, açıklamalar ve örnekler birlikte taranır.",
+    en: "If you can't find it, try another word — names, descriptions and examples are all searched.",
+  },
+
+  /* Nasıl yapılır ---------------------------------------------------- */
+  "howTo.title": { tr: "Nasıl yapılır?", en: "How to" },
+  "howTo.subtitle": {
+    tr: "Veri dünyasının nokta atışı soruları ve kısa, uygulanabilir cevapları. Her sayfa önce hızlı cevabı verir, sonra adım adım anlatır.",
+    en: "Precise questions from the data world with short, actionable answers. Every page leads with the quick answer, then walks through the steps.",
+  },
+  "howTo.searchPlaceholder": {
+    tr: "Bir soru ara — YoY, eksik veri, pivot…",
+    en: "Search a question — YoY, missing data, pivot…",
+  },
+  "howTo.quickAnswer": { tr: "Kısa cevap", en: "Quick answer" },
+  "howTo.steps": { tr: "Adım adım", en: "Step by step" },
+  "howTo.faq": { tr: "Sık sorulanlar", en: "Frequently asked" },
+  "howTo.related": { tr: "Benzer sorular", en: "Related questions" },
+  "howTo.count": { tr: "rehber", en: "guides" },
+  "howTo.readTime": { tr: "dk okuma", en: "min read" },
+
+  /* Kopya kâğıtları -------------------------------------------------- */
+  "cheatsheet.title": { tr: "Kopya kâğıtları", en: "Cheatsheets" },
+  "cheatsheet.subtitle": {
+    tr: "Tek sayfalık özetler. Yer imlerine ekle, yazdır, ekranın kenarında tut — takıldığın anda bak.",
+    en: "One-page summaries. Bookmark them, print them, keep them at the edge of your screen.",
+  },
+  "cheatsheet.print": { tr: "Yazdır / PDF", en: "Print / PDF" },
+  "cheatsheet.rows": { tr: "satır", en: "rows" },
+  "cheatsheet.colSyntax": { tr: "Sözdizimi", en: "Syntax" },
+  "cheatsheet.colWhat": { tr: "Ne yapar", en: "What it does" },
+  "cheatsheet.colNote": { tr: "Not", en: "Note" },
+  "cheatsheet.open": { tr: "Kâğıdı aç", en: "Open sheet" },
+
+  /* Alet çantası ----------------------------------------------------- */
+  "toolbox.title": { tr: "Alet çantası", en: "Toolbox" },
+  "toolbox.subtitle": {
+    tr: "Ders akışına girmeden ihtiyacın olanı bul: referans sözlüğü, nokta atışı rehberler, kopya kâğıtları ve serbest deneme alanı.",
+    en: "Find what you need without entering a lesson: the reference, precise how-to guides, cheatsheets and a free playground.",
+  },
+
+  /* Avatar ----------------------------------------------------------- */
+  "avatar.title": { tr: "Avatar stüdyosu", en: "Avatar studio" },
+  "avatar.subtitle": {
+    tr: "Kazandığın XP'yi harcayarak avatarını özelleştir. Harcama seviyeni düşürmez — yalnızca harcanabilir bakiyenden iner.",
+    en: "Spend the XP you've earned to customize your avatar. Spending never lowers your level — it only reduces your spendable balance.",
+  },
+  "avatar.slot.base": { tr: "Temel karakter", en: "Base character" },
+  "avatar.slot.outfit": { tr: "Kıyafet", en: "Outfit" },
+  "avatar.slot.accessory": { tr: "Aksesuar", en: "Accessory" },
+  "avatar.slot.effect": { tr: "Görsel efekt", en: "Visual effect" },
+  "avatar.balance": { tr: "Harcanabilir XP", en: "Spendable XP" },
+  "avatar.spent": { tr: "Harcanan XP", en: "XP spent" },
+  "avatar.unlock": { tr: "Aç", en: "Unlock" },
+  "avatar.equip": { tr: "Kuşan", en: "Equip" },
+  "avatar.equipped": { tr: "Kuşanıldı", en: "Equipped" },
+  "avatar.remove": { tr: "Çıkar", en: "Remove" },
+  "avatar.owned": { tr: "Açıldı", en: "Unlocked" },
+  "avatar.needLevel": { tr: "Seviye", en: "Level" },
+  "avatar.needLevelSuffix": { tr: "gerekir", en: "required" },
+  "avatar.needBadge": { tr: "Şu rozet gerekir:", en: "Requires badge:" },
+  "avatar.notEnough": { tr: "Yeterli XP yok", en: "Not enough XP" },
+  "avatar.none": { tr: "Yok", en: "None" },
+  "avatar.free": { tr: "Ücretsiz", en: "Free" },
+  "avatar.preview": { tr: "Önizleme", en: "Preview" },
+  "avatar.cta": { tr: "Avatarını özelleştir", en: "Customize your avatar" },
+  "avatar.unlockedToast": { tr: "Yeni parça açıldı", en: "New part unlocked" },
+  "avatar.parts": { tr: "parça", en: "parts" },
+  "avatar.rarity.common": { tr: "Sıradan", en: "Common" },
+  "avatar.rarity.rare": { tr: "Nadir", en: "Rare" },
+  "avatar.rarity.epic": { tr: "Efsanevi", en: "Epic" },
+  "avatar.rarity.legendary": { tr: "Söylence", en: "Legendary" },
+  "avatar.progressHint": {
+    tr: "Ders bitir, quiz çöz, proje tamamla — açılan parçalar burada birikir.",
+    en: "Finish lessons, solve quizzes, complete projects — unlocked parts pile up here.",
+  },
 
   /* Üyelik ---------------------------------------------------------- */
   "auth.signIn": { tr: "Giriş yap", en: "Sign in" },

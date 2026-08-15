@@ -11,6 +11,7 @@ import { LESSON_BONUS_XP, taskKeyOf } from "@/lib/content";
 import type { Block, Lesson, Locale } from "@/lib/types";
 import { ExerciseBlock } from "./exercise-block";
 import { OrderBlock } from "./order-block";
+import { PlaygroundBlock } from "./playground-block";
 import { QuizBlock } from "./quiz-block";
 
 /** Ders sayfasına tüm patika ağacını taşımaya gerek yok; sadece kimliği yeter. */
@@ -245,6 +246,9 @@ function BlockRenderer({
           locale={locale}
         />
       );
+
+    case "playground":
+      return <PlaygroundBlock block={block} locale={locale} />;
 
     default:
       return null;

@@ -53,13 +53,18 @@ yakalamanı sağlar.
 2. Bölge olarak kullanıcılarına en yakınını seç (Türkiye için `eu-central-1` iyi bir seçim).
 3. Veritabanı şifresini bir yere kaydet — sonra lazım olmayacak ama kaybedersen sıfırlaman gerekir.
 
-Proje hazır olunca **SQL Editor**'ü aç ve `supabase/migrations/0001_init.sql` dosyasının
-**tamamını** yapıştırıp çalıştır. Bu dosya şunları kurar:
+Proje hazır olunca **SQL Editor**'ü aç ve `supabase/migrations/` altındaki dosyaları
+**numara sırasıyla** çalıştır — her birinin tamamını yapıştır:
+
+1. `0001_init.sql` — şema, görünümler ve RLS politikaları
+2. `0002_avatar.sql` — avatar sütunu ve liderlik tablosunun güncel sürümü
+
+İlk dosya şunları kurar:
 
 | Nesne | İşlevi |
 |---|---|
 | `profiles` | Üye bilgileri, rol, askı durumu |
-| `progress` | XP, tamamlanan ders/proje, rozetler, aktif günler |
+| `progress` | XP, tamamlanan ders/proje, rozetler, aktif günler, avatar |
 | `content_docs` | Panelden düzenlenen patika/proje sürümleri |
 | `audit_log` | Panelde yapılan yönetim işlemleri |
 | `admin_members` | Üye listesi için birleşik görünüm |

@@ -16,7 +16,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
         aria-hidden
         className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent"
       />
-      <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-4">
+      <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-5">
         <div className="md:col-span-2">
           <div className="flex items-center gap-2.5">
             <BrandLockup size={32} />
@@ -50,11 +50,42 @@ export function SiteFooter({ locale }: { locale: Locale }) {
         </div>
 
         <div>
+          <h3 className="eyebrow">{ui("nav.toolbox", locale)}</h3>
+          <ul className="mt-3 space-y-2 text-sm text-muted">
+            <li>
+              <Link className="hover:text-text" href={link("/reference")}>
+                {ui("reference.title", locale)}
+              </Link>
+            </li>
+            <li>
+              <Link className="hover:text-text" href={link("/how-to")}>
+                {ui("howTo.title", locale)}
+              </Link>
+            </li>
+            <li>
+              <Link className="hover:text-text" href={link("/cheatsheets")}>
+                {ui("cheatsheet.title", locale)}
+              </Link>
+            </li>
+            <li>
+              <Link className="hover:text-text" href={link("/playground")}>
+                {ui("playground.pageTitle", locale)}
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        <div>
           <h3 className="eyebrow">{ui("nav.profile", locale)}</h3>
           <ul className="mt-3 space-y-2 text-sm text-muted">
             <li>
               <Link className="hover:text-text" href={link("/profile")}>
                 {ui("profile.overview", locale)}
+              </Link>
+            </li>
+            <li>
+              <Link className="hover:text-text" href={link("/avatar")}>
+                {ui("avatar.title", locale)}
               </Link>
             </li>
             <li>
