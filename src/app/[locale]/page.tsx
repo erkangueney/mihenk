@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AdSlot } from "@/components/ads/ad-slot";
 import { HeroCta, type ResumeTarget } from "@/components/hero-cta";
 import { IconBook, IconClipboard, IconCompass, IconPlay } from "@/components/ui/icons";
 import { TrackCard } from "@/components/track-card";
@@ -296,6 +297,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </ul>
         </div>
       </section>
+
+      <AdSlot placement="home-footer" className="mx-auto my-10 max-w-7xl px-4 sm:px-6" />
     </>
   );
 }

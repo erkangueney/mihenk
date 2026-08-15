@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { AdSlot } from "@/components/ads/ad-slot";
 import { LeaderboardView } from "@/components/leaderboard-view";
 import { isLocale, ui } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
@@ -33,6 +34,8 @@ export default async function LeaderboardPage({
         </p>
       </header>
       <LeaderboardView locale={locale} />
+
+      <AdSlot placement="leaderboard-sidebar" className="mt-8 hidden sm:block" />
     </div>
   );
 }

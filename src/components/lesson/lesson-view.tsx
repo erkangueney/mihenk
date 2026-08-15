@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { LESSON_INTERSTITIAL_EVERY, LessonInterstitial } from "@/components/lesson/lesson-interstitial";
 import { PremiumLockNotice } from "@/components/premium-gate";
 import { useProgress } from "@/components/progress-provider";
 import { CodeCard } from "@/components/ui/code-view";
@@ -9,6 +11,7 @@ import { Markdown } from "@/components/ui/markdown";
 import { ProgressBar } from "@/components/ui/progress";
 import { canAccessLevel } from "@/lib/entitlements";
 import { usePlanInfo } from "@/lib/entitlements-client";
+import { isNativePlatform } from "@/lib/platform";
 import { t, ui } from "@/lib/i18n";
 import { LESSON_BONUS_XP, taskKeyOf } from "@/lib/content";
 import type { Block, Lesson, LevelId, Locale } from "@/lib/types";
@@ -45,14 +48,25 @@ export function LessonView({
   prev: { slug: string; title: string } | null;
   next: { slug: string; title: string } | null;
 }) {
-  const { isTaskDone, isLessonDone, completeLesson } = useProgress();
-  const { ready: planReady, ...planInfo } = usePlanInfo();
+  const { progress, isTaskDone, isLessonDone, completeLesson } = useProgress();
+  const { ready: planReady, isPremium, ...planInfo } = usePlanInfo();
+  const router = useRouter();
+  const [interstitialHref, setInterstitialHref] = useState<string | null>(null);
   const lessonKey = `${track.slug}/${lesson.slug}`;
   const finished = isLessonDone(lessonKey);
   // Kilitliyken görev blokları hiç render edilmez — DOM'a girmediği için
   // "Dersi tamamla" butonu da ayrıca gizlenir, aksi halde görevsiz bir ders
   // (yalnızca metin) kilitliyken bile XP kazandırırdı.
   const locked = planReady && !canAccessLevel(track.slug, levelId, planInfo);
+  // Ücretsiz + native olmayan kullanıcıda, dersi tamamlayıp sonrakine
+  // geçmeden önce her N derste bir ara ekran (reklam) gösterilir.
+  const showInterstitial =
+    planReady &&
+    !isPremium &&
+    !isNativePlatform() &&
+    finished &&
+    progress.lessons.length > 0 &&
+    progress.lessons.length % LESSON_INTERSTITIAL_EVERY === 0;
 
   const taskBlocks = useMemo(
     () =>
@@ -167,13 +181,21 @@ export function LessonView({
             <span />
           )}
           {next ? (
-            <Link
-              href={`/${locale}/learn/${track.slug}/${next.slug}`}
+            <button
+              type="button"
+              onClick={() => {
+                const href = `/${locale}/learn/${track.slug}/${next.slug}`;
+                // Ara ekran yalnızca bir kez, koşul tekrar sağlansa bile bu
+                // tıklamada yeniden tetiklenmesin diye showInterstitial değil
+                // sabit bir anlık kontrol kullanılır.
+                if (showInterstitial) setInterstitialHref(href);
+                else router.push(href);
+              }}
               className="card group p-4 text-right transition hover:border-accent sm:col-start-2"
             >
               <span className="text-xs text-muted">{ui("lesson.next", locale)} →</span>
               <span className="mt-1 block font-semibold">{next.title}</span>
-            </Link>
+            </button>
           ) : (
             <Link
               href={`/${locale}/learn/${track.slug}`}
@@ -185,6 +207,13 @@ export function LessonView({
           )}
         </div>
       </footer>
+
+      {interstitialHref ? (
+        <LessonInterstitial
+          locale={locale}
+          onContinue={() => router.push(interstitialHref)}
+        />
+      ) : null}
     </article>
   );
 }

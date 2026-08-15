@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { ConsentBanner } from "@/components/consent-banner";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { HtmlLang } from "@/components/html-lang";
@@ -25,6 +26,7 @@ export default async function LocaleLayout({
       <SiteHeader locale={locale} />
       <main className="flex-1">{children}</main>
       <SiteFooter locale={locale} />
+      <ConsentBanner locale={locale} />
     </>
   );
 }

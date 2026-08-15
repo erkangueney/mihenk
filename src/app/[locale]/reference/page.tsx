@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AdSlot } from "@/components/ads/ad-slot";
 import {
   ReferenceSearch,
   type ReferenceSearchItem,
@@ -108,6 +109,8 @@ export default async function ReferenceIndexPage({
           }))}
         />
       </section>
+
+      <AdSlot placement="reference-sidebar" className="hidden sm:block" />
     </div>
   );
 }

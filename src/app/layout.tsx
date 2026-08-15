@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 import { ProgressProvider } from "@/components/progress-provider";
 import { SessionProvider } from "@/components/auth/session-provider";
+import { AdScriptLoader } from "@/components/ads/ad-script-loader";
 import { BRAND_NAME } from "@/lib/brand";
 import { Toaster } from "@/components/toaster";
 import { themeScript } from "@/components/theme-toggle";
@@ -86,6 +87,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Toaster />
           </ProgressProvider>
         </SessionProvider>
+        <AdScriptLoader />
       </body>
     </html>
   );

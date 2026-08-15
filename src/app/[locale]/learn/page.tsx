@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { AdSlot } from "@/components/ads/ad-slot";
 import { TrackExplorer, type ExplorerTrack } from "@/components/track-explorer";
 import { lessonKeyOf, trackStats } from "@/lib/content";
 import { getTracks } from "@/lib/content-docs/resolve";
@@ -56,6 +57,8 @@ export default async function LearnPage({ params }: { params: Promise<{ locale: 
       </header>
 
       <TrackExplorer tracks={cards} locale={locale} />
+
+      <AdSlot placement="learn-footer" className="mt-10" />
     </div>
   );
 }

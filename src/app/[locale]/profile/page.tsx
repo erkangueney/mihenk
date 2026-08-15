@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { AdSlot } from "@/components/ads/ad-slot";
 import { ProfileView, type TrackProgressItem } from "@/components/profile-view";
 import { lessonKeyOf } from "@/lib/content";
 import { getProjects, getTracks } from "@/lib/content-docs/resolve";
@@ -42,6 +43,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
         {ui("profile.title", locale)}
       </h1>
       <ProfileView tracks={items} totalProjects={projects.length} locale={locale} />
+
+      <AdSlot placement="profile-sidebar" className="mt-8 hidden sm:block" />
     </div>
   );
 }
