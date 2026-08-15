@@ -181,6 +181,8 @@ export function lesson(config: {
   summary: Localized;
   minutes: number;
   blocks: Lesson["blocks"];
+  /** true ise bu ders premium — bir seviyeye ücretsiz derslerin yanına eklenen bonus ders. */
+  premium?: boolean;
 }): Lesson {
   return { ...config };
 }

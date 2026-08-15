@@ -17,6 +17,8 @@ export interface LevelLesson {
   tasks: number;
   xp: number;
   key: string;
+  /** true ise bu tek ders premium — bir seviyeye ücretsiz derslerin yanına eklenen bonus ders. */
+  premium?: boolean;
 }
 
 export interface LevelData {
@@ -99,12 +101,15 @@ export function TrackLevels({
             <ol className="divide-y divide-border">
               {level.lessons.map((lesson, lessonIndex) => {
                 const complete = ready && progress.lessons.includes(lesson.key);
+                const lessonPremiumLocked =
+                  planReady &&
+                  !canAccessContent({ trackPremium, premium: level.premium || lesson.premium }, planInfo);
                 return (
                   <li key={lesson.slug}>
                     <Link
                       href={`/${locale}/learn/${trackSlug}/${lesson.slug}`}
                       className={`flex items-start gap-4 p-4 transition hover:bg-surface-2 sm:p-5 ${
-                        locked ? "opacity-55" : ""
+                        locked || lessonPremiumLocked ? "opacity-55" : ""
                       }`}
                     >
                       <span
@@ -120,7 +125,18 @@ export function TrackLevels({
                         {complete ? "✓" : lessonIndex + 1}
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block font-semibold">{lesson.title}</span>
+                        <span className="flex items-center gap-1.5 font-semibold">
+                          {lesson.title}
+                          {lesson.premium && !level.premium ? (
+                            <span
+                              aria-hidden
+                              title={locale === "tr" ? "Premium ders" : "Premium lesson"}
+                              className="text-xs text-accent"
+                            >
+                              💎
+                            </span>
+                          ) : null}
+                        </span>
                         <span className="mt-1 block text-sm leading-relaxed text-muted">
                           {lesson.summary}
                         </span>

@@ -62,7 +62,8 @@ export function LessonView({
   // "Dersi tamamla" butonu da ayrıca gizlenir, aksi halde görevsiz bir ders
   // (yalnızca metin) kilitliyken bile XP kazandırırdı.
   const locked =
-    planReady && !canAccessContent({ trackPremium, premium: levelPremium }, planInfo);
+    planReady &&
+    !canAccessContent({ trackPremium, premium: levelPremium || lesson.premium }, planInfo);
   // Ücretsiz + native olmayan kullanıcıda, dersi tamamlayıp sonrakine
   // geçmeden önce her N derste bir ara ekran (reklam) gösterilir.
   const showInterstitial =

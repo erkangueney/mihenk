@@ -218,6 +218,7 @@ function lesson(value: unknown, path: string): Lesson {
     blocks: arr(record.blocks, `${path}.blocks`, { min: 1 }).map((item, index) =>
       block(item, `${path}.blocks[${index}]`),
     ),
+    premium: record.premium === true,
   };
 }
 

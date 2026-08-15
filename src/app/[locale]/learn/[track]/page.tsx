@@ -57,6 +57,7 @@ export default async function TrackPage({
             tasks: ls.tasks,
             xp: ls.xp,
             key: lessonKeyOf(track.slug, lesson.slug),
+            premium: lesson.premium,
           };
         }),
         project: project

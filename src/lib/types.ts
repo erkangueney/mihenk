@@ -141,6 +141,8 @@ export interface Lesson {
   /** Tahmini süre (dakika) */
   minutes: number;
   blocks: Block[];
+  /** true ise bu ders premium — bir seviyeye ücretsiz derslerin yanına eklenen bonus ders. */
+  premium?: boolean;
 }
 
 export interface Level {
