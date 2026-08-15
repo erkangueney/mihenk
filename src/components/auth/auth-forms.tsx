@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import Script from "next/script";
+import { useActionState, useRef } from "react";
 import {
   requestPasswordResetAction,
   signInAction,
@@ -11,6 +12,17 @@ import {
 import { emptyAuthState } from "@/lib/auth/types";
 import { ui } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
+
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+
+declare global {
+  interface Window {
+    grecaptcha?: {
+      ready: (callback: () => void) => void;
+      execute: (siteKey: string, options: { action: string }) => Promise<string>;
+    };
+  }
+}
 
 /* ------------------------------------------------------------------ */
 /* Ortak parçalar                                                      */
@@ -141,46 +153,84 @@ export function LoginForm({ locale, next }: { locale: Locale; next?: string }) {
 
 export function SignupForm({ locale }: { locale: Locale }) {
   const [state, action, pending] = useActionState(signUpAction, emptyAuthState);
+  const formRef = useRef<HTMLFormElement>(null);
+  const tokenInputRef = useRef<HTMLInputElement>(null);
+  // Token'lı ikinci `requestSubmit()` çağrısı bu handler'a tekrar düşer;
+  // döngüye girmemek için bir kerelik geçiş bayrağı.
+  const bypassRef = useRef(false);
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    if (!RECAPTCHA_SITE_KEY) return; // site key yoksa reCAPTCHA hiç devrede değil
+    if (bypassRef.current) {
+      bypassRef.current = false;
+      return;
+    }
+    event.preventDefault();
+
+    const grecaptcha = window.grecaptcha;
+    if (!grecaptcha) {
+      // Script yüklenemedi (ör. engelleyici) — kaydı sonsuza kadar kilitleme.
+      bypassRef.current = true;
+      formRef.current?.requestSubmit();
+      return;
+    }
+    grecaptcha.ready(() => {
+      grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: "signup" }).then((token) => {
+        if (tokenInputRef.current) tokenInputRef.current.value = token;
+        bypassRef.current = true;
+        formRef.current?.requestSubmit();
+      });
+    });
+  }
 
   return (
-    <form action={action} className="space-y-4">
-      <Notice ok={state.ok} message={state.message} />
-      <Field
-        label={ui("auth.displayName", locale)}
-        name="displayName"
-        autoComplete="nickname"
-        required
-        maxLength={40}
-        placeholder={ui("auth.displayNameHint", locale)}
-        error={state.errors.displayName}
-      />
-      <Field
-        label={ui("auth.email", locale)}
-        name="email"
-        type="email"
-        autoComplete="email"
-        required
-        placeholder="ornek@eposta.com"
-        error={state.errors.email}
-      />
-      <Field
-        label={ui("auth.password", locale)}
-        name="password"
-        type="password"
-        autoComplete="new-password"
-        required
-        minLength={8}
-        placeholder={ui("auth.passwordHint", locale)}
-        error={state.errors.password}
-      />
-      <Submit pending={pending} label={ui("auth.createAccount", locale)} locale={locale} />
-      <p className="text-center text-xs text-muted">
-        {ui("auth.haveAccount", locale)}{" "}
-        <Link href={`/${locale}/giris`} className="font-semibold text-accent hover:underline">
-          {ui("auth.signIn", locale)}
-        </Link>
-      </p>
-    </form>
+    <>
+      {RECAPTCHA_SITE_KEY ? (
+        <Script
+          src={`https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`}
+          strategy="afterInteractive"
+        />
+      ) : null}
+      <form ref={formRef} action={action} onSubmit={handleSubmit} className="space-y-4">
+        <input ref={tokenInputRef} type="hidden" name="recaptchaToken" />
+        <Notice ok={state.ok} message={state.message} />
+        <Field
+          label={ui("auth.displayName", locale)}
+          name="displayName"
+          autoComplete="nickname"
+          required
+          maxLength={40}
+          placeholder={ui("auth.displayNameHint", locale)}
+          error={state.errors.displayName}
+        />
+        <Field
+          label={ui("auth.email", locale)}
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+          placeholder="ornek@eposta.com"
+          error={state.errors.email}
+        />
+        <Field
+          label={ui("auth.password", locale)}
+          name="password"
+          type="password"
+          autoComplete="new-password"
+          required
+          minLength={8}
+          placeholder={ui("auth.passwordHint", locale)}
+          error={state.errors.password}
+        />
+        <Submit pending={pending} label={ui("auth.createAccount", locale)} locale={locale} />
+        <p className="text-center text-xs text-muted">
+          {ui("auth.haveAccount", locale)}{" "}
+          <Link href={`/${locale}/giris`} className="font-semibold text-accent hover:underline">
+            {ui("auth.signIn", locale)}
+          </Link>
+        </p>
+      </form>
+    </>
   );
 }
 

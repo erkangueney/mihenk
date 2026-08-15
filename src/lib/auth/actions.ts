@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 import type { AuthFormState } from "./types";
 
 const MIN_PASSWORD = 8;
@@ -42,6 +43,11 @@ export async function signUpAction(_prev: AuthFormState, form: FormData): Promis
   }
   if (displayName.length < 2) errors.displayName = "Görünen ad en az 2 karakter olmalı.";
   if (Object.keys(errors).length > 0) return fail("Formu kontrol et.", errors);
+
+  const recaptchaToken = String(form.get("recaptchaToken") ?? "");
+  if (!(await verifyRecaptcha(recaptchaToken))) {
+    return fail("Bot koruması doğrulanamadı. Sayfayı yenileyip tekrar dene.");
+  }
 
   const { data, error } = await supabase.auth.signUp({
     email,
