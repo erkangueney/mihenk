@@ -1398,6 +1398,131 @@ kontrol_et(silver_satis, "siparis_id", ["tarih", "tutar", "musteri_id"])`,
     ],
   }),
 
+  project({
+    slug: "excel-lambda-fonksiyon-kutuphanesi",
+    track: "excel",
+    level: "expert",
+    title: ["LAMBDA Fonksiyon Kütüphanesi", "A LAMBDA Function Library"],
+    stack: ["Excel", "LAMBDA", "Ad Yöneticisi"],
+    hours: 6,
+    xp: 400,
+    summary: [
+      "Ekibinin tekrar tekrar yazdığı 5 formülü LAMBDA ile kendi fonksiyonlarına çevir, belgeleyip paylaşılabilir bir kütüphane hâline getir.",
+      "Turn 5 formulas your team keeps rewriting into your own LAMBDA functions, documented and packaged as a shareable library.",
+    ],
+    dataset: [
+      "Kendi işyerinden veya bu platformdaki derslerden tanıdık en az 5 tekrar eden hesaplama (KDV, komisyon, yaş hesabı, hafta numarası gibi).",
+      "At least 5 recurring calculations from your own workplace or familiar from this platform's lessons (VAT, commission, age calculation, week number).",
+    ],
+    deliverables: [
+      ["Ad Yöneticisi'nde tanımlanmış, isimlendirilmiş en az 5 LAMBDA fonksiyonu", "At least 5 named LAMBDA functions defined in the Name Manager"],
+      ["Her fonksiyon için 1 satırlık açıklama ve örnek çağrı", "A one-line description and example call for each function"],
+      ["Fonksiyonların çalıştığını gösteren bir test sayfası", "A test sheet demonstrating each function works"],
+      ["Kütüphaneyi başka bir dosyaya taşıma talimatı (Ad Yöneticisi'nden dışa aktarma/kopyalama)", "Instructions for moving the library to another file (exporting/copying from Name Manager)"],
+    ],
+    steps: [
+      {
+        title: ["5 tekrar eden formülü listele", "List 5 recurring formulas"],
+        body: [
+          "Kendi çalışmalarında veya bu platformdaki derslerde en az 3 farklı yerde kopyaladığın formülleri bul. Her biri iyi bir LAMBDA adayıdır — ne kadar çok tekrarlanıyorsa, LAMBDA'nın kazancı o kadar büyük.",
+          "Find formulas you've copied in at least 3 different places, either in your own work or across this platform's lessons. Each one is a good LAMBDA candidate — the more it repeats, the bigger LAMBDA's payoff.",
+        ],
+      },
+      {
+        title: ["Her formülü LAMBDA'ya çevir ve isimlendir", "Convert each formula to a LAMBDA and name it"],
+        body: [
+          "Formülü parametrelere ayır (hangi değerler her çağrıda değişecek?), `=LAMBDA(parametre1; parametre2; ...formül...)` olarak yaz ve Ad Yöneticisi'nde anlamlı bir isimle (`KOMISYON`, `YAS_HESAPLA`) kaydet.",
+          "Break the formula into parameters (which values change on every call?), write it as `=LAMBDA(param1; param2; ...formula...)`, and save it under a meaningful name (`COMMISSION`, `CALC_AGE`) in the Name Manager.",
+        ],
+        lang: "excel",
+        code: `# Ad Yöneticisi'nde "YAS_HESAPLA" adıyla kaydedilir:
+=LAMBDA(dogum_tarihi; DATEDIF(dogum_tarihi; BUGÜN(); "y"))
+
+# Kullanımı:
+=YAS_HESAPLA(B2)`,
+      },
+      {
+        title: ["Test sayfası kur", "Build a test sheet"],
+        body: [
+          "Ayrı bir sayfada her fonksiyonu birkaç farklı girdiyle çağır ve beklenen sonuçla karşılaştır. Bu, hem fonksiyonların doğru çalıştığını kanıtlar hem de kütüphaneyi devralacak birine canlı bir örnek sunar.",
+          "On a separate sheet, call each function with a few different inputs and compare against the expected result. This both proves the functions work and gives anyone inheriting the library a live example.",
+        ],
+      },
+      {
+        title: ["Belgele ve paylaşılabilir hâle getir", "Document it and make it shareable"],
+        body: [
+          "Her fonksiyon için tek satırlık bir açıklama yaz (ne yapar, parametreleri ne). LAMBDA isimleri bir dosyaya özgüdür — kütüphaneyi başka bir dosyada kullanmak için Ad Yöneticisi'nden isimleri o dosyaya kopyalaman/dışa aktarman gerektiğini not et.",
+          "Write a one-line description for each function (what it does, what its parameters are). LAMBDA names are file-specific — note that using the library in another file means copying/exporting the names from the Name Manager into that file.",
+        ],
+      },
+      githubStep("lambda-fonksiyon-kutuphanesi"),
+    ],
+    premium: true,
+  }),
+
+  project({
+    slug: "excel-vba-otomatik-rapor-dugmesi",
+    track: "excel",
+    level: "expert",
+    title: ["VBA ile Otomatik Rapor Düğmesi", "An Automated Report Button with VBA"],
+    stack: ["Excel", "VBA", "Makro"],
+    hours: 7,
+    xp: 450,
+    summary: [
+      "Her hafta elle yaptığın çok adımlı bir temizlik/rapor işini kaydet, VBA Düzenleyicisi'nde sadeleştir ve tek tıkla çalışan bir düğmeye bağla.",
+      "Record a multi-step cleanup/report task you do by hand every week, simplify it in the VBA Editor, and wire it to a one-click button.",
+    ],
+    dataset: [
+      "Kendi işinden düzenli tekrar eden bir Excel işlemi (haftalık satış özeti, aylık filtre temizliği gibi); yoksa bu patikadaki excel-otomatik-aylik-rapor projesinin verisini kullan.",
+      "A recurring Excel task from your own work (a weekly sales summary, a monthly filter cleanup); if you don't have one, reuse this track's excel-otomatik-aylik-rapor project's data.",
+    ],
+    deliverables: [
+      ["Makro Kaydet ile üretilmiş ham VBA kodu", "The raw VBA code produced by Record Macro"],
+      ["VBA Düzenleyicisi'nde sadeleştirilmiş, gereksiz Select/Activate satırları temizlenmiş sürüm", "A version cleaned up in the VBA Editor with unnecessary Select/Activate lines removed"],
+      ["Makroyu çalıştıran bir düğme/şekil", "A button/shape that runs the macro"],
+      ["Öncesi (elle, kaç dakika) / sonrası (tek tık) süre karşılaştırması", "A before (by hand, how many minutes) / after (one click) time comparison"],
+    ],
+    steps: [
+      {
+        title: ["İşlemi Makro Kaydet ile kaydet", "Record the task with Record Macro"],
+        body: [
+          "Geliştirici sekmesinde Makro Kaydet'e bas, işlemi normalde yaptığın gibi elle yap (filtrele, sil, biçimlendir, kaydet), sonra kaydı durdur. Bu, kaba ama çalışan bir ilk sürüm üretir.",
+          "Click Record Macro on the Developer tab, do the task by hand exactly as you normally would (filter, delete, format, save), then stop recording. This produces a rough but working first version.",
+        ],
+      },
+      {
+        title: ["VBA Düzenleyicisi'nde kodu oku ve sadeleştir", "Read and simplify the code in the VBA Editor"],
+        body: [
+          "Alt+F11 ile VBA Düzenleyicisi'ni aç, üretilen kodu satır satır oku. Gereksiz `.Select`/`.Activate` çiftlerini kaldır — çoğu satır, bir nesneyi seçip sonra ona işlem yapmak yerine doğrudan işlem yapılarak tek satıra indirilebilir.",
+          "Open the VBA Editor with Alt+F11 and read the generated code line by line. Remove unnecessary `.Select`/`.Activate` pairs — most lines can shrink to one by acting on an object directly instead of selecting it first.",
+        ],
+        lang: "vba",
+        code: `' Önce (kayıttan çıkan hâli):
+Range("A1").Select
+Selection.AutoFilter Field:=3, Criteria1:="İptal"
+
+' Sonra (sadeleştirilmiş):
+Range("A1").AutoFilter Field:=3, Criteria1:="İptal"`,
+      },
+      {
+        title: ["Düğmeye bağla", "Wire it to a button"],
+        body: [
+          "Ekle → Şekiller ile bir düğme ekle, sağ tıkla \"Makro Ata\" ile makroyu bağla. Düğmeye işlemi anlatan bir metin yaz (\"Aylık Raporu Temizle\") — hangi tuşa basacağını bilmeyen biri bile kullanabilmeli.",
+          "Insert a shape via Insert → Shapes, right-click it and \"Assign Macro\" to wire it up. Label the button with what it does (\"Clean Monthly Report\") — even someone who's never touched VBA should be able to use it.",
+        ],
+      },
+      {
+        title: ["Zaman kazancını ölç", "Measure the time saved"],
+        body: [
+          "İşlemi elle yaparken kaç dakika sürdüğünü, düğmeyle kaç saniye sürdüğünü not et. Haftalık/aylık tekrar sayısıyla çarpıp yıllık kazanılan saati hesapla — bu, otomasyonun iş değerini somutlaştırır.",
+          "Note how many minutes the task took by hand versus how many seconds it takes with the button. Multiply by how often it repeats (weekly/monthly) to compute hours saved per year — this makes the automation's business value concrete.",
+        ],
+      },
+      githubStep("vba-otomatik-rapor-dugmesi"),
+    ],
+    premium: true,
+  }),
+
   /* ------------------------- İstatistik ------------------------- */
   project({
     slug: "istatistik-kesif-analizi",

@@ -2985,6 +2985,251 @@ Geçen Yıl = CALCULATE([Toplam Ciro]; SAMEPERIODLASTYEAR(Tarih[Tarih]))`,
             }),
           ],
         }),
+        lesson({
+          slug: "lambda-ile-ozel-fonksiyon",
+          title: L("LAMBDA ile kendi fonksiyonunu yazmak", "Writing your own function with LAMBDA"),
+          summary: L(
+            "Excel'de her yerde tekrar ettiğin uzun bir formülü, tek kelimelik kendi fonksiyonuna dönüştür.",
+            "Turn a long formula you repeat everywhere in Excel into your own one-word function.",
+          ),
+          minutes: 16,
+          premium: true,
+          blocks: [
+            text(
+              "Aynı karmaşık formülü (ör. bir KDV hesabı, bir kademeli komisyon hesabı) düzinelerce hücrede kopyalayıp yapıştırdıysan, formülde bir hata bulduğunda hepsini tek tek düzeltmen gerekir. **LAMBDA**, Excel'e kendi fonksiyonunu tanıtmanı sağlar — parametre alan, tek yerde tanımlanan, her yerde `=KOMİSYON(tutar; oran)` gibi çağrılabilen bir formül.\n\nLAMBDA'yı tek başına bir hücreye yazmak işe yaramaz; **Ad Yöneticisi**'nde (Formüller → Ad Tanımla) bir isimle kaydetmen gerekir. Kaydettikten sonra o isim, yerleşik bir Excel fonksiyonu gibi kullanılır.",
+              "If you've copy-pasted the same complex formula (a VAT calculation, a tiered commission calculation) across dozens of cells, finding a bug in it means fixing every copy by hand. **LAMBDA** lets you teach Excel your own function — one that takes parameters, is defined in exactly one place, and can be called anywhere as `=COMMISSION(amount; rate)`.\n\nWriting a LAMBDA in a single cell on its own does nothing useful; you need to save it under a name in the **Name Manager** (Formulas → Define Name). Once saved, that name is used just like a built-in Excel function.",
+            ),
+            code(
+              "excel",
+              `# Ad Yöneticisi'nde "KOMISYON" adıyla tanımlanır:
+=LAMBDA(tutar; oran; MAX(tutar * oran; 50))
+
+# Artık her hücrede böyle çağrılır:
+=KOMISYON(A2; 0,08)
+
+# Kendi kendine referans veren (özyinelemeli) bir LAMBDA da yazılabilir,
+# örn. bir sayının faktöriyelini hesaplayan:
+=LAMBDA(n; IF(n<=1; 1; n * FAKTORIYEL(n-1)))`,
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Tek bir hücreye yazılan `=LAMBDA(...)` formülü neden tek başına işe yaramaz?",
+                "Why does a `=LAMBDA(...)` formula typed into a single cell do nothing useful on its own?",
+              ],
+              options: [
+                [
+                  "Ad Yöneticisi'nde bir isimle kaydedilmeden, başka hiçbir hücreden çağrılabilir bir fonksiyon hâline gelmez",
+                  "Until it's saved under a name in the Name Manager, it never becomes a function callable from any other cell",
+                ],
+                ["LAMBDA yalnızca grafiklerde kullanılabilir", "LAMBDA can only be used inside charts"],
+                ["LAMBDA metin içeremez", "LAMBDA cannot contain text"],
+                ["Hücreye yazılan her LAMBDA otomatik hata verir", "Every LAMBDA typed into a cell automatically errors"],
+              ],
+              answer: 0,
+              explain: [
+                "LAMBDA'nın gücü, bir kere tanımlanıp her yerden çağrılabilmesindendir. Bunun için Ad Yöneticisi'nde bir isim altına kaydedilmesi şart — aksi hâlde sıradan, tekrar kullanılamayan bir formülden farksızdır.",
+                "LAMBDA's power comes from being defined once and called from anywhere. That requires saving it under a name in the Name Manager — without that, it's no different from an ordinary, non-reusable formula.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "Bir KDV formülünü 50 farklı hücreye kopyalamak yerine LAMBDA ile tanımlamanın asıl avantajı nedir?",
+                "What's the real advantage of defining a VAT formula with LAMBDA instead of copying it into 50 cells?",
+              ],
+              options: [
+                [
+                  "Hesaplama mantığı tek bir yerde durur; hatayı orada düzeltince her çağrıldığı yerde otomatik güncellenir",
+                  "The calculation logic lives in exactly one place; fixing it there automatically updates every place it's called",
+                ],
+                ["LAMBDA formülleri her zaman daha hızlı hesaplanır", "LAMBDA formulas always calculate faster"],
+                ["LAMBDA kullanmak dosya boyutunu küçültmez ama rengini değiştirir", "Using LAMBDA doesn't shrink file size but changes its color"],
+                ["Kopyalanmış formüller asla hatalı olamaz", "Copied formulas can never contain errors"],
+              ],
+              answer: 0,
+              explain: [
+                "50 kopya hâlindeki bir formülde hata bulursan 50 yeri düzeltmen gerekir — biri unutulursa tutarsızlık sessizce kalır. LAMBDA ile mantık tek yerdedir; kod tekrarını önleme prensibi Excel formüllerine de uygulanmış olur.",
+                "Find a bug in a formula copied 50 times and you must fix all 50 — miss one and the inconsistency sits there silently. With LAMBDA the logic lives in one place; it's the same don't-repeat-yourself principle applied to Excel formulas.",
+              ],
+            }),
+            order({
+              id: "o1",
+              prompt: [
+                "Bir LAMBDA fonksiyonunu tanımlayıp kullanılabilir hâle getirme adımlarını doğru sıraya diz.",
+                "Put the steps for defining a LAMBDA function and making it usable in the right order.",
+              ],
+              lines: [
+                "Formüller sekmesinde Ad Yöneticisi'ni aç",
+                "Yeni Ad ile bir isim (ör. KOMISYON) belirle",
+                "Başvuru Yapılan kutusuna =LAMBDA(...) formülünü yaz ve kaydet",
+                "Herhangi bir hücrede =KOMISYON(...) olarak çağır",
+              ],
+              xp: 25,
+            }),
+            pitfall(
+              "LAMBDA'yı özyinelemeli yazarken çıkış koşulunu unutma",
+              "Don't forget the exit condition when writing a recursive LAMBDA",
+              "LAMBDA kendi kendine (tanımlandığı isimle) başvurabilir — ör. faktöriyel örneğindeki gibi. Ama bir \"dur\" koşulu (`IF(n<=1; 1; ...)`) yoksa Excel sonsuz döngüye girer ve donar. Her özyinelemeli LAMBDA'da açık bir çıkış koşulu olmalıdır.",
+              "A LAMBDA can refer to itself (by its saved name) — like in the factorial example. But without a \"stop\" condition (`IF(n<=1; 1; ...)`), Excel spins forever and freezes. Every recursive LAMBDA needs an explicit exit condition.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "senaryo-analizi-hedef-ara-cozucu",
+          title: L("Senaryo analizi: Veri Tablosu, Hedef Ara, Çözücü", "What-if analysis: Data Table, Goal Seek, Solver"),
+          summary: L(
+            "'Kâr %20 olsun diye fiyat ne olmalı?' gibi soruları formülü tersine mühendislik yapmadan cevaplamak.",
+            "Answering questions like \"what price gives 20% profit?\" without reverse-engineering the formula by hand.",
+          ),
+          minutes: 17,
+          premium: true,
+          blocks: [
+            text(
+              "Excel'in **Veri → Tahmin/Senaryo Analizi** grubunda üç araç, üç farklı \"ters\" soruyu cevaplar:\n\n- **Hedef Ara (Goal Seek)** — \"Sonuç hücresi şu değere ulaşsın diye GİRDİ hücresi ne olmalı?\" Tek bir girdi, tek bir hedef.\n- **Veri Tablosu (Data Table)** — Bir veya iki girdiyi bir ARALIKTA değiştirip sonucun her kombinasyonda ne çıktığını otomatik tablo hâlinde gösterir — \"fiyat 80-120 arasında, maliyet 40-60 arasında değişirse kâr ne olur?\"\n- **Çözücü (Solver)** — Birden fazla girdiyi, birden fazla KISITLA (\"stok ≤ 500\", \"bütçe ≤ 10.000\") birlikte, tek bir hedefi en iyileyecek şekilde bulur. En güçlü ama kurulumu en karmaşık olanı.\n\nÜçü de \"sonuçtan girdiye\" doğru çalışır — normal formül kullanımının tam tersi yönde.",
+              "Excel's **Data → What-If Analysis** group has three tools that each answer a different \"reverse\" question:\n\n- **Goal Seek** — \"What must the INPUT cell be for the result cell to hit this value?\" One input, one target.\n- **Data Table** — Varies one or two inputs across a RANGE and shows the result for every combination in an automatic table — \"if price ranges 80-120 and cost ranges 40-60, what does profit look like?\"\n- **Solver** — Finds multiple inputs that optimize a single target, subject to multiple CONSTRAINTS at once (\"stock ≤ 500\", \"budget ≤ 10,000\"). The most powerful, and the most involved to set up.\n\nAll three work \"backwards\", from result to input — the opposite direction of normal formula use.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Hedef Ara (Goal Seek) hangi soruyu cevaplar?",
+                "Which question does Goal Seek answer?",
+              ],
+              options: [
+                [
+                  "Sonuç hücresi belirli bir değere ulaşsın diye TEK bir girdi hücresi ne olmalı",
+                  "What a SINGLE input cell must be for the result cell to reach a specific value",
+                ],
+                ["Birden fazla girdiyi aynı anda birden fazla kısıtla optimize eder", "It optimizes multiple inputs under multiple constraints at once"],
+                ["Bir aralıktaki tüm kombinasyonları otomatik tablo yapar", "It automatically tables every combination across a range"],
+                ["Hücrelerdeki hataları bulur", "It finds errors in cells"],
+              ],
+              answer: 0,
+              explain: [
+                "Hedef Ara, tam olarak tek girdi–tek hedef sorununu çözer. Birden fazla girdi/kısıt gerekiyorsa doğru araç Çözücü'dür; bir aralığın tamamını görmek istiyorsan Veri Tablosu'dur.",
+                "Goal Seek solves exactly the single-input, single-target problem. If you need multiple inputs/constraints, Solver is the right tool; if you want to see an entire range at once, it's Data Table.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "Çözücü'yü (Solver) Hedef Ara'dan ayıran temel özellik nedir?",
+                "What's the key feature that separates Solver from Goal Seek?",
+              ],
+              options: [
+                [
+                  "Çözücü birden fazla girdiyi, birden fazla kısıt altında, tek bir hedefi en iyileyecek şekilde birlikte bulabilir",
+                  "Solver can find multiple inputs together, under multiple constraints, to optimize a single target",
+                ],
+                ["Çözücü yalnızca metin hücrelerinde çalışır", "Solver only works on text cells"],
+                ["Çözücü grafik çizer, Hedef Ara çizmez", "Solver draws charts, Goal Seek doesn't"],
+                ["İkisi arasında gerçek bir fark yoktur", "There's no real difference between the two"],
+              ],
+              answer: 0,
+              explain: [
+                "Hedef Ara tek girdi-tek hedefle sınırlıdır ve kısıt tanımlayamaz. Çözücü, 'stok ≤ 500' gibi kısıtlarla birlikte birden fazla girdiyi aynı anda optimize edebilir — bu yüzden üretim planlama, karışım optimizasyonu gibi problemlerde kullanılır.",
+                "Goal Seek is limited to one input, one target, and can't express constraints. Solver can optimize multiple inputs at once under constraints like 'stock ≤ 500' — which is why it's used for problems like production planning or mix optimization.",
+              ],
+            }),
+            order({
+              id: "o1",
+              prompt: [
+                "Hedef Ara'yı kullanma adımlarını doğru sıraya diz.",
+                "Put the steps for using Goal Seek in the right order.",
+              ],
+              lines: [
+                "Veri sekmesinde Hedef Ara'yı aç",
+                "Ayarlanacak Hücre kutusuna sonuç formülünün olduğu hücreyi seç",
+                "Beğenilen Değer kutusuna ulaşılmak istenen sonucu yaz",
+                "Değişecek Hücre kutusuna değişecek girdi hücresini seç",
+                "Tamam'a tıkla — Excel geriye doğru çözüp girdiyi bulur",
+              ],
+              xp: 25,
+            }),
+            pitfall(
+              "Çözücü varsayılan olarak yüklü değildir",
+              "Solver isn't loaded by default",
+              "Çözücü, Excel'de bir eklentidir (Dosya → Seçenekler → Eklentiler → Excel Eklentileri → Çözücü Eklentisi). İlk kullanımda Veri sekmesinde görünmüyorsa, önce oradan etkinleştirmen gerekir.",
+              "Solver is an Excel add-in (File → Options → Add-ins → Excel Add-ins → Solver Add-in). If it doesn't appear on the Data tab the first time, you need to enable it there first.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "makrolara-giris-vba",
+          title: L("Makrolara giriş: VBA ile tekrarlayan işleri otomatikleştirmek", "Intro to macros: automating repetitive work with VBA"),
+          summary: L(
+            "Her hafta elle yaptığın 10 adımlık bir işlemi, tek tıkla çalışan bir düğmeye dönüştür.",
+            "Turn a 10-step task you do by hand every week into a single button click.",
+          ),
+          minutes: 16,
+          premium: true,
+          blocks: [
+            text(
+              "Her hafta aynı 10 adımı (filtrele, kopyala, biçimlendir, kaydet) elle tekrarlıyorsan, bunu bir **makro**ya kaydedebilirsin. En basit yol **Makro Kaydet** (Geliştirici sekmesi → Makro Kaydet): Excel, yaptığın her tıklamayı ve yazdığın her değeri **VBA** (Visual Basic for Applications) koduna çevirir. Kaydı durdurunca o kod tek bir düğmeyle tekrar çalıştırılabilir.\n\nKaydedilen kod her zaman en verimli kod değildir — genelde gereksiz `Select`/`Activate` satırlarıyla doludur. Ama işe yarayan bir başlangıç noktasıdır ve VBA Düzenleyicisi'nde (Alt+F11) elle düzenlenebilir.",
+              "If you repeat the same 10 steps (filter, copy, format, save) by hand every week, you can record it as a **macro**. The simplest way is **Record Macro** (Developer tab → Record Macro): Excel translates every click you make and every value you type into **VBA** (Visual Basic for Applications) code. Stop recording, and that code can be re-run with a single button.\n\nRecorded code is never the most efficient code — it's usually full of unnecessary `Select`/`Activate` lines. But it's a working starting point, and it can be edited by hand in the VBA Editor (Alt+F11).",
+            ),
+            code(
+              "vba",
+              `Sub AylikRaporuTemizle()
+    ' Makro Kaydet ile üretilip elle sadeleştirilmiş hâli
+    With Worksheets("Ham Veri")
+        .Range("A1").AutoFilter Field:=3, Criteria1:="İptal"
+        .AutoFilter.Range.Offset(1).EntireRow.Delete
+        .AutoFilterMode = False
+    End With
+    MsgBox "Rapor temizlendi."
+End Sub`,
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Makro Kaydet özelliği ne yapar?",
+                "What does the Record Macro feature do?",
+              ],
+              options: [
+                [
+                  "Yaptığın tıklama ve girdileri otomatik olarak VBA koduna çevirir",
+                  "It automatically translates your clicks and inputs into VBA code",
+                ],
+                ["Dosyanı otomatik olarak bulut yedekler", "It automatically backs your file up to the cloud"],
+                ["Yalnızca formülleri kaydeder, tıklamaları değil", "It only records formulas, not clicks"],
+                ["Kod yazmadan asla düzenlenemeyen sabit bir kayıt üretir", "It produces a fixed recording that can never be edited without writing code"],
+              ],
+              answer: 0,
+              explain: [
+                "Makro Kaydet, ekranda yaptığın her hareketi arka planda VBA koduna dönüştürür. Kayıt bittiğinde bu kod VBA Düzenleyicisi'nde (Alt+F11) görülüp elle düzenlenebilir.",
+                "Record Macro converts every action you take on screen into VBA code behind the scenes. Once recording stops, that code can be viewed and hand-edited in the VBA Editor (Alt+F11).",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "Makro Kaydet ile üretilen kodun tipik zayıflığı nedir?",
+                "What's the typical weakness of code produced by Record Macro?",
+              ],
+              options: [
+                [
+                  "Genelde gereksiz Select/Activate satırlarıyla doludur; verimli değildir ama işlevseldir",
+                  "It's usually full of unnecessary Select/Activate lines; not efficient, but functional",
+                ],
+                ["Asla çalışmaz, yalnızca örnek amaçlıdır", "It never actually runs, it's for illustration only"],
+                ["Yalnızca tek bir sayfada kullanılabilir", "It can only be used on a single sheet"],
+                ["Otomatik olarak diğer dosyalara da uygulanır", "It automatically applies itself to other files too"],
+              ],
+              answer: 0,
+              explain: [
+                "Kaydedici, ekranda gerçekte olan her seçim/aktivasyon adımını da kaydeder — bu genelde gereksizdir. Kod çalışır ama VBA Düzenleyicisi'nde bu satırlar elle temizlenip sadeleştirilebilir.",
+                "The recorder also captures every literal select/activate step that happened on screen — usually unnecessary. The code works, but those lines can be manually cleaned up and simplified in the VBA Editor.",
+              ],
+            }),
+            tip(
+              "Bir makroyu düğmeye bağlamak son adımdır",
+              "Wiring a macro to a button is the final step",
+              "Kaydedilen bir makro, Ekle → Şekiller ile eklenen herhangi bir şekle sağ tıklanıp \"Makro Ata\" ile bağlanabilir. Bu, teknik olmayan bir iş arkadaşının bile makroyu VBA'ya hiç dokunmadan tek tıkla çalıştırmasını sağlar.",
+              "A recorded macro can be wired to any shape added via Insert → Shapes by right-clicking it and choosing \"Assign Macro\". This lets even a non-technical colleague run the macro with a single click, without ever touching VBA.",
+            ),
+          ],
+        }),
       ],
     },
   ],
