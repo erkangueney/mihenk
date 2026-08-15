@@ -45,6 +45,7 @@ export default async function ProjectsPage({
       stack: project.stack,
       hours: project.hours,
       xp: project.xp,
+      premium: project.premium,
     };
   });
 

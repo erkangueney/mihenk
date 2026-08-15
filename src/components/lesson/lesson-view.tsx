@@ -9,12 +9,12 @@ import { useProgress } from "@/components/progress-provider";
 import { CodeCard } from "@/components/ui/code-view";
 import { Markdown } from "@/components/ui/markdown";
 import { ProgressBar } from "@/components/ui/progress";
-import { canAccessLevel } from "@/lib/entitlements";
+import { canAccessContent } from "@/lib/entitlements";
 import { usePlanInfo } from "@/lib/entitlements-client";
 import { isNativePlatform } from "@/lib/platform";
 import { t, ui } from "@/lib/i18n";
 import { LESSON_BONUS_XP, taskKeyOf } from "@/lib/content";
-import type { Block, Lesson, LevelId, Locale } from "@/lib/types";
+import type { Block, Lesson, Locale } from "@/lib/types";
 import { ExerciseBlock } from "./exercise-block";
 import { OrderBlock } from "./order-block";
 import { PlaygroundBlock } from "./playground-block";
@@ -36,14 +36,18 @@ const calloutStyles: Record<string, { border: string; bg: string; icon: string }
 export function LessonView({
   track,
   lesson,
-  levelId,
+  trackPremium,
+  levelPremium,
   locale,
   prev,
   next,
 }: {
   track: TrackRef;
   lesson: Lesson;
-  levelId: LevelId;
+  /** true ise bulunduğu patikanın tamamı premium — mevcut hiçbir patikada işaretli değil. */
+  trackPremium?: boolean;
+  /** true ise bu seviye premium — mevcut hiçbir seviyede işaretli değil. */
+  levelPremium?: boolean;
   locale: Locale;
   prev: { slug: string; title: string } | null;
   next: { slug: string; title: string } | null;
@@ -57,7 +61,8 @@ export function LessonView({
   // Kilitliyken görev blokları hiç render edilmez — DOM'a girmediği için
   // "Dersi tamamla" butonu da ayrıca gizlenir, aksi halde görevsiz bir ders
   // (yalnızca metin) kilitliyken bile XP kazandırırdı.
-  const locked = planReady && !canAccessLevel(track.slug, levelId, planInfo);
+  const locked =
+    planReady && !canAccessContent({ trackPremium, premium: levelPremium }, planInfo);
   // Ücretsiz + native olmayan kullanıcıda, dersi tamamlayıp sonrakine
   // geçmeden önce her N derste bir ara ekran (reklam) gösterilir.
   const showInterstitial =

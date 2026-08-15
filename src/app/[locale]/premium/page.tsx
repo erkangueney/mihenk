@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { FreeTrackPicker } from "@/components/premium/free-track-picker";
 import { PremiumActions } from "@/components/premium/premium-actions";
 import { isLocale, ui } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
@@ -15,8 +14,8 @@ export async function generateMetadata({
   return {
     title: tr ? "Premium'a geç" : "Upgrade to Premium",
     description: tr
-      ? "12 patikanın tamamı, tüm seviyeler, 24 proje ve reklamsız deneyim."
-      : "All 12 tracks, every level, all 24 projects and an ad-free experience.",
+      ? "Premium-özel ek dersler, ileri seviye projeler ve reklamsız deneyim."
+      : "Premium-exclusive extra lessons, advanced projects and an ad-free experience.",
   };
 }
 
@@ -63,15 +62,15 @@ export default async function PremiumPage({
           <ul className="space-y-2 text-sm text-muted">
             <li>
               {locale === "tr"
-                ? "Her patikanın Temel seviyesi"
-                : "Every track's Foundation level"}
+                ? "12 patikanın tamamı, tüm seviyeler"
+                : "All 12 tracks, every level"}
             </li>
+            <li>{locale === "tr" ? "24 uçtan uca projenin tamamı" : "All 24 end-to-end projects"}</li>
             <li>
               {locale === "tr"
-                ? "Seçtiğin 1 patika tamamen açık"
-                : "One track of your choice, fully unlocked"}
+                ? "Öğrenmenin kendisi asla kilitli olmaz"
+                : "Learning itself is never locked"}
             </li>
-            <li>{locale === "tr" ? "2 örnek uçtan uca proje" : "2 sample end-to-end projects"}</li>
           </ul>
         </section>
 
@@ -96,10 +95,6 @@ export default async function PremiumPage({
 
       <div className="mt-8">
         <PremiumActions locale={locale} checkoutEnabled={checkoutEnabled} />
-      </div>
-
-      <div className="mt-8">
-        <FreeTrackPicker locale={locale} />
       </div>
     </div>
   );

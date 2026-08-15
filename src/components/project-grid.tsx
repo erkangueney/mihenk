@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useProgress } from "@/components/progress-provider";
 import { levelOrder } from "@/lib/content";
-import { canAccessProject } from "@/lib/entitlements";
+import { canAccessContent } from "@/lib/entitlements";
 import { usePlanInfo } from "@/lib/entitlements-client";
 import { ui, type DictKey } from "@/lib/i18n";
 import type { LevelId, Locale } from "@/lib/types";
@@ -21,6 +21,8 @@ export interface ProjectCardData {
   stack: string[];
   hours: number;
   xp: number;
+  /** true ise proje premium (bkz. src/lib/entitlements.ts) — mevcut projelerde işaretli değil. */
+  premium?: boolean;
 }
 
 export function ProjectGrid({
@@ -68,7 +70,7 @@ export function ProjectGrid({
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map((project) => {
           const done = ready && progress.projects.includes(project.slug);
-          const locked = planReady && !canAccessProject(project, planInfo);
+          const locked = planReady && !canAccessContent({ premium: project.premium }, planInfo);
           return (
             <Link
               key={project.slug}

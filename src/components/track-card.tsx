@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useProgress } from "@/components/progress-provider";
 import { ProgressRing } from "@/components/ui/progress";
+import { canAccessContent } from "@/lib/entitlements";
 import { usePlanInfo } from "@/lib/entitlements-client";
 import { ui } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
@@ -18,20 +19,20 @@ export interface TrackCardData {
   minutes: number;
   /** Bu patikaya ait ders anahtarları — ilerleme oranı bunlardan hesaplanır. */
   lessonKeys: string[];
+  /** true ise patikanın tamamı premium (bkz. src/lib/entitlements.ts) — mevcut hiçbir patikada işaretli değil. */
+  premium?: boolean;
 }
 
 export function TrackCard({ track, locale }: { track: TrackCardData; locale: Locale }) {
   const { progress, ready } = useProgress();
-  const { ready: planReady, isPremium, freeTrackChoice } = usePlanInfo();
+  const { ready: planReady, ...planInfo } = usePlanInfo();
 
   const done = ready
     ? track.lessonKeys.filter((key) => progress.lessons.includes(key)).length
     : 0;
   const ratio = track.lessons === 0 ? 0 : done / track.lessons;
   const started = done > 0;
-  // Temel seviye her zaman serbest; ötesi premium ya da kullanıcının seçtiği
-  // tek ücretsiz patika gerektirir (bkz. src/lib/entitlements.ts).
-  const premiumLocked = planReady && !isPremium && freeTrackChoice !== track.slug;
+  const premiumLocked = planReady && !canAccessContent({ premium: track.premium }, planInfo);
 
   return (
     <Link
@@ -58,7 +59,7 @@ export function TrackCard({ track, locale }: { track: TrackCardData; locale: Loc
             {premiumLocked ? (
               <span
                 aria-hidden
-                title={locale === "tr" ? "Temel seviye ücretsiz, ötesi Premium" : "Foundation is free, the rest is Premium"}
+                title={locale === "tr" ? "Bu patika Premium" : "This track is Premium"}
                 className="rounded-full bg-accent/15 px-1.5 py-0.5 text-[11px] text-accent"
               >
                 💎

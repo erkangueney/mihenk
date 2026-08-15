@@ -67,6 +67,7 @@ export default async function TrackPage({
               xp: project.xp,
             }
           : undefined,
+        premium: level.premium,
       };
     }),
   );
@@ -114,7 +115,13 @@ export default async function TrackPage({
         </div>
       </header>
 
-      <TrackLevels levels={levels} trackSlug={track.slug} color={track.color} locale={locale} />
+      <TrackLevels
+        levels={levels}
+        trackSlug={track.slug}
+        trackPremium={track.premium}
+        color={track.color}
+        locale={locale}
+      />
     </div>
   );
 }

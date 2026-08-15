@@ -14,8 +14,8 @@ function project(config: {
   dataset: [string, string];
   deliverables: [string, string][];
   steps: { title: [string, string]; body: [string, string]; code?: string; lang?: string }[];
-  /** true ise ücretsiz kullanıcıya da açık (bkz. src/lib/entitlements.ts). */
-  freeSample?: boolean;
+  /** true ise premium (bkz. src/lib/entitlements.ts) — mevcut projelerde kullanılmaz. */
+  premium?: boolean;
 }): Project {
   return {
     slug: config.slug,
@@ -36,7 +36,7 @@ function project(config: {
         lang: step.lang,
       }),
     ),
-    freeSample: config.freeSample === true,
+    premium: config.premium === true,
   };
 }
 
@@ -125,7 +125,6 @@ ORDER BY ay;`,
       },
       githubStep("eticaret-satis-raporu"),
     ],
-    freeSample: true,
   }),
 
   project({
@@ -334,7 +333,6 @@ print(df["aykiri_mi"].sum(), "aykırı değer işaretlendi")`,
       },
       githubStep("veri-temizligi-hatti"),
     ],
-    freeSample: true,
   }),
 
   project({

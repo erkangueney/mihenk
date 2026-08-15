@@ -42,6 +42,7 @@ export default async function LearnPage({ params }: { params: Promise<{ locale: 
       lessonKeys: track.levels
         .flatMap((level) => level.lessons)
         .map((lesson) => lessonKeyOf(track.slug, lesson.slug)),
+      premium: track.premium,
     };
   });
 

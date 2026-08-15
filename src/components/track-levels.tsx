@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useProgress } from "@/components/progress-provider";
 import { ProgressBar } from "@/components/ui/progress";
 import { UNLOCK_RATIO } from "@/lib/content";
-import { canAccessLevel } from "@/lib/entitlements";
+import { canAccessContent } from "@/lib/entitlements";
 import { usePlanInfo } from "@/lib/entitlements-client";
 import { ui, type DictKey } from "@/lib/i18n";
 import type { Locale, LevelId } from "@/lib/types";
@@ -25,16 +25,21 @@ export interface LevelData {
   description: string;
   lessons: LevelLesson[];
   project?: { slug: string; title: string; hours: number; xp: number };
+  /** true ise bu seviye premium (bkz. src/lib/entitlements.ts) — mevcut hiçbir seviyede işaretli değil. */
+  premium?: boolean;
 }
 
 export function TrackLevels({
   levels,
   trackSlug,
+  trackPremium,
   color,
   locale,
 }: {
   levels: LevelData[];
   trackSlug: string;
+  /** true ise patikanın tamamı premium — tüm seviyeler kilitlenir. */
+  trackPremium?: boolean;
   color: string;
   locale: Locale;
 }) {
@@ -55,7 +60,8 @@ export function TrackLevels({
         const previousRatio =
           previous && previous.lessons.length > 0 ? doneIn(previous) / previous.lessons.length : 1;
         const xpLocked = ready && index > 0 && previousRatio < UNLOCK_RATIO;
-        const premiumLocked = planReady && !canAccessLevel(trackSlug, level.id, planInfo);
+        const premiumLocked =
+          planReady && !canAccessContent({ trackPremium, premium: level.premium }, planInfo);
         const locked = xpLocked || premiumLocked;
 
         return (

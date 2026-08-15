@@ -15,21 +15,31 @@ ve önceliklendirme dokümanıdır.
 
 ## 2. Ücretsiz / Premium sınırı
 
-Prensip: **öğrenmenin kendisi asla kilitli olmasın** — kilitlenen şey hız, konfor ve "ekstra"lar.
-Bir dersin ortasında ücret duvarına çarpmak güveni kırar; bu yüzden kilit sınırları **patika/seviye**
-bazında, ders içi blok bazında değil.
+**Karar (2026-08-15'te güncellendi):** Mevcut tüm müfredat — 12 patikanın tamamı, tüm seviyeler
+(Junior → Expert) ve 24 uçtan uca projenin tamamı — **her zaman ücretsizdir**. Kullanıcının
+kaydolduğunda karşılaştığı hiçbir şey kilitlenmez; ücretsiz/premium ayrımının kendisi mevcut
+içeriğe hiç uygulanmaz.
+
+Premium, bunun yerine **yalnızca ileride eklenecek yeni, premium-özel** ders ve projelerle var
+olur: her patikaya premium-özel ileri seviye ek dersler (patika başına 3-5) ve premium-özel
+uçtan uca projeler (patika başına 2+). Bu içerik `src/lib/types.ts`'teki `premium?: boolean`
+bayrağıyla işaretlenir (`Track`, `Level`, `Project`) — bayrak yoksa (mevcut tüm içerikte olduğu
+gibi) her zaman serbesttir (bkz. `src/lib/entitlements.ts`).
 
 | Alan | Ücretsiz | Premium |
 |---|---|---|
-| Patikalar | Her patikanın **Temel** seviyesi tamamı + **1 patika** (SQL veya Python, kullanıcı seçer) tamamen açık | 12 patikanın tamamı, tüm seviyeler (Junior → Expert) |
-| Dersler/sorular | Açık patikalarda tüm dersler + 10 soru | Aynı (soru sayısı asla kısıtlanmaz — bu öğrenme kalitesi) |
-| Uçtan uca projeler | İlk seviyeden 2 proje | 24 projenin tamamı |
-| Alet çantası (referans, nasıl yapılır, kopya kâğıdı, deneme alanı) | Referans + deneme alanı açık (SEO ve "tekrar gel" için) | + kopya kâğıtlarında PDF indirme, sınırsız deneme alanı geçmişi |
+| Patikalar (mevcut 12) | Tamamı, tüm seviyeler | Aynı — zaten dahil |
+| Uçtan uca projeler (mevcut 24) | Tamamı | Aynı — zaten dahil |
+| Yeni premium ders/proje | — | Patika başına 3-5 ek ders + 2+ ek proje (ileride eklenecek, ayrı bir içerik üretim işi) |
+| Alet çantası (referans, nasıl yapılır, kopya kâğıdı, deneme alanı) | Tamamı açık | + kopya kâğıtlarında PDF indirme, sınırsız deneme alanı geçmişi |
 | Reklam | Ders arası ve sayfa içi banner/native reklam gösterilir | **Reklamsız** |
 | Avatar | Ücretsiz parçalar + XP ile açılanlar | + premium-özel nadir/efsanevi parça seti (satın almayla değil, **abonelik süresince** açık) |
 | Liderlik tablosu | Görünür, yarışır | + profilde "Premium" rozeti/çerçeve |
 | Sertifika | — | Seviye/patika tamamlama sertifikası (PDF, LinkedIn'e eklenebilir) |
 | İlerleme yedeği | Hesapla bulut yedekleme (zaten var) | Aynı |
+
+Yönetici (admin) rolündeki kullanıcılar plan durumundan bağımsız her zaman tam erişime sahiptir;
+onlara kilit/reklam/premium'a geç arayüzü hiç gösterilmez (bkz. `usePlanInfo()`).
 
 Not: XP, seri, rozet, liderlik — oyunlaştırmanın çekirdeği — hiçbir katmanda kısıtlanmaz. Parayla
 XP ya da seviye satmak (pay-to-win) bu platformun "gerçek beceri kazandırma" konumlamasıyla çelişir;

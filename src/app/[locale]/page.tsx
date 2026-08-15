@@ -34,6 +34,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       lessonKeys: track.levels
         .flatMap((level) => level.lessons)
         .map((lesson) => lessonKeyOf(track.slug, lesson.slug)),
+      premium: track.premium,
     };
   });
 

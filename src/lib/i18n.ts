@@ -394,8 +394,8 @@ const dictionary = {
   "nav.premium": { tr: "Premium", en: "Premium" },
   "premium.title": { tr: "Premium'a geç", en: "Upgrade to Premium" },
   "premium.subtitle": {
-    tr: "Her patikanın Temel seviyesi ve seçtiğin bir patika her zaman ücretsiz. Premium; 12 patikanın tamamını, tüm seviyeleri, 24 projenin tamamını ve reklamsız deneyimi açar.",
-    en: "Every track's Foundation level and one track of your choice are always free. Premium unlocks all 12 tracks, every level, all 24 projects and an ad-free experience.",
+    tr: "12 patikanın tamamı, tüm seviyeler ve 24 uçtan uca proje her zaman ücretsizdir — öğrenmenin kendisi asla kilitli olmaz. Premium; ileri seviye ek dersler, premium-özel uçtan uca projeler ve reklamsız deneyim sunar.",
+    en: "All 12 tracks, every level and all 24 end-to-end projects are always free — learning itself is never locked. Premium adds advanced bonus lessons, premium-exclusive end-to-end projects and an ad-free experience.",
   },
   "premium.free.title": { tr: "Ücretsiz", en: "Free" },
   "premium.free.price": { tr: "₺0", en: "$0" },
@@ -414,22 +414,19 @@ const dictionary = {
   "premium.active": { tr: "Premium'a sahipsin", en: "You have Premium" },
   "premium.activeUntil": { tr: "Yenileme/geçerlilik", en: "Renews/valid until" },
   "premium.feature.tracks": {
-    tr: "12 patikanın tamamı, tüm seviyeler",
-    en: "All 12 tracks, every level",
+    tr: "Premium-özel ileri seviye dersler",
+    en: "Premium-exclusive advanced lessons",
   },
-  "premium.feature.projects": { tr: "24 projenin tamamı", en: "All 24 projects" },
+  "premium.feature.projects": {
+    tr: "Premium-özel uçtan uca projeler",
+    en: "Premium-exclusive end-to-end projects",
+  },
   "premium.feature.ads": { tr: "Reklamsız deneyim", en: "Ad-free experience" },
   "premium.feature.avatar": {
     tr: "Premium-özel avatar parçaları",
     en: "Premium-exclusive avatar parts",
   },
   "premium.feature.badge": { tr: "Profilde Premium rozeti", en: "Premium badge on profile" },
-  "premium.freeTrack.title": { tr: "Ücretsiz patikan", en: "Your free track" },
-  "premium.freeTrack.subtitle": {
-    tr: "Ücretsiz katmanda SQL veya Python'dan birini tamamen açık tutabilirsin.",
-    en: "On the free tier you can keep either SQL or Python fully unlocked.",
-  },
-  "premium.freeTrack.saved": { tr: "Kaydedildi", en: "Saved" },
 
   /* Reklam ------------------------------------------------------------ */
   "consent.title": { tr: "Çerez ve reklam onayı", en: "Cookie & ad consent" },

@@ -12,7 +12,6 @@ export interface SessionUserClient {
   role: UserRole;
   plan: "free" | "premium";
   planExpiresAt: string | null;
-  freeTrackChoice: string | null;
 }
 
 interface SessionValue {
@@ -65,7 +64,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
       const { data: profile } = await client
         .from("profiles")
-        .select("display_name, role, email, plan, plan_expires_at, free_track_choice")
+        .select("display_name, role, email, plan, plan_expires_at")
         .eq("id", authUser.id)
         .maybeSingle<{
           display_name: string;
@@ -73,7 +72,6 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
           email: string;
           plan: "free" | "premium";
           plan_expires_at: string | null;
-          free_track_choice: string | null;
         }>();
 
       if (cancelled) return;
@@ -85,7 +83,6 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         role: profile?.role === "admin" ? "admin" : "member",
         plan: profile?.plan === "premium" ? "premium" : "free",
         planExpiresAt: profile?.plan_expires_at ?? null,
-        freeTrackChoice: profile?.free_track_choice ?? null,
       });
       setReady(true);
     }

@@ -133,10 +133,7 @@ export default async function ProjectPage({
         </ul>
       </section>
 
-      <PremiumGate
-        target={{ kind: "project", trackSlug: project.trackSlug, slug: project.slug }}
-        locale={locale}
-      >
+      <PremiumGate flags={{ premium: project.premium }} locale={locale}>
         <section className="mt-10">
           <h2 className="mb-5 text-xl font-bold tracking-tight sm:text-2xl">
             {ui("projects.steps", locale)}

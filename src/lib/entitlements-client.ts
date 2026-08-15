@@ -13,6 +13,8 @@ export interface PlanInfoValue extends PlanInfo {
 /**
  * Kullanıcının plan bilgisini oturumdan okur.
  *
+ * Admin her zaman `isPremium: true` görür — yönetici zaten her yetkiye
+ * sahip, ona kilit/reklam/premium'a geç gibi arayüz hiç gösterilmez.
  * Oturum yoksa veya Supabase kapalıysa `free` döner (mevcut sessiz-kapanma
  * deseniyle tutarlı) — hiçbir yerde hata fırlatmaz.
  */
@@ -21,8 +23,9 @@ export function usePlanInfo(): PlanInfoValue {
 
   return useMemo(() => {
     const info: PlanInfo = user
-      ? { plan: user.plan, planExpiresAt: user.planExpiresAt, freeTrackChoice: user.freeTrackChoice }
+      ? { plan: user.plan, planExpiresAt: user.planExpiresAt }
       : FREE_PLAN_INFO;
-    return { ...info, ready, isPremium: isPremiumActive(info) };
+    const isAdmin = user?.role === "admin";
+    return { ...info, ready, isPremium: isAdmin || isPremiumActive(info) };
   }, [user, ready]);
 }

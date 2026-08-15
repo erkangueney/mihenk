@@ -247,6 +247,7 @@ function level(value: unknown, path: string): Level {
       record.projectSlug === undefined || record.projectSlug === null
         ? undefined
         : slugOf(record.projectSlug, `${path}.projectSlug`),
+    premium: record.premium === true,
   };
 }
 
@@ -270,6 +271,7 @@ function track(value: unknown): Track {
     levels: arr(record.levels, "levels", { min: 1 }).map((item, index) =>
       level(item, `levels[${index}]`),
     ),
+    premium: record.premium === true,
   };
 }
 
@@ -303,7 +305,7 @@ function project(value: unknown): Project {
         lang: step.lang === undefined ? undefined : str(step.lang, `${stepPath}.lang`),
       };
     }),
-    freeSample: record.freeSample === true,
+    premium: record.premium === true,
   };
 }
 

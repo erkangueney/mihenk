@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { canAccessLevel, canAccessProject } from "@/lib/entitlements";
+import { canAccessContent, type PremiumFlags } from "@/lib/entitlements";
 import { usePlanInfo } from "@/lib/entitlements-client";
-import type { LevelId, Locale } from "@/lib/types";
+import type { Locale } from "@/lib/types";
 
 /** Kilit ekranındaki kart — hem PremiumGate hem LessonView tarafından kullanılır. */
 export function PremiumLockNotice({ locale, className = "" }: { locale: Locale; className?: string }) {
@@ -17,8 +17,8 @@ export function PremiumLockNotice({ locale, className = "" }: { locale: Locale; 
       </p>
       <p className="max-w-sm text-sm text-muted">
         {locale === "tr"
-          ? "Tüm patikalar, tüm seviyeler ve tüm uçtan uca projeler Premium'da açılır."
-          : "All tracks, all levels and all end-to-end projects unlock with Premium."}
+          ? "Bu, Premium-özel ek bir ders/proje. Diğer tüm patikalar, seviyeler ve projeler zaten ücretsiz."
+          : "This is a Premium-exclusive bonus lesson/project. Every other track, level and project is already free."}
       </p>
       <Link href={`/${locale}/premium`} className="btn-gold mt-1 inline-flex items-center justify-center">
         {locale === "tr" ? "Premium'a geç" : "Upgrade to Premium"}
@@ -27,10 +27,6 @@ export function PremiumLockNotice({ locale, className = "" }: { locale: Locale; 
   );
 }
 
-type GateTarget =
-  | { kind: "level"; trackSlug: string; levelId: LevelId }
-  | { kind: "project"; trackSlug: string; slug: string };
-
 /**
  * Kilitli içeriği hiç render etmez (blur değil) — böylece etkileşimli görev
  * blokları (quiz/exercise/mark-as-done) DOM'a hiç girmez, kilitliyken XP
@@ -38,24 +34,18 @@ type GateTarget =
  * halde premium kullanıcı her sayfa açılışında bir anlığına kilit görürdü.
  */
 export function PremiumGate({
-  target,
+  flags,
   locale,
   children,
 }: {
-  target: GateTarget;
+  flags: PremiumFlags;
   locale: Locale;
   children: React.ReactNode;
 }) {
   const { ready, ...planInfo } = usePlanInfo();
 
   if (!ready) return <>{children}</>;
-
-  const entitled =
-    target.kind === "level"
-      ? canAccessLevel(target.trackSlug, target.levelId, planInfo)
-      : canAccessProject({ slug: target.slug, trackSlug: target.trackSlug }, planInfo);
-
-  if (entitled) return <>{children}</>;
+  if (canAccessContent(flags, planInfo)) return <>{children}</>;
 
   return <PremiumLockNotice locale={locale} />;
 }

@@ -150,6 +150,8 @@ export interface Level {
   lessons: Lesson[];
   /** Bu seviyeyi bitiren kişinin yapacağı uçtan uca proje. */
   projectSlug?: string;
+  /** true ise bu seviye premium (bkz. src/lib/entitlements.ts). Mevcut seviyelerde işaretli değil. */
+  premium?: boolean;
 }
 
 export interface Track {
@@ -162,6 +164,8 @@ export interface Track {
   tagline: Localized;
   description: Localized;
   levels: Level[];
+  /** true ise patikanın tamamı premium. Mevcut patikalarda işaretli değil. */
+  premium?: boolean;
 }
 
 /* ------------------------------------------------------------------ */
@@ -191,8 +195,8 @@ export interface Project {
   /** Projeyi bitmiş saymak için karşılanması gereken çıktılar. */
   deliverables: Localized[];
   steps: ProjectStep[];
-  /** true ise ücretsiz kullanıcıya da açık (bkz. src/lib/entitlements.ts). */
-  freeSample?: boolean;
+  /** true ise bu proje premium (bkz. src/lib/entitlements.ts). Mevcut projelerde işaretli değil. */
+  premium?: boolean;
 }
 
 /* ------------------------------------------------------------------ */
