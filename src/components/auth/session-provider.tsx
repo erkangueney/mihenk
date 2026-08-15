@@ -50,41 +50,51 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       const client = getSupabaseBrowser();
       if (!client) return;
 
-      const {
-        data: { user: authUser },
-      } = await client.auth.getUser();
+      // Supabase'e ulaşılamazsa (ağ hatası, yerel Docker kapalı vb.) oturumu
+      // "girişli değil" saymak doğru davranış: kapalı yönde başarısız oluruz
+      // (bkz. auth/dal.ts getCurrentUser) — aksi halde `ready` hiç true
+      // olmaz ve tüm premium/kilit kontrolleri sessizce açık kalırdı.
+      try {
+        const {
+          data: { user: authUser },
+        } = await client.auth.getUser();
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      if (!authUser) {
+        if (!authUser) {
+          setUser(null);
+          setReady(true);
+          return;
+        }
+
+        const { data: profile } = await client
+          .from("profiles")
+          .select("display_name, role, email, plan, plan_expires_at")
+          .eq("id", authUser.id)
+          .maybeSingle<{
+            display_name: string;
+            role: UserRole;
+            email: string;
+            plan: "free" | "premium";
+            plan_expires_at: string | null;
+          }>();
+
+        if (cancelled) return;
+
+        setUser({
+          id: authUser.id,
+          email: profile?.email || authUser.email || "",
+          displayName: profile?.display_name ?? "",
+          role: profile?.role === "admin" ? "admin" : "member",
+          plan: profile?.plan === "premium" ? "premium" : "free",
+          planExpiresAt: profile?.plan_expires_at ?? null,
+        });
+        setReady(true);
+      } catch {
+        if (cancelled) return;
         setUser(null);
         setReady(true);
-        return;
       }
-
-      const { data: profile } = await client
-        .from("profiles")
-        .select("display_name, role, email, plan, plan_expires_at")
-        .eq("id", authUser.id)
-        .maybeSingle<{
-          display_name: string;
-          role: UserRole;
-          email: string;
-          plan: "free" | "premium";
-          plan_expires_at: string | null;
-        }>();
-
-      if (cancelled) return;
-
-      setUser({
-        id: authUser.id,
-        email: profile?.email || authUser.email || "",
-        displayName: profile?.display_name ?? "",
-        role: profile?.role === "admin" ? "admin" : "member",
-        plan: profile?.plan === "premium" ? "premium" : "free",
-        planExpiresAt: profile?.plan_expires_at ?? null,
-      });
-      setReady(true);
     }
 
     void sync();

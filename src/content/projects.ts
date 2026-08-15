@@ -264,6 +264,144 @@ FROM rfm_ham;`,
     ],
   }),
 
+  project({
+    slug: "sql-performans-denetimi",
+    track: "sql",
+    level: "expert",
+    title: ["SQL Performans Denetimi", "SQL Performance Audit"],
+    stack: ["SQL", "SQLite", "EXPLAIN QUERY PLAN", "İndeksleme"],
+    hours: 10,
+    xp: 600,
+    summary: [
+      "Yavaş çalışan beş raporu ele al: her birinin sorgu planını oku, darboğazı teşhis et, doğru indeksi ekle ve öncesi/sonrası hızlanmayı ölçüp belgele.",
+      "Take five slow-running reports: read each one's query plan, diagnose the bottleneck, add the right index, and measure and document the before/after speed-up.",
+    ],
+    dataset: [
+      "Platformdaki `shop` veritabanı; gerçekçi bir denetim için satır sayısını 100 katına büyütülmüş bir kopyasını kullan (`INSERT INTO ... SELECT` ile kendi üzerine çoğalt).",
+      "The platform's `shop` database; for a realistic audit use a copy with row counts multiplied ~100x (replicate it onto itself with `INSERT INTO ... SELECT`).",
+    ],
+    deliverables: [
+      ["5 sorgunun EXPLAIN QUERY PLAN çıktısı, öncesi ve sonrası", "EXPLAIN QUERY PLAN output for all 5 queries, before and after"],
+      ["Her sorgu için eklenen indeks ve gerekçesi", "The index added for each query and why"],
+      ["Öncesi/sonrası çalışma süresi ölçüm tablosu", "A before/after execution-time measurement table"],
+      ["\"Ne zaman indeks eklenmez\" başlıklı 1 sayfalık not (yazma maliyeti trade-off'u)", "A one-page note titled \"when not to add an index\" (the write-cost trade-off)"],
+    ],
+    steps: [
+      {
+        title: ["Beş yavaş raporu topla", "Collect five slow reports"],
+        body: [
+          "Platformun kendi sorgularından (müşteri geçmişi, ürün araması, aylık özet, kohort filtreleme, ürün×kategori raporu) beşini seç. Her biri farklı bir filtre/JOIN deseni kullanmalı — tek bir indeks türüyle hepsini çözemeyeceksin.",
+          "Pick five from the platform's own query patterns (customer history, product search, monthly summary, cohort filtering, product×category report). Each should use a different filter/JOIN pattern — one index type won't fix all of them.",
+        ],
+      },
+      {
+        title: ["Planı oku, darboğazı bul", "Read the plan, find the bottleneck"],
+        body: [
+          "Her sorgunun başına `EXPLAIN QUERY PLAN` koy. `SCAN` gördüğün her tabloyu not al — bu, indekssiz filtre veya JOIN adayıdır. Birden fazla `SCAN` varsa, en büyük tablodakini önceliklendir.",
+          "Prefix each query with `EXPLAIN QUERY PLAN`. Note every table where you see `SCAN` — that's a candidate for a missing index on a filter or JOIN column. If there are multiple SCANs, prioritize the one on the largest table.",
+        ],
+        lang: "sql",
+        code: `EXPLAIN QUERY PLAN
+SELECT c.name, SUM(oi.quantity * oi.unit_price) AS toplam
+FROM customers c
+JOIN orders o ON o.customer_id = c.id
+JOIN order_items oi ON oi.order_id = o.id
+WHERE c.city = 'İstanbul' AND o.status = 'teslim'
+GROUP BY c.name;
+-- plan: SCAN oi  (order_items — en büyük tablo, hiç indeksi yok)
+--       SEARCH o USING INTEGER PRIMARY KEY
+--       SEARCH c USING INTEGER PRIMARY KEY
+-- En büyük tablo SCAN ediliyor: order_items(order_id) indeks adayı.`,
+      },
+      {
+        title: ["Doğru indeksi ekle", "Add the right index"],
+        body: [
+          "Her `SCAN`'i tek tek indeksle: filtrede kullanılan sütuna (`WHERE`) veya JOIN'de kullanılan yabancı anahtara. Çok sütunlu filtrelerde (`WHERE city = ? AND status = ?`) sıralı çok sütunlu indeks (`(city, status)`) tek sütunlu iki indeksten genelde daha etkilidir.",
+          "Index each `SCAN` one at a time: on the column used in the filter (`WHERE`) or the foreign key used in the JOIN. For multi-column filters (`WHERE city = ? AND status = ?`), an ordered composite index (`(city, status)`) usually beats two separate single-column indexes.",
+        ],
+      },
+      {
+        title: ["Ölç, belgele, geri al gerekirse", "Measure, document, revert if needed"],
+        body: [
+          "Her indeksten sonra planı tekrar oku (`SCAN` → `SEARCH` değişti mi?) ve çalışma süresini kaydet. Bir indeks ölçülebilir bir fark yaratmıyorsa (sorgu zaten hızlıysa ya da tablo küçükse) onu **kaldır** — her indeks yazma maliyeti taşır, ölçülmeyen indeks borçtur.",
+          "After each index, re-read the plan (did `SCAN` become `SEARCH`?) and record the execution time. If an index makes no measurable difference (the query was already fast, or the table is small), **drop it** — every index carries a write cost, and an unmeasured index is just debt.",
+        ],
+      },
+      githubStep("sql-performans-denetimi"),
+    ],
+    premium: true,
+  }),
+
+  project({
+    slug: "sql-yonetici-panosu-hareketli-ortalama",
+    track: "sql",
+    level: "expert",
+    title: ["Yönetici Panosu: Trend ve Müşteri Dilimleri", "Executive Dashboard: Trend and Customer Tiers"],
+    stack: ["SQL", "Window Functions", "Power BI / Tableau"],
+    hours: 9,
+    xp: 550,
+    summary: [
+      "Aylık geliri hareketli ortalamayla düzleştir, müşterileri harcamaya göre 4 dilime ayır ve ikisini tek bir yönetici panosunda birleştir.",
+      "Smooth monthly revenue with a moving average, split customers into 4 spending tiers, and combine both into a single executive dashboard.",
+    ],
+    dataset: [
+      "Platformdaki `shop` veritabanı; daha zengin bir trend için en az 18 aylık sipariş verisi öner.",
+      "The platform's `shop` database; for a richer trend, use at least 18 months of order data.",
+    ],
+    deliverables: [
+      ["Aylık ciro + 3 aylık hareketli ortalama çizgi grafiği", "A monthly revenue + 3-month moving average line chart"],
+      ["Müşteri harcama dilimi (NTILE 4) tablosu ve dilim başına toplam ciro payı", "A customer spending-tier (NTILE 4) table and each tier's share of total revenue"],
+      ["\"En üst dilim toplam cironun yüzde kaçını oluşturuyor?\" sorusunun cevabı", "The answer to \"what share of total revenue does the top tier produce?\""],
+      ["Trend + dilim bulgularını birleştiren 1 sayfalık yönetici özeti", "A one-page executive summary combining the trend and tier findings"],
+    ],
+    steps: [
+      {
+        title: ["Aylık ciroyu ve hareketli ortalamayı hesapla", "Compute monthly revenue and the moving average"],
+        body: [
+          "Aylık ciroyu bir CTE'de topla, ardından `AVG() OVER (ORDER BY ay ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)` ile 3 aylık hareketli ortalamayı ekle. Ham ciro dalgalıyken hareketli ortalama trendi düzleştirir.",
+          "Aggregate monthly revenue in a CTE, then add a 3-month moving average with `AVG() OVER (ORDER BY ay ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)`. While raw revenue is noisy, the moving average smooths the trend.",
+        ],
+        lang: "sql",
+        code: `WITH aylik AS (
+  SELECT strftime('%Y-%m', o.order_date) AS ay,
+         SUM(oi.quantity * oi.unit_price) AS ciro
+  FROM orders o
+  JOIN order_items oi ON oi.order_id = o.id
+  WHERE o.status = 'teslim'
+  GROUP BY ay
+)
+SELECT ay, ciro,
+       ROUND(AVG(ciro) OVER (
+         ORDER BY ay ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+       ), 0) AS hareketli_ortalama
+FROM aylik ORDER BY ay;`,
+      },
+      {
+        title: ["Müşterileri harcama dilimine ayır", "Split customers into spending tiers"],
+        body: [
+          "Her müşterinin toplam harcamasını hesapla, `NTILE(4) OVER (ORDER BY toplam_harcama DESC)` ile 4 eşit dilime böl. Dilim 1 en yüksek harcayanları temsil eder.",
+          "Compute each customer's total spend, split into 4 equal tiers with `NTILE(4) OVER (ORDER BY toplam_harcama DESC)`. Tier 1 represents the top spenders.",
+        ],
+      },
+      {
+        title: ["Dilim başına gelir payını çıkar", "Extract each tier's revenue share"],
+        body: [
+          "Dilimlenmiş sonucu dilime göre `GROUP BY` yapıp topla, ardından her dilimin toplam ciroya oranını hesapla (`dilim_toplami / SUM(dilim_toplami) OVER ()`). Bu sayı genelde şaşırtıcıdır — az sayıda müşteri cironun büyük bir kısmını taşır.",
+          "`GROUP BY` the tiered result by tier and sum, then compute each tier's share of total revenue (`tier_total / SUM(tier_total) OVER ()`). This number is usually surprising — a small number of customers carry a large share of revenue.",
+        ],
+      },
+      {
+        title: ["Panoya taşı ve yorumla", "Move it to the dashboard and interpret"],
+        body: [
+          "İki sonucu (trend + dilim) Power BI/Tableau'da yan yana koy. Yönetici özetinde şu ikisini cevapla: ciro trendi hangi yönde ve neden; en üst dilim (dilim 1) kaybedilirse ciro ne kadar düşer?",
+          "Place both results (trend + tiers) side by side in Power BI/Tableau. In the executive summary, answer two things: which direction is the revenue trend going and why; and how much revenue would be lost if the top tier (tier 1) churned?",
+        ],
+      },
+      githubStep("yonetici-panosu-trend-dilim"),
+    ],
+    premium: true,
+  }),
+
   /* --------------------------- Python -------------------------- */
   project({
     slug: "python-veri-temizligi",

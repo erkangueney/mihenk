@@ -4895,6 +4895,369 @@ ORDER BY city;`,
             }),
           ],
         }),
+        lesson({
+          slug: "cerceve-fonksiyonlari-hareketli-ortalama",
+          title: L(
+            "Çerçeve fonksiyonları: hareketli ortalama ve NTILE",
+            "Frame clauses: moving averages and NTILE",
+          ),
+          summary: L(
+            "OVER () bir pencerenin SINIRINI da tanımlayabilir — kaç satır önce/sonrasına bakılacağını sen belirlersin.",
+            "OVER () can also define a window's BOUNDARY — you decide how many rows before/after to look at.",
+          ),
+          minutes: 18,
+          premium: true,
+          blocks: [
+            text(
+              "`ORDER BY` içeren bir pencere fonksiyonu, varsayılan olarak her satırda \"partition'ın başından bu satıra kadar\" hesap yapar — bunu daha önce kümülatif toplamda gördün. Ama bazen \"bu satırdan bu satıra kadar\" demek istersin: son 3 ayın ortalaması, önceki ve sonraki satırın ortası gibi. Bunu **çerçeve (frame)** ifadesi belirler:\n\n```\nROWS BETWEEN 2 PRECEDING AND CURRENT ROW\n```\n\nBu, \"şu anki satır ve ondan önceki 2 satır — toplam 3 satır\" demektir. `AVG()` ile birlikte kullanılınca 3 birimlik **hareketli ortalama** (moving average) üretir; ayın tekil dalgalanmalarını yumuşatıp trendi görmeni sağlar.",
+              "A window function with `ORDER BY` computes, by default, \"from the start of the partition up to this row\" — you saw this with the running total. But sometimes you want \"from this row to that row\": the average of the last 3 months, or the row before and after averaged together. A **frame** clause defines this:\n\n```\nROWS BETWEEN 2 PRECEDING AND CURRENT ROW\n```\n\nThis means \"the current row plus the 2 rows before it — 3 rows total\". Combined with `AVG()` it produces a 3-unit **moving average**, smoothing out single-month noise so you can see the trend.",
+            ),
+            code(
+              "sql",
+              `WITH aylik AS (
+  SELECT strftime('%Y-%m', o.order_date) AS ay,
+         SUM(oi.quantity * oi.unit_price) AS ciro
+  FROM orders o
+  JOIN order_items oi ON oi.order_id = o.id
+  WHERE o.status = 'teslim'
+  GROUP BY ay
+)
+SELECT
+  ay,
+  ciro,
+  ROUND(AVG(ciro) OVER (
+    ORDER BY ay ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+  ), 0) AS hareketli_ortalama_3ay
+FROM aylik
+ORDER BY ay;`,
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "`ROWS BETWEEN 2 PRECEDING AND CURRENT ROW` kaç satır üzerinden hesap yapar?",
+                "How many rows does `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW` compute over?",
+              ],
+              options: [
+                ["3 — şu anki satır + önceki 2 satır", "3 — the current row plus the 2 rows before it"],
+                ["2 — yalnızca önceki 2 satır", "2 — only the 2 rows before"],
+                ["Partition'ın tamamı", "The entire partition"],
+                ["Yalnızca şu anki satır", "Only the current row"],
+              ],
+              answer: 0,
+              explain: [
+                "PRECEDING sınırı geriye doğru sayar, CURRENT ROW ise şu anki satırı dahil eder. 2 PRECEDING + CURRENT ROW = 3 satır.",
+                "PRECEDING counts backward, CURRENT ROW includes the row itself. 2 PRECEDING + CURRENT ROW = 3 rows.",
+              ],
+            }),
+            text(
+              "Bambaşka bir soru tipi: \"müşterileri harcamalarına göre 4 eşit dilime böl\" — en çok harcayan çeyrek, en az harcayan çeyrek gibi. Bunu `RANK()` ile yapamazsın çünkü RANK her müşteriye ayrı bir sıra verir, gruplamaz. **`NTILE(n)`** tam bunun için var: sıralanmış satırları `n` tane mümkün olduğunca eşit gruba böler ve her satıra grup numarasını (1..n) yazar.",
+              "A different kind of question: \"split customers into 4 equal buckets by spend\" — the top quartile, the bottom quartile. `RANK()` can't do this — it gives every customer a distinct position, not a group. **`NTILE(n)`** exists exactly for this: it splits ordered rows into `n` roughly-equal groups and labels each row with its group number (1..n).",
+            ),
+            quiz({
+              id: "q2",
+              q: [
+                "`NTILE(4) OVER (ORDER BY toplam_harcama DESC)` ne yapar?",
+                "What does `NTILE(4) OVER (ORDER BY toplam_harcama DESC)` do?",
+              ],
+              options: [
+                [
+                  "Müşterileri harcamaya göre sıralayıp 4 eşit büyüklükte gruba (çeyreğe) ayırır",
+                  "Sorts customers by spend and splits them into 4 equal-sized groups (quartiles)",
+                ],
+                ["Yalnızca en yüksek 4 müşteriyi getirir", "Returns only the top 4 customers"],
+                ["Harcamayı 4'e böler", "Divides the spend value by 4"],
+                ["4 satır atlar", "Skips 4 rows"],
+              ],
+              answer: 0,
+              explain: [
+                "NTILE(4), ORDER BY'a göre sıralanmış satırları mümkün olduğunca eşit 4 gruba ayırır ve her satıra 1-4 arası bir dilim numarası verir. Grup içindeki sırayı değil, hangi dilimde olduğunu söyler.",
+                "NTILE(4) splits the ORDER BY-sorted rows into 4 as-equal-as-possible groups and labels each row with a bucket number 1-4. It reports which bucket a row falls into, not its rank within it.",
+              ],
+            }),
+            sqlTask({
+              id: "t1",
+              dataset: "shop",
+              prompt: [
+                "Her müşterinin toplam harcamasını (yalnızca `teslim` siparişler) hesapla ve harcamaya göre **4 eşit dilime** (`dilim`) ayır — en çok harcayan `dilim = 1` olacak. Sütunlar: `name`, `toplam_harcama`, `dilim`; harcamaya göre azalan sırala.",
+                "Compute each customer's total spend (delivered orders only) and split customers into **4 equal buckets** (`dilim`) by spend — the top spenders get `dilim = 1`. Columns: `name`, `toplam_harcama`, `dilim`; sort by spend descending.",
+              ],
+              starter: `WITH harcama AS (
+  SELECT c.id, c.name,
+         SUM(oi.quantity * oi.unit_price) AS toplam_harcama
+  FROM customers c
+  JOIN orders o ON o.customer_id = c.id AND o.status = 'teslim'
+  JOIN order_items oi ON oi.order_id = o.id
+  GROUP BY c.id, c.name
+)
+SELECT
+  name,
+  toplam_harcama,
+  -- NTILE'ı buraya yaz
+FROM harcama
+ORDER BY toplam_harcama DESC;`,
+              solution: `WITH harcama AS (
+  SELECT c.id, c.name,
+         SUM(oi.quantity * oi.unit_price) AS toplam_harcama
+  FROM customers c
+  JOIN orders o ON o.customer_id = c.id AND o.status = 'teslim'
+  JOIN order_items oi ON oi.order_id = o.id
+  GROUP BY c.id, c.name
+)
+SELECT
+  name,
+  toplam_harcama,
+  NTILE(4) OVER (ORDER BY toplam_harcama DESC) AS dilim
+FROM harcama
+ORDER BY toplam_harcama DESC;`,
+              hint: [
+                "`NTILE(4) OVER (ORDER BY toplam_harcama DESC)` — parantez içindeki 4, kaç dilim istediğini söyler.",
+                "`NTILE(4) OVER (ORDER BY toplam_harcama DESC)` — the 4 in parentheses is how many buckets you want.",
+              ],
+              xp: 45,
+            }),
+            pitfall(
+              "NTILE grupları her zaman tam eşit olmayabilir",
+              "NTILE buckets are not always perfectly equal",
+              "Satır sayısı `n`'e tam bölünmüyorsa (örn. 15 müşteri, 4 dilim), NTILE fazla satırları ilk dilimlere dağıtır — bazı dilimler 1 satır daha büyük olabilir. Bu bir hata değil, beklenen davranıştır.",
+              "If the row count doesn't divide evenly by `n` (e.g. 15 customers, 4 buckets), NTILE distributes the extra rows to the earlier buckets — some buckets end up one row larger. This isn't a bug, it's expected behavior.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "sorgu-plani-ve-indeks",
+          title: L("Sorgu planını okumak: EXPLAIN ve indeksler", "Reading the query plan: EXPLAIN and indexes"),
+          summary: L(
+            "Bir sorgu neden yavaş? Veritabanına \"bunu nasıl çalıştıracaksın?\" diye sormanın yolu: EXPLAIN QUERY PLAN.",
+            "Why is a query slow? The way to ask the database \"how will you run this?\" is EXPLAIN QUERY PLAN.",
+          ),
+          minutes: 16,
+          premium: true,
+          blocks: [
+            text(
+              "Şimdiye kadar hep \"sorgu doğru sonucu veriyor mu\" diye baktın. Üretimde ikinci bir soru daha var: \"sorgu ne kadar sürede çalışıyor?\" Milyonlarca satırlı bir tabloda `WHERE customer_id = 42` gibi basit bir filtre bile, veritabanı tabloyu satır satır taramak zorunda kalırsa saniyeler sürebilir. Bunun önüne **indeks** geçer — belirli bir sütuna göre önceden sıralanmış, hızlı arama yapılabilen bir yapı (bir kitabın sonundaki dizin gibi).\n\nAma indeksi \"deneyip görmek\" yerine, veritabanına planını sorabilirsin:\n\n```sql\nEXPLAIN QUERY PLAN\nSELECT * FROM orders WHERE customer_id = 1;\n```\n\nBu, sorguyu **çalıştırmaz** — SQLite'ın onu nasıl çalıştıracağını satır satır açıklar.",
+              "So far you've only asked \"does the query return the right result?\". In production there's a second question: \"how long does the query take?\" Even a simple filter like `WHERE customer_id = 42` on a table with millions of rows can take seconds if the database has to scan every row one by one. An **index** prevents this — a structure pre-sorted by a specific column that supports fast lookups (like the index at the back of a book).\n\nInstead of \"trying it and seeing\", you can ask the database for its plan:\n\n```sql\nEXPLAIN QUERY PLAN\nSELECT * FROM orders WHERE customer_id = 1;\n```\n\nThis does **not run** the query — it explains, step by step, how SQLite intends to run it.",
+            ),
+            code(
+              "sql",
+              `-- İndeks yokken: SCAN — tüm tabloyu satır satır tarar
+EXPLAIN QUERY PLAN
+SELECT * FROM orders WHERE customer_id = 1;
+-- sonuç: SCAN orders
+
+-- İndeks eklendikten sonra: SEARCH — doğrudan ilgili satırlara atlar
+CREATE INDEX idx_orders_customer ON orders(customer_id);
+
+EXPLAIN QUERY PLAN
+SELECT * FROM orders WHERE customer_id = 1;
+-- sonuç: SEARCH orders USING INDEX idx_orders_customer (customer_id=?)`,
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "`EXPLAIN QUERY PLAN` çalıştırıldığında ne olur?",
+                "What happens when you run `EXPLAIN QUERY PLAN`?",
+              ],
+              options: [
+                [
+                  "Sorgu çalıştırılmaz; veritabanı onu nasıl çalıştıracağını açıklar",
+                  "The query is not executed; the database explains how it would run it",
+                ],
+                ["Sorgu çalıştırılır ve normal sonuç döner", "The query runs and returns its normal result"],
+                ["Sorguyu otomatik olarak hızlandırır", "It automatically speeds the query up"],
+                ["Eksik indeksleri otomatik oluşturur", "It automatically creates any missing indexes"],
+              ],
+              answer: 0,
+              explain: [
+                "EXPLAIN QUERY PLAN, sorgunun kendisini çalıştırmadan yalnızca planını (SCAN mı SEARCH mü, hangi indeks kullanılacak) döndürür.",
+                "EXPLAIN QUERY PLAN does not execute the query itself — it only returns its plan (SCAN or SEARCH, which index would be used).",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "Plan çıktısında `SCAN orders` görmek ile `SEARCH orders USING INDEX ...` görmek arasındaki fark nedir?",
+                "What's the difference between seeing `SCAN orders` and `SEARCH orders USING INDEX ...` in the plan output?",
+              ],
+              options: [
+                [
+                  "SCAN tüm tabloyu satır satır gezer, SEARCH indeks sayesinde doğrudan ilgili satırlara atlar",
+                  "SCAN walks the whole table row by row, SEARCH jumps straight to the relevant rows via an index",
+                ],
+                ["İkisi de aynı hızda çalışır", "Both run at the same speed"],
+                ["SCAN daha hızlıdır", "SCAN is faster"],
+                ["SEARCH sonucu yanlış döndürür", "SEARCH returns the wrong result"],
+              ],
+              answer: 0,
+              explain: [
+                "Büyük tablolarda SCAN ile SEARCH arasındaki fark saniyelerle milisaniyeler arasında olabilir. İndeks, veritabanına \"nereye bakacağını\" önceden söyleyen bir kısayoldur.",
+                "On large tables the difference between SCAN and SEARCH can be seconds versus milliseconds. An index is a shortcut that tells the database in advance \"where to look\".",
+              ],
+            }),
+            sqlTask({
+              id: "t1",
+              dataset: "shop",
+              prompt: [
+                "`order_items` tablosunda `product_id`'ye göre arama yapan sorguları hızlandırmak için bir indeks oluştur, sonra `EXPLAIN QUERY PLAN` ile `product_id = 1` filtresinin bu indeksi kullandığını doğrula. İki ayrı ifade yaz: önce `CREATE INDEX`, sonra `EXPLAIN QUERY PLAN ... SELECT`.",
+                "Create an index that speeds up queries filtering `order_items` by `product_id`, then use `EXPLAIN QUERY PLAN` to confirm that a `product_id = 1` filter uses it. Write two statements: first `CREATE INDEX`, then `EXPLAIN QUERY PLAN ... SELECT`.",
+              ],
+              starter: `-- 1) indeksi oluştur\n\n\n-- 2) planı sorgula\nEXPLAIN QUERY PLAN\nSELECT * FROM order_items WHERE product_id = 1;`,
+              solution: `CREATE INDEX idx_order_items_product ON order_items(product_id);
+
+EXPLAIN QUERY PLAN
+SELECT * FROM order_items WHERE product_id = 1;`,
+              hint: [
+                "`CREATE INDEX indeks_adi ON tablo(sutun);` — sütun adı köşeli parantez içine değil, düz parantez içine yazılır.",
+                "`CREATE INDEX index_name ON table(column);` — the column name goes inside plain parentheses.",
+              ],
+              xp: 40,
+            }),
+            pitfall(
+              "İndeks bedava değildir",
+              "An index isn't free",
+              "Her indeks, her `INSERT`/`UPDATE`/`DELETE` işleminde de güncellenmesi gereken ekstra bir yapıdır — yazma işlemlerini biraz yavaşlatır ve disk yeri kaplar. Bu yüzden \"her sütuna indeks koy\" doğru değildir; yalnızca sık filtrelenen/JOIN edilen sütunlara indeks eklenir.",
+              "Every index is extra structure that must also be updated on every `INSERT`/`UPDATE`/`DELETE` — it slows writes down slightly and takes disk space. So \"index every column\" is wrong; you only index columns that are frequently filtered or joined on.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "coklu-cte-kohort-gelir",
+          title: L(
+            "Çok adımlı CTE zinciri: kohort ve geliri birleştirmek",
+            "Chaining CTEs: combining cohort and revenue",
+          ),
+          summary: L(
+            "Karmaşık bir analiz genelde tek sorgu değil, birbirinin üstüne kurulan birkaç CTE'dir.",
+            "A complex analysis is usually not one query — it's several CTEs built on top of each other.",
+          ),
+          minutes: 20,
+          premium: true,
+          blocks: [
+            text(
+              "Gerçek analiz soruları nadiren tek bir `SELECT` ile cevaplanır. \"Her müşteri kohortunun (ilk sipariş ayına göre gruplanmış) ilk 3 aydaki ortalama gelirini göster\" gibi bir soru birkaç ayrı adımı gerektirir:\n\n1. Her müşterinin **ilk sipariş ayını** bul (kohortu)\n2. Her siparişi, müşterinin kohortuna göre kaçıncı ayda olduğunu hesaba katarak **etiketle**\n3. Kohort + ay kırılımında **geliri topla**\n\nBu üç adımı iç içe alt sorgularla yazmak okunmaz hâle gelir. Çözüm: her adımı ayrı bir **CTE** (`WITH adim1 AS (...), adim2 AS (...)`) yapıp bir sonrakinde ona referans vermek — bir üretim hattı gibi, her CTE bir öncekinin çıktısını girdisi olarak alır.",
+              "Real analytical questions are rarely answered by a single `SELECT`. A question like \"show the average revenue per customer cohort (grouped by first-order month) over their first 3 months\" needs several distinct steps:\n\n1. Find each customer's **first order month** (their cohort)\n2. **Label** each order with how many months after the customer's cohort it happened\n3. **Sum revenue** by cohort + month-number\n\nWriting these three steps as nested subqueries becomes unreadable. The fix: turn each step into its own **CTE** (`WITH step1 AS (...), step2 AS (...)`) and reference it in the next — like a pipeline, where each CTE takes the previous one's output as its input.",
+            ),
+            code(
+              "sql",
+              `WITH ilk_siparis AS (
+  -- Adım 1: her müşterinin kohortu = ilk sipariş ayı
+  SELECT customer_id, MIN(strftime('%Y-%m', order_date)) AS kohort
+  FROM orders
+  WHERE status = 'teslim'
+  GROUP BY customer_id
+),
+etiketli AS (
+  -- Adım 2: her siparişi, kohorttan kaç ay sonra olduğuyla etiketle
+  SELECT
+    o.customer_id,
+    i.kohort,
+    (CAST(strftime('%Y', o.order_date) AS INT) - CAST(SUBSTR(i.kohort, 1, 4) AS INT)) * 12
+      + (CAST(strftime('%m', o.order_date) AS INT) - CAST(SUBSTR(i.kohort, 6, 2) AS INT)) AS ay_farki,
+    oi.quantity * oi.unit_price AS tutar
+  FROM orders o
+  JOIN ilk_siparis i ON i.customer_id = o.customer_id
+  JOIN order_items oi ON oi.order_id = o.id
+  WHERE o.status = 'teslim'
+)
+-- Adım 3: kohort + ay_farki kırılımında geliri topla
+SELECT kohort, ay_farki, SUM(tutar) AS gelir
+FROM etiketli
+WHERE ay_farki BETWEEN 0 AND 2
+GROUP BY kohort, ay_farki
+ORDER BY kohort, ay_farki;`,
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Bu üç adımlı analizi tek bir CTE zincirine bölmenin asıl faydası nedir?",
+                "What's the real benefit of splitting this three-step analysis into a chain of CTEs?",
+              ],
+              options: [
+                [
+                  "Her adım ayrı isimlendirilip test edilebilir; sorgu iç içe alt sorgulardan çok daha okunur kalır",
+                  "Each step gets its own name and can be checked separately; the query stays far more readable than nested subqueries",
+                ],
+                ["CTE'ler sorguyu otomatik olarak hızlandırır", "CTEs automatically make the query faster"],
+                ["CTE kullanmadan JOIN yapılamaz", "You cannot JOIN without using a CTE"],
+                ["CTE'ler veriyi kalıcı olarak diske yazar", "CTEs permanently write data to disk"],
+              ],
+              answer: 0,
+              explain: [
+                "CTE zinciri performans için değil, okunabilirlik ve doğrulanabilirlik için tercih edilir — her adımı ayrı ayrı `SELECT * FROM adim1` çalıştırıp gözle kontrol edebilirsin.",
+                "A CTE chain isn't chosen for performance — it's chosen for readability and verifiability. You can run `SELECT * FROM step1` on its own and eyeball each step.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "Yukarıdaki sorguda `etiketli` CTE'si hangi CTE'ye referans veriyor?",
+                "In the query above, which CTE does the `etiketli` CTE reference?",
+              ],
+              options: [
+                ["ilk_siparis", "ilk_siparis"],
+                ["Hiçbirine, bağımsız çalışır", "None — it runs independently"],
+                ["Kendi kendine (özyinelemeli)", "Itself (recursively)"],
+                ["Doğrudan orders tablosunun ham hâline, başka hiçbir şeye değil", "Only the raw orders table, nothing else"],
+              ],
+              answer: 0,
+              explain: [
+                "`etiketli`, `JOIN ilk_siparis i ON i.customer_id = o.customer_id` ile bir önceki adımın sonucuna bağlanıyor — bu yüzden her siparişin kohort bilgisine erişebiliyor.",
+                "`etiketli` joins to the previous step's result via `JOIN ilk_siparis i ON i.customer_id = o.customer_id` — that's how it gets each order's cohort information.",
+              ],
+            }),
+            sqlTask({
+              id: "t1",
+              dataset: "shop",
+              prompt: [
+                "Yukarıdaki üç adımlı deseni kullanarak, her kohortun (ilk sipariş ayı) **0. ayda** (kohort ayının kendisinde) kaç farklı müşteriden gelir elde ettiğini bul. Sütunlar: `kohort`, `musteri_sayisi`; kohorta göre artan sırala. `COUNT(DISTINCT ...)` kullanmayı unutma.",
+                "Using the three-step pattern above, find how many distinct customers each cohort (first-order month) generated revenue from in **month 0** (the cohort month itself). Columns: `kohort`, `musteri_sayisi`; sort ascending by cohort. Remember `COUNT(DISTINCT ...)`.",
+              ],
+              starter: `WITH ilk_siparis AS (
+  SELECT customer_id, MIN(strftime('%Y-%m', order_date)) AS kohort
+  FROM orders
+  WHERE status = 'teslim'
+  GROUP BY customer_id
+),
+etiketli AS (
+  SELECT
+    o.customer_id,
+    i.kohort,
+    (CAST(strftime('%Y', o.order_date) AS INT) - CAST(SUBSTR(i.kohort, 1, 4) AS INT)) * 12
+      + (CAST(strftime('%m', o.order_date) AS INT) - CAST(SUBSTR(i.kohort, 6, 2) AS INT)) AS ay_farki
+  FROM orders o
+  JOIN ilk_siparis i ON i.customer_id = o.customer_id
+  WHERE o.status = 'teslim'
+)
+-- burada 0. aydaki müşteri sayısını say
+SELECT`,
+              solution: `WITH ilk_siparis AS (
+  SELECT customer_id, MIN(strftime('%Y-%m', order_date)) AS kohort
+  FROM orders
+  WHERE status = 'teslim'
+  GROUP BY customer_id
+),
+etiketli AS (
+  SELECT
+    o.customer_id,
+    i.kohort,
+    (CAST(strftime('%Y', o.order_date) AS INT) - CAST(SUBSTR(i.kohort, 1, 4) AS INT)) * 12
+      + (CAST(strftime('%m', o.order_date) AS INT) - CAST(SUBSTR(i.kohort, 6, 2) AS INT)) AS ay_farki
+  FROM orders o
+  JOIN ilk_siparis i ON i.customer_id = o.customer_id
+  WHERE o.status = 'teslim'
+)
+SELECT kohort, COUNT(DISTINCT customer_id) AS musteri_sayisi
+FROM etiketli
+WHERE ay_farki = 0
+GROUP BY kohort
+ORDER BY kohort;`,
+              hint: [
+                "`WHERE ay_farki = 0` ile filtrele, sonra `kohort`'a göre `GROUP BY` yapıp `COUNT(DISTINCT customer_id)` say.",
+                "Filter with `WHERE ay_farki = 0`, then `GROUP BY kohort` and count with `COUNT(DISTINCT customer_id)`.",
+              ],
+              xp: 50,
+            }),
+          ],
+        }),
       ],
     },
   ],
