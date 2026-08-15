@@ -2538,6 +2538,181 @@ SUM([Satış]) / { EXCLUDE [Alt Kategori] : SUM([Satış]) }
             }),
           ],
         }),
+        lesson({
+          slug: "kumeler-ve-kume-eylemleri",
+          title: L("Kümeler ve küme eylemleri: tıklamayla dinamik segment", "Sets and set actions: dynamic segments via clicks"),
+          summary: L(
+            "Kullanıcı bir noktaya tıkladığında o segmenti canlı olarak tanımlayan, filtreden daha güçlü bir araç.",
+            "A tool more powerful than a filter: it lets the viewer define a segment live, just by clicking a mark.",
+          ),
+          minutes: 16,
+          premium: true,
+          blocks: [
+            text(
+              "**Küme (Set)**, bir boyutun üyelerinden özel bir alt grup tanımlayan özel bir alandır — \"Yüksek Değerli Müşteriler\" gibi. Statik olarak (elle seçerek) veya bir koşula göre (\"Toplam Satışı > 10.000 olan müşteriler\") tanımlanabilir.\n\n**Küme eylemi (Set Action)**, kümeyi **etkileşimli** hale getirir: kullanıcı bir görselde bir veya birden fazla işareti tıkladığında (veya üzerine gelip fare tuşunu bıraktığında), tıklanan öğeler o kümeye **otomatik olarak eklenir/çıkarılır**. Bu, dashboard'un kendisini bir segment oluşturma aracına çevirir — kullanıcı önceden tanımlanmış bir filtreyle sınırlı kalmaz.",
+              "A **Set** is a special field that defines a custom subgroup of a dimension's members — like \"High-Value Customers\". It can be defined statically (picked by hand) or by a condition (\"customers where Total Sales > 10,000\").\n\nA **Set Action** makes the set **interactive**: when the viewer clicks one or more marks in a view (or hovers, on mouse-up), the clicked items are **automatically added to/removed from** that set. This turns the dashboard itself into a segment-building tool — the viewer isn't limited to a pre-defined filter.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Statik bir küme ile koşula dayalı (dinamik) bir küme arasındaki fark nedir?",
+                "What's the difference between a static set and a condition-based (dynamic) set?",
+              ],
+              options: [
+                [
+                  "Statik küme elle seçilen sabit üyeleri tutar; koşula dayalı küme veriler değiştikçe kendini günceller",
+                  "A static set holds fixed, hand-picked members; a condition-based set updates itself as the data changes",
+                ],
+                ["İkisi de birebir aynı şekilde davranır", "Both behave in exactly the same way"],
+                ["Statik küme yalnızca sayısal alanlarda çalışır", "A static set only works on numeric fields"],
+                ["Koşula dayalı küme yalnızca bir defa hesaplanır, hiç güncellenmez", "A condition-based set is computed only once and never updates"],
+              ],
+              answer: 0,
+              explain: [
+                "Statik bir kümeye eklediğin üyeler, veri değişse bile aynı kalır — sen değiştirene kadar sabittir. Koşula dayalı bir küme ise ('Toplam Satış > 10.000') her yenilemede yeniden değerlendirilir; yeni bir müşteri eşiği geçerse kümeye otomatik girer.",
+                "Members you add to a static set stay the same even as the data changes — fixed until you change them yourself. A condition-based set ('Total Sales > 10,000') is re-evaluated on every refresh; a new customer crossing the threshold enters the set automatically.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "Küme eylemi (Set Action), sıradan bir Filter Action'dan nasıl farklıdır?",
+                "How does a Set Action differ from an ordinary Filter Action?",
+              ],
+              options: [
+                [
+                  "Filter Action yalnızca görünümü daraltır; Set Action tıklanan öğeleri kalıcı bir kümeye ekler/çıkarır, o küme başka hesaplarda ve görsellerde kullanılabilir",
+                  "A Filter Action only narrows the view; a Set Action adds/removes clicked items from a persistent set that can then be used in other calculations and visuals",
+                ],
+                ["İkisi birebir aynı işi yapar, yalnızca adı farklıdır", "They do exactly the same thing, only the name differs"],
+                ["Set Action yalnızca haritalarda çalışır", "Set Actions only work on maps"],
+                ["Filter Action kümeleri, Set Action filtreleri değiştirir", "Filter Action changes sets, Set Action changes filters"],
+              ],
+              answer: 0,
+              explain: [
+                "Filter Action geçicidir — yalnızca o an görüneni değiştirir. Set Action ise bir kümeyi (kalıcı bir nesneyi) günceller; bu küme 'seçili mi?' diye soran bir hesaplanan alanda, başka bir dashboard'ta veya renklendirmede tekrar kullanılabilir.",
+                "A Filter Action is transient — it only changes what's currently visible. A Set Action updates a set (a persistent object); that set can be reused in a calculated field asking \"is this selected?\", in another dashboard, or for coloring.",
+              ],
+            }),
+            code(
+              "dax",
+              `// Küme eylemiyle güncellenen "Seçili Müşteriler" kümesini kullanan bir hesaplanan alan:
+IF [Seçili Müşteriler] THEN "Seçildi" ELSE "Diğer" END
+
+// Seçilenlerin toplam satışını, seçilmeyenlerle karşılaştırmak için:
+{ FIXED : SUM(IF [Seçili Müşteriler] THEN [Satış] END) }`,
+            ),
+            tip(
+              "Küme eylemleri en çok karşılaştırma senaryolarında parlar",
+              "Set actions shine most in comparison scenarios",
+              "Tipik kullanım: bir harita veya çubuk grafikte birkaç bölgeye tıkla, dashboard'un geri kalanı otomatik olarak 'seçilenler vs geri kalan herkes' karşılaştırmasına dönüşsün. Bunu önceden tanımlanmış sabit bir filtreyle yapmak, her yeni karşılaştırma isteği için ayrı bir hesaplanan alan yazmak anlamına gelirdi.",
+              "A typical use: click a few regions on a map or bar chart, and the rest of the dashboard automatically becomes a \"selected vs everyone else\" comparison. Doing this with a fixed, pre-defined filter would mean writing a new calculated field for every new comparison request.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "fixed-lod-ve-kumeler-en-degerli-musteriler",
+          title: L(
+            "FIXED LOD + kümeler: en değerli müşterileri bulmak",
+            "FIXED LOD + sets: finding the most valuable customers",
+          ),
+          summary: L(
+            "İki ileri tekniği birleştirerek, tek başına hiçbirinin çözemeyeceği bir soruyu cevaplamak.",
+            "Combining two advanced techniques to answer a question neither can solve alone.",
+          ),
+          minutes: 17,
+          premium: true,
+          blocks: [
+            text(
+              "\"En yüksek harcayan %20 müşteri, toplam cironun yüzde kaçını oluşturuyor?\" sorusu iki adım gerektirir ve tek bir teknikle çözülmez:\n\n1. Her müşterinin toplam harcamasını, görseldeki başka hiçbir boyuma bakmaksızın hesapla — bu bir **FIXED LOD** işidir: `{ FIXED [Müşteri ID] : SUM([Satış]) }`\n2. Bu harcamaya göre müşterileri sırala, en üstteki %20'yi bir **kümeye** al (elle değil, \"En İyi\" seçeneğiyle: Top 20% by Toplam Harcama)\n\nİkisi birleşince: kümedeki müşterilerin toplam satışı / tüm müşterilerin toplam satışı = aradığın yüzde.",
+              "\"What share of total revenue comes from the top 20% of spenders?\" needs two steps and no single technique solves it alone:\n\n1. Compute each customer's total spend, ignoring every other dimension in the view — a job for **FIXED LOD**: `{ FIXED [Customer ID] : SUM([Sales]) }`\n2. Rank customers by that spend and put the top 20% into a **set** (not by hand — using the \"Top\" tab: Top 20% by Toplam Harcama)\n\nCombine the two: the set's total sales divided by everyone's total sales = the percentage you're after.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Bu iki adımlı problemde FIXED LOD'un rolü nedir?",
+                "What's FIXED LOD's role in this two-step problem?",
+              ],
+              options: [
+                [
+                  "Her müşterinin toplam harcamasını, görseldeki diğer boyutlardan bağımsız, sabit bir sayı olarak hesaplamak — kümenin 'Top %20' kararını buna göre verebilmesi için",
+                  "Computing each customer's total spend as a fixed number independent of other dimensions in the view — so the set's \"Top 20%\" decision can be based on it",
+                ],
+                ["Kümeyi otomatik olarak oluşturmak", "Automatically creating the set"],
+                ["Görseli filtrelemek", "Filtering the view"],
+                ["Veriyi Tableau Server'a yayınlamak", "Publishing the data to Tableau Server"],
+              ],
+              answer: 0,
+              explain: [
+                "Küme, 'Top %20' kararını bir ölçüye göre verir — bu ölçünün görseldeki başka kırılımlardan (ay, ürün) etkilenmeden sabit bir 'müşteri başına toplam' olması gerekir. Bunu garanti eden FIXED LOD'dur.",
+                "The set makes its \"Top 20%\" decision based on a measure — and that measure needs to be a fixed \"total per customer\" unaffected by other breakdowns in the view (month, product). FIXED LOD is what guarantees that.",
+              ],
+            }),
+            order({
+              id: "o1",
+              prompt: [
+                "\"En değerli %20 müşteri toplam cironun yüzde kaçı\" sorusunu çözme adımlarını doğru sıraya diz.",
+                "Put the steps for solving \"what share of revenue comes from the top 20% of customers\" in the right order.",
+              ],
+              lines: [
+                "FIXED LOD ile her müşterinin toplam harcamasını hesapla",
+                "Bu harcamaya göre müşterileri sırala",
+                "Top 20% seçeneğiyle bir küme oluştur",
+                "Kümedeki satışı toplam satışa bölerek yüzdeyi bul",
+              ],
+              xp: 25,
+            }),
+            pitfall(
+              "Top N kümesi, filtrelerden ÖNCE mi SONRA mı hesaplanıyor?",
+              "Is a Top-N set computed BEFORE or AFTER your filters?",
+              "Bir küme oluşturulduğunda hangi veri üzerinde 'Top %20' hesaplandığı önemlidir. Görselde bir bölge filtresi varsa ve küme tüm veri üzerinden tanımlandıysa, gördüğün liste o bölgedeki değil TÜM müşterilerin en değerli %20'si olabilir. Kümenin hangi kapsamda hesaplandığını her zaman kontrol et.",
+              "When you create a set, it matters what data the \"top 20%\" was computed against. If the view has a region filter but the set was defined against all the data, the list you see can be the top 20% of ALL customers, not just that region's. Always check the scope a set was computed against.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "hikaye-noktalari",
+          title: L("Hikaye noktaları: sıralı bir veri anlatısı kurmak", "Story points: building a sequential data narrative"),
+          summary: L(
+            "Bir dashboard'u tek seferde göstermek yerine, izleyiciyi adım adım bir sonuca götürmek.",
+            "Instead of showing a dashboard all at once, walking the viewer step by step to a conclusion.",
+          ),
+          minutes: 14,
+          premium: true,
+          blocks: [
+            text(
+              "Bir dashboard genelde **keşif** içindir — kullanıcı istediği filtreyi uygular, istediği sırayla bakar. Ama bazen amacın keşif değil, belirli bir **sonuca ikna etmektir**: \"Q3'te neden kaybettik\" gibi bir sunumda izleyicinin kendi başına gezinmesini değil, senin belirlediğin sırayla bilgiyi görmesini istersin.\n\n**Hikaye (Story)**, birden fazla görsel/dashboard'u sıralı \"hikaye noktaları\"na böler — her nokta ayrı bir başlık ve açıklama metniyle gelir, izleyici İleri/Geri ile ilerler. Her Excel'deki bir sunumun slaytları gibi ama her \"slayt\" canlı, etkileşimli bir Tableau görselidir.",
+              "A dashboard is usually built for **exploration** — the viewer applies whatever filter they want, in whatever order. But sometimes your goal isn't exploration, it's **persuading toward a specific conclusion**: in a presentation like \"why we lost in Q3\", you don't want the viewer wandering on their own — you want them to see the information in the order you decided.\n\nA **Story** splits several views/dashboards into sequential \"story points\" — each point comes with its own caption and description text, and the viewer moves through them with Next/Back. Like slides in a presentation, except every \"slide\" is a live, interactive Tableau view.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Bir dashboard ile bir Story'nin temel amaç farkı nedir?",
+                "What's the core difference in purpose between a dashboard and a Story?",
+              ],
+              options: [
+                [
+                  "Dashboard serbest keşif içindir; Story, izleyiciyi belirli bir sırada, belirli bir sonuca doğru yönlendirmek içindir",
+                  "A dashboard is for free exploration; a Story is for guiding the viewer through a specific order toward a specific conclusion",
+                ],
+                ["İkisi birebir aynı şeydir, yalnızca isim farklıdır", "They're exactly the same thing, only the name differs"],
+                ["Story yalnızca statik resimlerden oluşur, etkileşimli değildir", "A Story is made of static images only, it isn't interactive"],
+                ["Dashboard yalnızca bir görsel içerebilir, Story birden fazla içerir", "A dashboard can only contain one view, a Story contains more than one"],
+              ],
+              answer: 0,
+              explain: [
+                "Dashboard, kullanıcının kendi sorularını kendi sırasında keşfetmesi için tasarlanır. Story ise senin anlatını belirlediğin bir sunum aracıdır — her nokta hâlâ etkileşimlidir, ama sıra ve bağlam sen tarafından kuruludur.",
+                "A dashboard is designed for the viewer to explore their own questions in their own order. A Story is a presentation tool where you set the narrative — each point is still interactive, but the order and framing are yours.",
+              ],
+            }),
+            tip(
+              "Her hikaye noktasına net bir başlık yaz — 'Panel 3' değil",
+              "Give every story point a clear caption — not \"Panel 3\"",
+              "Bir hikaye noktasının başlığı, o noktanın söylediği tek cümlelik bulguyu taşımalı: \"Kayıp, tek bölgede yoğunlaşıyor\" gibi. İzleyici başlıkları art arda okuduğunda, görselleri hiç açmadan bile hikayenin özetini çıkarabilmeli.",
+              "A story point's caption should carry the one-sentence finding that point makes: something like \"The loss is concentrated in one region\". If a viewer reads the captions back to back, they should get the gist of the story even without opening a single view.",
+            ),
+          ],
+        }),
       ],
     },
   ],

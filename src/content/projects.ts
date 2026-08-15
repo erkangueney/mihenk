@@ -905,6 +905,118 @@ THEN "Yeni" ELSE "Mevcut" END`,
     ],
   }),
 
+  project({
+    slug: "tableau-kume-eylemli-segment-panosu",
+    track: "tableau",
+    level: "expert",
+    title: ["Küme Eylemli Segment Panosu", "A Set-Action Segmentation Dashboard"],
+    stack: ["Tableau", "Sets", "Set Actions", "LOD"],
+    hours: 9,
+    xp: 550,
+    summary: [
+      "Kullanıcının bir grafikte tıklayarak kendi karşılaştırma segmentini oluşturduğu, 'seçilenler vs geri kalan herkes' panosu kur.",
+      "Build a dashboard where the viewer defines their own comparison segment by clicking a chart — \"selected vs everyone else\".",
+    ],
+    dataset: [
+      "Müşteri/bölge/ürün kırılımlı herhangi bir satış veri seti (Superstore veya kendi verin).",
+      "Any sales dataset with a customer/region/product breakdown (Superstore or your own data).",
+    ],
+    deliverables: [
+      ["Bir harita veya çubuk grafikte tıklamayla güncellenen bir küme", "A set that updates via clicks on a map or bar chart"],
+      ["'Seçilenler vs geri kalanlar' karşılaştırması yapan bir hesaplanan alan ve görsel", "A calculated field and visual comparing \"selected vs the rest\""],
+      ["FIXED LOD ile hesaplanmış, kümenin dayandığı bir taban metrik (ör. müşteri başına toplam satış)", "A base metric computed with FIXED LOD that the set relies on (e.g. total sales per customer)"],
+      ["Panoyu nasıl kullanacağını anlatan 3 cümlelik bir kullanım notu", "A 3-sentence usage note explaining how to use the dashboard"],
+    ],
+    steps: [
+      {
+        title: ["Taban metriği FIXED LOD ile kur", "Build the base metric with FIXED LOD"],
+        body: [
+          "Kümenin dayanacağı bir metrik hazırla — \"müşteri başına toplam satış\" gibi. Görseldeki diğer kırılımlardan etkilenmemesi için `{ FIXED [Müşteri ID] : SUM([Satış]) }` kullan.",
+          "Prepare the metric the set will rely on — something like \"total sales per customer\". Use `{ FIXED [Customer ID] : SUM([Sales]) }` so it isn't affected by other breakdowns in the view.",
+        ],
+      },
+      {
+        title: ["Kümeyi oluştur ve küme eylemine bağla", "Create the set and wire it to a set action"],
+        body: [
+          "İlgili boyuttan (Müşteri, Bölge) bir küme oluştur, dashboard'a ekle. Sonra Dashboard → Actions → Add Action → Change Set Values ile bir görseldeki tıklamanın bu kümeyi güncellemesini sağla.",
+          "Create a set from the relevant dimension (Customer, Region) and add it to the dashboard. Then use Dashboard → Actions → Add Action → Change Set Values so clicking in a view updates that set.",
+        ],
+      },
+      {
+        title: ["Karşılaştırma görselini kur", "Build the comparison visual"],
+        body: [
+          "`IF [Küme] THEN 'Seçili' ELSE 'Diğer' END` gibi bir hesaplanan alan yaz ve bunu renk/gruplamada kullanarak seçilenlerin toplamını geri kalanla yan yana göster.",
+          "Write a calculated field like `IF [Set] THEN 'Selected' ELSE 'Other' END` and use it for color/grouping to show the selected group's total side by side with everyone else's.",
+        ],
+      },
+      {
+        title: ["Kullanım notunu yaz", "Write the usage note"],
+        body: [
+          "Panoyu ilk gören birinin ne yapması gerektiğini 3 cümleyle anlat: nereye tıklanır, seçim nasıl temizlenir, karşılaştırma nerede görünür. Etkileşimli bir pano, nasıl kullanılacağı yazılı olmadan çoğu zaman keşfedilmeden kalır.",
+          "Explain in 3 sentences what a first-time viewer should do: where to click, how to clear the selection, where the comparison appears. An interactive dashboard usually goes undiscovered without written instructions on how to use it.",
+        ],
+      },
+      githubStep("kume-eylemli-segment-panosu"),
+    ],
+    premium: true,
+  }),
+
+  project({
+    slug: "tableau-hikaye-ceyrek-sonuclari",
+    track: "tableau",
+    level: "expert",
+    title: ["Hikaye: Çeyrek Sonuçlarını Anlatmak", "A Story: Narrating the Quarterly Results"],
+    stack: ["Tableau", "Story Points", "Dashboard Design"],
+    hours: 7,
+    xp: 500,
+    summary: [
+      "Bir çeyreğin sonuçlarını, izleyiciyi belirli bir sonuca adım adım götüren 4-5 noktalı bir Story'ye dönüştür.",
+      "Turn a quarter's results into a 4-5 point Story that walks the viewer step by step to a specific conclusion.",
+    ],
+    dataset: [
+      "En az bir çeyreklik (3 ay) satış/performans verisi; bir önceki dönemle karşılaştırma yapılabilmeli.",
+      "At least one quarter (3 months) of sales/performance data, comparable against the prior period.",
+    ],
+    deliverables: [
+      ["4-5 hikaye noktasından oluşan bir Tableau Story", "A Tableau Story made of 4-5 story points"],
+      ["Her noktada bulguyu özetleyen bir başlık (caption)", "A caption on every point summarizing that point's finding"],
+      ["Genelden özele giden bir anlatı sırası (toplam sonuç → sebep → detay → aksiyon önerisi)", "A narrative order that goes from general to specific (overall result → cause → detail → recommended action)"],
+      ["Story'nin sonunda net bir 'öneri' noktası", "A clear \"recommendation\" point at the end of the Story"],
+    ],
+    steps: [
+      {
+        title: ["Anlatının sırasını kâğıt üzerinde planla", "Plan the narrative order on paper"],
+        body: [
+          "Tableau'yu açmadan önce, hangi 4-5 bulguyu hangi sırayla göstereceğini yaz. İyi bir sıra genelden özele gider: 'genel sonuç ne oldu' → 'en büyük sebep neydi' → 'hangi segment/bölge en çok etkiledi' → 'ne yapılmalı'.",
+          "Before opening Tableau, write down which 4-5 findings you'll show and in what order. A good order goes from general to specific: 'what was the overall result' → 'what was the biggest cause' → 'which segment/region drove it most' → 'what should happen next'.",
+        ],
+      },
+      {
+        title: ["Her nokta için bir görsel/dashboard hazırla", "Prepare a view/dashboard for each point"],
+        body: [
+          "Her hikaye noktası ayrı bir sayfa veya dashboard kullanır. Noktalar arasında tutarlı bir görsel dil (renk, yazı tipi) koru — izleyici bir slayttan diğerine geçtiğinde kaybolmuş hissetmemeli.",
+          "Each story point uses a separate sheet or dashboard. Keep a consistent visual language (color, font) across points — the viewer shouldn't feel lost moving from one point to the next.",
+        ],
+      },
+      {
+        title: ["Story'yi kur ve başlıkları yaz", "Build the Story and write the captions"],
+        body: [
+          "Yeni bir Story sayfası aç, hazırladığın görselleri sırayla sürükle. Her noktaya, o noktanın söylediği bulguyu tek cümlede özetleyen bir başlık yaz — başlıklar art arda okunduğunda hikayenin özeti çıkmalı.",
+          "Open a new Story sheet and drag in your prepared views in order. Write each point a caption that summarizes its finding in one sentence — reading the captions back to back should give the gist of the whole story.",
+        ],
+      },
+      {
+        title: ["Öneri noktasıyla kapat", "Close with a recommendation point"],
+        body: [
+          "Son nokta yalnızca veri göstermemeli — \"bu yüzden şunu öneriyoruz\" diyen net bir aksiyon içermeli. Bir hikaye veri ile başlar ama bir kararla bitmelidir.",
+          "The last point shouldn't just show data — it should state a clear action: \"which is why we recommend...\". A story starts with data but should end with a decision.",
+        ],
+      },
+      githubStep("hikaye-ceyrek-sonuclari"),
+    ],
+    premium: true,
+  }),
+
   /* -------------------------- Power BI -------------------------- */
   project({
     slug: "powerbi-satis-raporu",
