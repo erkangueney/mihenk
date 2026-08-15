@@ -612,6 +612,139 @@ st.plotly_chart(isi_haritasi(matris), use_container_width=True)`,
     ],
   }),
 
+  project({
+    slug: "python-performans-optimizasyonu",
+    track: "python",
+    level: "expert",
+    title: ["Performans Optimizasyonu: 10 Kat Hızlandırma", "Performance Optimization: A 10x Speed-Up"],
+    stack: ["Python", "pandas", "transform()", "Profiling"],
+    hours: 11,
+    xp: 600,
+    summary: [
+      "Yavaş çalışan (döngü ve apply ağırlıklı) bir analiz betiğini ele al; profille, darboğazı bul, vektörleştir ve öncesi/sonrası hızlanmayı ölçüp belgele.",
+      "Take a slow analysis script (heavy on loops and apply); profile it, find the bottleneck, vectorize it, and measure and document the before/after speed-up.",
+    ],
+    dataset: [
+      "En az 200.000 satırlık bir işlem/sipariş veri seti (\"Online Retail II\" veya kendi verin); küçük veride optimizasyon farkı görünmez.",
+      "A transaction/order dataset with at least 200,000 rows (\"Online Retail II\" or your own data); the optimization gap won't show on small data.",
+    ],
+    deliverables: [
+      ["Yavaş sürümün profil çıktısı (`%timeit` veya `cProfile`) ve darboğaz teşhisi", "The slow version's profile output (`%timeit` or `cProfile`) and bottleneck diagnosis"],
+      ["Vektörleştirilmiş/transform tabanlı hızlı sürüm", "A vectorized/transform-based fast version"],
+      ["Öncesi/sonrası çalışma süresi tablosu (en az 3 senaryoda)", "A before/after execution-time table across at least 3 scenarios"],
+      ["\"Bu optimizasyon ne zaman gereksizdir?\" başlıklı 1 sayfalık not", "A one-page note titled \"when is this optimization not worth it?\""],
+    ],
+    steps: [
+      {
+        title: ["Yavaş sürümü yaz ve profille", "Write the slow version and profile it"],
+        body: [
+          "Önce \"doğal\" ama yavaş bir sürüm yaz: `for` döngüsüyle satır satır gezip her satır için bir hesap yap, ya da `df.apply(fonksiyon, axis=1)` kullan. `%timeit` (Jupyter) veya `time.perf_counter()` ile süresini ölç — bu senin karşılaştırma temelin.",
+          "First write a \"natural\" but slow version: loop row by row with `for` and compute per row, or use `df.apply(function, axis=1)`. Time it with `%timeit` (Jupyter) or `time.perf_counter()` — this is your baseline for comparison.",
+        ],
+        lang: "python",
+        code: `import time
+
+start = time.perf_counter()
+sonuclar = []
+for _, satir in df.iterrows():
+    sonuclar.append(satir["tutar"] * (1 + kdv_oranlari[satir["kategori"]]))
+df["kdv_dahil"] = sonuclar
+print(f"iterrows: {time.perf_counter() - start:.2f} sn")`,
+      },
+      {
+        title: ["Vektörleştir", "Vectorize"],
+        body: [
+          "`iterrows()`/`apply(axis=1)` yerine, pandas'ın sütun bazlı işlemlerini kullan: `.map()`, boolean indeksleme, aritmetik operatörler doğrudan sütunlar üzerinde. Grup-bağıl hesaplarda (ör. \"her satırın kendi kategorisine göre payı\") `groupby(...).transform(...)` kullan — bir önceki derste gördüğün teknik.",
+          "Replace `iterrows()`/`apply(axis=1)` with pandas' column-wise operations: `.map()`, boolean indexing, arithmetic operators applied directly to columns. For group-relative calculations (e.g. \"each row's share within its own category\"), use `groupby(...).transform(...)` — the technique from the previous lesson.",
+        ],
+      },
+      {
+        title: ["Öncesi/sonrasını 3 farklı veri boyutunda ölç", "Measure before/after at 3 different data sizes"],
+        body: [
+          "Aynı iki sürümü 10 bin, 100 bin ve 1 milyon satırlık örneklerde çalıştır ve süreleri bir tabloya yaz. Fark küçük veride görünmeyebilir ama veri büyüdükçe genelde katlanarak açılır — bu, \"neden önce ölçüyoruz\" sorusunun cevabıdır.",
+          "Run both versions on samples of 10K, 100K and 1M rows and record the timings in a table. The gap might not show at small sizes but usually widens exponentially as data grows — this is the answer to \"why measure before optimizing\".",
+        ],
+      },
+      {
+        title: ["Ne zaman gereksiz olduğunu yaz", "Write down when it isn't worth it"],
+        body: [
+          "Vektörleştirme her zaman gerekli değildir: küçük veride (birkaç bin satır) veya yalnızca bir kez çalışacak bir betikte, okunabilir ama \"yavaş\" kod genelde tercih edilir. Notunda şunu cevapla: bu projede vektörleştirme ne kadar geliştirici zamanına mal oldu, karşılığında ne kazandırdı?",
+          "Vectorizing isn't always necessary: on small data (a few thousand rows) or a script that runs only once, readable-but-\"slow\" code is often the right call. In your note, answer: how much developer time did vectorizing cost in this project, and what did it buy you?",
+        ],
+      },
+      githubStep("performans-optimizasyonu"),
+    ],
+    premium: true,
+  }),
+
+  project({
+    slug: "python-otomatik-rapor-betigi",
+    track: "python",
+    level: "expert",
+    title: ["Otomatik Rapor Betiği: Loglama ve Yeniden Deneme", "Automated Report Script: Logging and Retry"],
+    stack: ["Python", "logging", "argparse", "Zamanlanmış Görev"],
+    hours: 9,
+    xp: 550,
+    summary: [
+      "Bir Jupyter defterindeki analizi, her gün otomatik ve güvenilir şekilde çalışacak, loglayan ve geçici hatalarda kendini toparlayan bir komut satırı betiğine çevir.",
+      "Turn a Jupyter-notebook analysis into a command-line script that runs automatically and reliably every day, logs what it does, and recovers from transient failures.",
+    ],
+    dataset: [
+      "Herhangi bir tekrar eden rapor senaryosu (günlük satış özeti, haftalık KPI); gerçekçi bir kaynak dosya veya API yeterli.",
+      "Any recurring report scenario (daily sales summary, weekly KPIs); a realistic source file or API is enough.",
+    ],
+    deliverables: [
+      ["`argparse` ile parametreli çalışan bir CLI betiği (`--tarih`, `--cikti` gibi)", "A parameterized CLI script using `argparse` (e.g. `--tarih`, `--cikti`)"],
+      ["`logging` ile zaman damgalı, seviyeli çalışma kaydı", "A timestamped, leveled run log using `logging`"],
+      ["Geçici hatalar için yeniden deneme (retry) mantığı", "Retry logic for transient failures"],
+      ["Betiği günlük çalıştıran bir zamanlama tanımı (cron ifadesi veya GitHub Actions workflow'u) ve neden o yöntemin seçildiğine dair kısa not", "A schedule definition that runs the script daily (a cron expression or a GitHub Actions workflow) with a short note on why that method was chosen"],
+    ],
+    steps: [
+      {
+        title: ["Analizi bir fonksiyona çıkar", "Extract the analysis into a function"],
+        body: [
+          "Jupyter hücrelerindeki kodu, açık girdi/çıktısı olan bir `calistir(tarih, cikti_yolu)` fonksiyonuna topla. Bu adım, betiği hem elle hem otomatik çalıştırılabilir hale getirir — Jupyter'e özgü hiçbir şey (görüntüleme, `%magic` komutları) fonksiyonun içinde kalmamalı.",
+          "Gather the notebook-cell code into a `run(date, output_path)` function with clear inputs/outputs. This step makes the script runnable both manually and automatically — nothing Jupyter-specific (display calls, `%magic` commands) should remain inside the function.",
+        ],
+      },
+      {
+        title: ["CLI ve loglama ekle", "Add CLI and logging"],
+        body: [
+          "`argparse` ile tarihi/dosya yolunu dışarıdan parametre olarak al; kodun içine gömme. `logging.basicConfig` ile INFO seviyesinde, zaman damgalı bir log kur ve her önemli adımda (\"veri çekildi\", \"N satır işlendi\", \"rapor yazıldı\") bir log satırı bırak.",
+          "Take the date/file path as an external parameter with `argparse` instead of hard-coding it. Set up INFO-level, timestamped logging with `logging.basicConfig` and leave a log line at every meaningful step (\"data fetched\", \"N rows processed\", \"report written\").",
+        ],
+        lang: "python",
+        code: `import argparse, logging
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logger = logging.getLogger(__name__)
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--tarih", required=True)
+parser.add_argument("--cikti", default="rapor.csv")
+args = parser.parse_args()
+
+logger.info("Rapor başlıyor: %s", args.tarih)`,
+      },
+      {
+        title: ["Kaynağa erişimi yeniden denemeli yap", "Make the source access retry-capable"],
+        body: [
+          "Veri kaynağı bir API veya ağ paylaşımıysa, geçici hatalarda (`ConnectionError`, zaman aşımı) birkaç kez yeniden deneyen bir sarmalayıcı yaz — bir önceki derste kurduğun `retry()` deseni. Son denemede de başarısız olursa hatayı logla ve programı anlamlı bir çıkış koduyla sonlandır (`sys.exit(1)`), sessizce yutma.",
+          "If the source is an API or network share, wrap it with a retry that tries a few times on transient errors (`ConnectionError`, timeouts) — the `retry()` pattern from the previous lesson. If the last attempt still fails, log the error and exit with a meaningful status code (`sys.exit(1)`) — don't swallow it silently.",
+        ],
+      },
+      {
+        title: ["Zamanla ve belgele", "Schedule it and document"],
+        body: [
+          "Betiği her gün belirli bir saatte çalıştıracak bir zamanlama tanımla — sunucuda `cron` (`0 7 * * * python rapor.py --tarih $(date +%F)`) veya GitHub Actions'ta bir `schedule` workflow'u. README'ye hangi yöntemi neden seçtiğini (sunucu erişimi var mı, kod zaten GitHub'da mı) yaz.",
+          "Define a schedule that runs the script daily at a fixed time — server `cron` (`0 7 * * * python report.py --date $(date +%F)`) or a GitHub Actions `schedule` workflow. In the README, note why you picked that method (do you have server access, is the code already on GitHub).",
+        ],
+      },
+      githubStep("otomatik-rapor-betigi"),
+    ],
+    premium: true,
+  }),
+
   /* -------------------------- Tableau --------------------------- */
   project({
     slug: "tableau-satis-panosu",

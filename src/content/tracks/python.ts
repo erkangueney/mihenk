@@ -5360,6 +5360,368 @@ sonuc = pd.concat(toplamlar).groupby(level=0).sum()`,
             }),
           ],
         }),
+        lesson({
+          slug: "grup-bagil-hesaplamalar-transform",
+          title: L(
+            "Grup-bağıl hesaplamalar: transform() ve qcut()",
+            "Group-relative calculations: transform() and qcut()",
+          ),
+          summary: L(
+            "groupby() satırları toplar; transform() ise grubun sonucunu HER satıra geri yayar, tabloyu küçültmeden.",
+            "groupby() collapses rows; transform() broadcasts the group's result back onto EVERY row, without shrinking the table.",
+          ),
+          minutes: 18,
+          premium: true,
+          blocks: [
+            text(
+              "`groupby(...).sum()` gruplanmış bir özet döndürür — satır sayısı azalır. Ama bazen \"her satıra kendi grubunun toplamını yaz\" istersin: satır sayısı **değişmeden** kalsın, yanına grup bilgisi eklensin. Bunun için `.agg()`/`.sum()` yerine **`.transform()`** kullanılır:\n\n```python\ndf[\"sehir_toplami\"] = df.groupby(\"sehir\")[\"tutar\"].transform(\"sum\")\n```\n\nBu satır, `df`'in satır sayısını hiç değiştirmez — her satıra, o satırın ait olduğu şehrin toplamını yazar. Sonra bunu orijinal `tutar` ile bölerek \"bu satır kendi şehrinin cirosunun yüzde kaçı\" gibi bir oran çıkarabilirsin.",
+              "`groupby(...).sum()` returns a collapsed summary — the row count shrinks. But sometimes you want \"write each row's own group total back onto that row\": the row count should stay **unchanged**, with group info attached alongside. For that, use **`.transform()`** instead of `.agg()`/`.sum()`:\n\n```python\ndf[\"sehir_toplami\"] = df.groupby(\"sehir\")[\"tutar\"].transform(\"sum\")\n```\n\nThis line never changes `df`'s row count — it writes each row's own city's total onto that row. You can then divide by the original `tutar` to get a ratio like \"what percentage of its city's revenue is this row\".",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "`df.groupby(\"sehir\")[\"tutar\"].sum()` ile `df.groupby(\"sehir\")[\"tutar\"].transform(\"sum\")` arasındaki temel fark nedir?",
+                "What's the core difference between `df.groupby(\"sehir\")[\"tutar\"].sum()` and `df.groupby(\"sehir\")[\"tutar\"].transform(\"sum\")`?",
+              ],
+              options: [
+                [
+                  "sum() satır sayısını gruplara indirger; transform(\"sum\") satır sayısını korur, sonucu her satıra geri yayar",
+                  "sum() collapses row count down to the groups; transform(\"sum\") keeps the row count and broadcasts the result back onto every row",
+                ],
+                ["İkisi de birebir aynı sonucu döndürür", "Both return exactly the same result"],
+                ["transform() yalnızca metin sütunlarında çalışır", "transform() only works on text columns"],
+                ["sum() daha yavaştır", "sum() is slower"],
+              ],
+              answer: 0,
+              explain: [
+                "sum() bir Series/DataFrame'i grup sayısı kadar satıra indirger. transform(\"sum\") ise orijinal satır sayısını korur — her satır, kendi grubunun toplamını görür. Bu, SQL'deki `SUM(x) OVER (PARTITION BY ...)` ile aynı fikirdir.",
+                "sum() reduces to as many rows as there are groups. transform(\"sum\") keeps the original row count — every row sees its own group's total. This is the same idea as SQL's `SUM(x) OVER (PARTITION BY ...)`.",
+              ],
+            }),
+            pyTask({
+              id: "t1",
+              prompt: [
+                "Her satıra, kendi `sehir`inin toplam `tutar`ını `sehir_toplami` sütunu olarak ekle (satır sayısı değişmemeli). Ardından her satırın kendi şehir toplamına oranını yüzde olarak `pay_yuzde` sütununa yaz (`round(1)` ile 1 ondalık basamağa yuvarla).",
+                "Add each row's own `sehir`'s total `tutar` as a `sehir_toplami` column (row count must not change). Then write each row's share of its own city's total as a percentage into `pay_yuzde` (round to 1 decimal with `round(1)`).",
+              ],
+              starter: `import pandas as pd
+
+df = pd.DataFrame({
+    "sehir": ["İstanbul", "Ankara", "İzmir", "İstanbul", "Ankara", "İstanbul"],
+    "tutar": [1200, 800, 950, 1500, 700, 300],
+})
+
+df["sehir_toplami"] =
+df["pay_yuzde"] =
+print(df)`,
+              solution: `import pandas as pd
+
+df = pd.DataFrame({
+    "sehir": ["İstanbul", "Ankara", "İzmir", "İstanbul", "Ankara", "İstanbul"],
+    "tutar": [1200, 800, 950, 1500, 700, 300],
+})
+
+df["sehir_toplami"] = df.groupby("sehir")["tutar"].transform("sum")
+df["pay_yuzde"] = (df["tutar"] / df["sehir_toplami"] * 100).round(1)
+print(df)`,
+              hint: [
+                "`df.groupby(\"sehir\")[\"tutar\"].transform(\"sum\")` satır sayısını değiştirmeden grup toplamını her satıra yazar.",
+                "`df.groupby(\"sehir\")[\"tutar\"].transform(\"sum\")` writes the group total onto every row without changing row count.",
+              ],
+              checks: [
+                {
+                  code: "len(df) == 6",
+                  msg: ["Satır sayısı değişmemeli (transform, groupby'dan farklıdır)", "Row count must not change (transform differs from groupby)"],
+                },
+                {
+                  code: "int(df.loc[0, 'sehir_toplami']) == 3000",
+                  msg: ["İstanbul satırlarının sehir_toplami'ı 3000 olmalı", "İstanbul rows' sehir_toplami must be 3000"],
+                },
+                {
+                  code: "round(float(df.loc[0, 'pay_yuzde']), 1) == 40.0",
+                  msg: ["İlk satırın payı %40.0 olmalı (1200/3000)", "The first row's share must be 40.0% (1200/3000)"],
+                },
+              ],
+              xp: 40,
+            }),
+            text(
+              "Bir soru daha: \"müşterileri harcamaya göre 4 eşit dilime böl\" — SQL'deki `NTILE(4)`'ün pandas karşılığı **`pd.qcut()`**'tur. `qcut`, veriyi **eşit sayıda satır** içeren dilimlere böler (eşit **değer aralığına** değil — o `pd.cut()`'tır).",
+              "One more question: \"split customers into 4 equal buckets by spend\" — the pandas counterpart of SQL's `NTILE(4)` is **`pd.qcut()`**. `qcut` splits data into buckets with **equal row counts** (not equal **value ranges** — that's `pd.cut()`).",
+            ),
+            quiz({
+              id: "q2",
+              q: [
+                "`pd.qcut()` ile `pd.cut()` arasındaki fark nedir?",
+                "What's the difference between `pd.qcut()` and `pd.cut()`?",
+              ],
+              options: [
+                [
+                  "qcut her dilime eşit sayıda satır koyar; cut her dilime eşit genişlikte bir değer aralığı verir",
+                  "qcut puts an equal number of rows in each bucket; cut gives each bucket an equal-width value range",
+                ],
+                ["İkisi de birebir aynı şeyi yapar", "Both do exactly the same thing"],
+                ["cut yalnızca tarihlerle çalışır", "cut only works with dates"],
+                ["qcut metin sütunlarını böler", "qcut splits text columns"],
+              ],
+              answer: 0,
+              explain: [
+                "`pd.cut(x, bins=4)` değer eksenini 4 eşit parçaya böler — her dilimde farklı sayıda satır olabilir. `pd.qcut(x, q=4)` ise satırları sıralayıp 4 eşit BÜYÜKLÜKTE gruba ayırır — bu yüzden 'çeyreklik' (quartile) demek istediğinde doğru araç qcut'tur.",
+                "`pd.cut(x, bins=4)` splits the value axis into 4 equal-width ranges — each bucket can end up with a different row count. `pd.qcut(x, q=4)` sorts the rows and splits them into 4 equal-SIZE groups — so when you mean 'quartile', qcut is the right tool.",
+              ],
+            }),
+            pyTask({
+              id: "t2",
+              prompt: [
+                "Müşteri başına toplam harcamayı hesapla, sonra `pd.qcut()` ile harcamaya göre 4 eşit dilime ayır (`labels=[4, 3, 2, 1]` — en çok harcayan dilim 1 olsun) ve sonucu `dilim` sütununa tam sayı olarak yaz.",
+                "Compute total spend per customer, then use `pd.qcut()` to split into 4 equal buckets by spend (`labels=[4, 3, 2, 1]` — the top spenders get bucket 1) and store the result as an integer column `dilim`.",
+              ],
+              starter: `import pandas as pd
+
+df = pd.DataFrame({
+    "musteri": ["A", "B", "C", "D", "E", "F", "G", "H"],
+    "tutar": [2700, 2050, 1450, 1300, 900, 700, 450, 300],
+})
+
+df["dilim"] =
+print(df)`,
+              solution: `import pandas as pd
+
+df = pd.DataFrame({
+    "musteri": ["A", "B", "C", "D", "E", "F", "G", "H"],
+    "tutar": [2700, 2050, 1450, 1300, 900, 700, 450, 300],
+})
+
+df["dilim"] = pd.qcut(df["tutar"], q=4, labels=[4, 3, 2, 1]).astype(int)
+print(df)`,
+              hint: [
+                "`pd.qcut(df[\"tutar\"], q=4, labels=[4, 3, 2, 1])` — labels sırası azalan olduğu için en yüksek harcama dilim 1'e düşer. Sonucu `.astype(int)` ile tam sayıya çevir.",
+                "`pd.qcut(df[\"tutar\"], q=4, labels=[4, 3, 2, 1])` — because labels are given in descending order, the highest spend falls into bucket 1. Convert the result with `.astype(int)`.",
+              ],
+              checks: [
+                {
+                  code: "int(df.loc[df['musteri'] == 'A', 'dilim'].iloc[0]) == 1",
+                  msg: ["En çok harcayan (A) dilim 1'de olmalı", "The top spender (A) must be in bucket 1"],
+                },
+                {
+                  code: "int(df.loc[df['musteri'] == 'H', 'dilim'].iloc[0]) == 4",
+                  msg: ["En az harcayan (H) dilim 4'te olmalı", "The lowest spender (H) must be in bucket 4"],
+                },
+              ],
+              xp: 40,
+            }),
+            pitfall(
+              "transform()'a verilen fonksiyon her zaman aynı uzunlukta sonuç döndürmeli",
+              "The function passed to transform() must always return a result of the same length",
+              "`.transform(\"sum\")` gibi hazır isimler güvenlidir. Ama kendi fonksiyonunu verirsen (`transform(lambda x: ...)`), o fonksiyon grup uzunluğunda bir sonuç döndürmezse hata alırsın — `.agg()`'ten farklı olarak transform grubu tek bir sayıya indirgeyip bırakamaz, her satıra bir değer yaymak zorundadır.",
+              "Built-in names like `.transform(\"sum\")` are safe. But if you pass your own function (`transform(lambda x: ...)`), it must return a result the same length as the group or you'll get an error — unlike `.agg()`, transform cannot collapse the group to a single number and stop there; it must broadcast a value onto every row.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "coklu-islem-paralel-veri",
+          title: L("Çoklu işlem (multiprocessing) ile paralel veri işleme", "Parallel data processing with multiprocessing"),
+          summary: L(
+            "Tek çekirdek CPU'yu sınıra dayadığında: işi birden çok çekirdeğe bölmek.",
+            "When a single core maxes out the CPU: splitting the work across multiple cores.",
+          ),
+          minutes: 16,
+          premium: true,
+          blocks: [
+            text(
+              "Python'da tek bir işlem (process), Küresel Yorumlayıcı Kilidi (**GIL**) yüzünden aynı anda yalnızca bir CPU çekirdeğinde Python kodu çalıştırabilir — normal bir fonksiyon ne kadar \"paralel\" yazılırsa yazılsın, CPU-yoğun bir işte (ağır bir hesaplama, çok sayıda dosya işleme) tek çekirdekte sıkışır. **`multiprocessing`** modülü, işi birden fazla ayrı Python **sürecine** (process) bölerek bu sınırı aşar — her süreç kendi çekirdeğinde, gerçekten paralel çalışır.\n\n> Bu ders kavramsaldır: kod örnekleri gerçek bir Python kurulumunda (kendi bilgisayarında veya Jupyter'de) çalışır. Bu platformun tarayıcı içi Python motoru (Pyodide) bir web sayfası içinde, işletim sistemi süreci açamayan bir sanal alanda (sandbox) çalışır — bu yüzden `multiprocessing` alıştırması burada çalıştırılamaz.",
+              "In Python, a single process can run Python code on only one CPU core at a time because of the Global Interpreter Lock (**GIL**) — no matter how you write a normal function, a CPU-heavy job (a heavy computation, processing many files) gets stuck on one core. The **`multiprocessing`** module gets around this by splitting work across multiple separate Python **processes** — each process runs on its own core, genuinely in parallel.\n\n> This lesson is conceptual: the code examples run on a real Python install (your own machine or Jupyter). This platform's in-browser Python engine (Pyodide) runs inside a web page, in a sandbox that cannot spawn operating-system processes — so a `multiprocessing` exercise cannot be executed here.",
+            ),
+            code(
+              "python",
+              `from multiprocessing import Pool
+import pandas as pd
+
+def sehir_ozeti(sehir_df):
+    sehir, grup = sehir_df
+    return {"sehir": sehir, "toplam": grup["tutar"].sum(), "adet": len(grup)}
+
+if __name__ == "__main__":
+    df = pd.read_csv("buyuk_satislar.csv")
+    gruplar = list(df.groupby("sehir"))   # [(sehir1, alt_df1), (sehir2, alt_df2), ...]
+
+    with Pool(processes=4) as havuz:       # 4 ayrı Python süreci başlat
+        sonuclar = havuz.map(sehir_ozeti, gruplar)
+
+    ozet = pd.DataFrame(sonuclar)
+    print(ozet)`,
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Python'da normal (çoklu-iş parçacıklı olmayan) kodun aynı anda birden fazla CPU çekirdeğinde çalışamamasının sebebi nedir?",
+                "Why can't normal (non-multiprocess) Python code run on more than one CPU core at the same time?",
+              ],
+              options: [
+                ["Küresel Yorumlayıcı Kilidi (GIL), tek bir süreçte aynı anda yalnızca bir çekirdekte Python bayt kodu çalıştırılmasına izin verir", "The Global Interpreter Lock (GIL) allows only one core to execute Python bytecode at a time within a single process"],
+                ["Python fiziksel olarak birden fazla çekirdeği tanıyamaz", "Python is physically unable to detect more than one core"],
+                ["pandas çoklu çekirdeği desteklemez", "pandas does not support multiple cores"],
+                ["Bu yalnızca Windows'ta bir sorundur", "This is only a problem on Windows"],
+              ],
+              answer: 0,
+              explain: [
+                "GIL, CPython yorumlayıcısının bir parçasıdır ve bellek güvenliğini basitleştirmek için tek seferde yalnızca bir iş parçacığının Python kodu çalıştırmasına izin verir. Bunu aşmanın yolu iş parçacığı değil, ayrı **süreçler** (her birinin kendi GIL'i vardır) kullanmaktır — `multiprocessing`'in yaptığı tam olarak budur.",
+                "The GIL is part of the CPython interpreter and, to simplify memory safety, lets only one thread execute Python code at a time. The way around it isn't more threads — it's separate **processes** (each with its own GIL), which is exactly what `multiprocessing` does.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "Yukarıdaki örnekte `if __name__ == \"__main__\":` bloğu neden önemlidir?",
+                "In the example above, why does the `if __name__ == \"__main__\":` guard matter?",
+              ],
+              options: [
+                [
+                  "Yeni süreçler dosyayı yeniden içe aktarır; bu koruma olmadan her alt süreç kendi Pool'unu tekrar başlatıp sonsuz döngüye girebilir",
+                  "New processes re-import the file; without this guard, each child process could re-launch its own Pool and spiral into infinite recursion",
+                ],
+                ["Sadece kod okunabilirliği için, işlevsel bir etkisi yoktur", "It's purely for readability and has no functional effect"],
+                ["pandas'ı import etmek için gereklidir", "It's required in order to import pandas"],
+                ["Yalnızca test dosyalarında kullanılır", "It's only used in test files"],
+              ],
+              answer: 0,
+              explain: [
+                "Windows ve macOS'ta (varsayılan 'spawn' yöntemiyle) her yeni süreç ana dosyayı sıfırdan içe aktarır. `if __name__ == \"__main__\":` koruması olmadan, alt süreç de dosyanın en üstündeki `Pool(...)` çağrısını tekrar çalıştırır — bu da her alt sürecin kendi alt süreçlerini açmaya çalışmasına, sonsuz bir döngüye yol açar.",
+                "On Windows and macOS (with the default 'spawn' method), every new process re-imports the main file from scratch. Without the `if __name__ == \"__main__\":` guard, the child process would also re-run the `Pool(...)` call at the top of the file — causing each child to try spawning its own children, in an infinite spiral.",
+              ],
+            }),
+            tip(
+              "Ne zaman multiprocessing, ne zaman değil",
+              "When to reach for multiprocessing — and when not to",
+              "multiprocessing yalnızca **CPU-yoğun** işlerde (ağır hesaplama) fayda sağlar. **I/O-yoğun** işlerde (çok sayıda dosya indirme, API çağrısı) `asyncio` veya `threading` genelde daha hafif ve etkilidir, çünkü darboğaz CPU değil beklemedir. Ayrıca küçük veride (birkaç bin satır) süreç başlatma maliyeti kazancı yer bile — önce ölç, sonra paralelleştir.",
+              "multiprocessing only pays off for **CPU-bound** work (heavy computation). For **I/O-bound** work (downloading many files, calling an API repeatedly), `asyncio` or `threading` are usually lighter and more effective, because the bottleneck is waiting, not the CPU. Also, on small data (a few thousand rows) the cost of starting processes can eat the gain entirely — measure first, parallelize second.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "saglam-rapor-betigi",
+          title: L(
+            "Sağlam bir rapor betiği: loglama, yeniden deneme, CLI",
+            "A production-grade report script: logging, retry, CLI",
+          ),
+          summary: L(
+            "Bir defalık not defteri hücresinden, güvenilir şekilde tekrar tekrar çalıştırılabilen bir betiğe.",
+            "From a one-off notebook cell to a script you can reliably run again and again.",
+          ),
+          minutes: 18,
+          premium: true,
+          blocks: [
+            text(
+              "Bir analiz Jupyter'de çalışıyor olması, onu üretimde güvenilir kılmaz. Her gün otomatik çalışacak bir rapor betiğinin üç şeye ihtiyacı vardır:\n\n- **Loglama** — `print()` yerine `logging`: zaman damgalı, seviyeli (INFO/WARNING/ERROR) ve kapatılıp açılabilir\n- **Yeniden deneme (retry)** — ağ/API çağrıları bazen geçici olarak başarısız olur; hemen pes etmek yerine birkaç kez dene\n- **Komut satırı arayüzü (CLI)** — tarihi, dosya yolunu kodun içine gömmek yerine dışarıdan parametre olarak al\n\n> Bu ders kavramsaldır: `argparse` komut satırı argümanları gerektirir ve bu platformun tarayıcı içi alıştırma alanında bir komut satırı yoktur — bu yüzden CLI kısmı yalnızca örnek kod olarak gösterilir. Yeniden deneme (retry) mantığı ise saf Python olduğu için aşağıda çalıştırıp deneyebilirsin.",
+              "The fact that an analysis runs in Jupyter doesn't make it reliable in production. A report script meant to run automatically every day needs three things:\n\n- **Logging** — `logging` instead of `print()`: timestamped, leveled (INFO/WARNING/ERROR), and can be turned up or down\n- **Retry** — network/API calls sometimes fail transiently; retry a few times instead of giving up immediately\n- **A command-line interface (CLI)** — take the date or file path as an external parameter instead of hard-coding it\n\n> This lesson is conceptual: `argparse` requires command-line arguments, and this platform's in-browser exercise area has no command line — so the CLI part is shown as example code only. The retry logic, being plain Python, you can run and try below.",
+            ),
+            code(
+              "python",
+              `import argparse
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Günlük satış raporu üretir")
+    parser.add_argument("--tarih", required=True, help="Rapor tarihi, YYYY-AA-GG")
+    parser.add_argument("--cikti", default="rapor.csv", help="Çıktı dosyası")
+    return parser.parse_args()
+
+if __name__ == "__main__":
+    args = parse_args()
+    logger.info("Rapor başlıyor: tarih=%s", args.tarih)
+    # ... veri çekme, işleme ...
+    logger.info("Rapor tamamlandı: %s", args.cikti)
+
+# Çalıştırma: python rapor.py --tarih 2026-01-15 --cikti ocak.csv`,
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Otomatik çalışan bir rapor betiğinde `print()` yerine `logging` kullanmanın asıl faydası nedir?",
+                "What's the real benefit of using `logging` instead of `print()` in an automated report script?",
+              ],
+              options: [
+                [
+                  "Zaman damgası ve seviye (INFO/WARNING/ERROR) taşır; seviyeye göre filtrelenebilir ve dosyaya/izleme sistemine yönlendirilebilir",
+                  "It carries a timestamp and level (INFO/WARNING/ERROR); it can be filtered by level and routed to a file or monitoring system"
+                ],
+                ["logging, print()'ten daha hızlı çalışır", "logging runs faster than print()"],
+                ["print() Jupyter dışında hiç çalışmaz", "print() doesn't work outside Jupyter at all"],
+                ["logging otomatik olarak hataları düzeltir", "logging automatically fixes errors"],
+              ],
+              answer: 0,
+              explain: [
+                "Kimse günde 1000 satır print çıktısını elle okumaz. logging, her satıra ne zaman/hangi önem derecesinde olduğunu ekler, üretimde yalnızca WARNING ve üstünü gösterecek şekilde seviyeyi ayarlamana ve çıktıyı bir dosyaya/izleme panosuna yönlendirmene izin verir.",
+                "Nobody manually reads 1000 lines of print output a day. logging attaches when and at what severity each line happened, lets you set production to show only WARNING and above, and lets you route output to a file or a monitoring dashboard.",
+              ],
+            }),
+            pyTask({
+              id: "t1",
+              prompt: [
+                "`kirilgan_cagri` bazen `ConnectionError` fırlatan bir fonksiyon. `retry(fn, tries=3)` adlı bir fonksiyon yaz: `fn()`'i çağırsın, `ConnectionError` alırsa tekrar densin (en fazla `tries` kez), üçüncüsünde de hata alırsa hatayı olduğu gibi yükseltsin (`raise`). Başarılı çağrının sonucunu döndür.",
+                "`kirilgan_cagri` is a function that sometimes raises `ConnectionError`. Write a function `retry(fn, tries=3)`: call `fn()`, retry on `ConnectionError` (up to `tries` times), and re-raise the error if it still fails on the last try. Return the successful call's result.",
+              ],
+              starter: `denemeler = []
+
+def kirilgan_cagri():
+    denemeler.append(1)
+    if len(denemeler) < 3:
+        raise ConnectionError("geçici ağ hatası")
+    return "başarılı"
+
+def retry(fn, tries=3):
+    # buraya yaz
+    pass
+
+sonuc = retry(kirilgan_cagri, tries=3)
+print(sonuc, len(denemeler))`,
+              solution: `denemeler = []
+
+def kirilgan_cagri():
+    denemeler.append(1)
+    if len(denemeler) < 3:
+        raise ConnectionError("geçici ağ hatası")
+    return "başarılı"
+
+def retry(fn, tries=3):
+    for deneme in range(1, tries + 1):
+        try:
+            return fn()
+        except ConnectionError:
+            if deneme == tries:
+                raise
+
+sonuc = retry(kirilgan_cagri, tries=3)
+print(sonuc, len(denemeler))`,
+              hint: [
+                "`for` döngüsüyle `tries` kez dene; `try`/`except ConnectionError` içinde son denemede `raise` ile hatayı tekrar fırlat.",
+                "Loop `tries` times with `for`; inside `try`/`except ConnectionError`, `raise` again on the last attempt.",
+              ],
+              checks: [
+                {
+                  code: "sonuc == 'başarılı'",
+                  msg: ["retry, başarılı sonucu döndürmeli", "retry must return the successful result"],
+                },
+                {
+                  code: "len(denemeler) == 3",
+                  msg: ["Fonksiyon tam olarak 3 kez çağrılmalı (2 başarısız + 1 başarılı)", "The function must be called exactly 3 times (2 failed + 1 successful)"],
+                },
+              ],
+              xp: 40,
+            }),
+            pitfall(
+              "Sınırsız yeniden deneme bir hatayı sonsuz döngüye çevirebilir",
+              "Unlimited retries can turn one failure into an infinite loop",
+              "`retry`'a her zaman bir üst sınır (`tries`) koy ve mümkünse denemeler arasına kısa bir bekleme (`time.sleep`) ekle. Sınırsız veya beklemesiz yeniden deneme, geçici bir hatayı (örn. hedef sunucu zaten yoğunken) daha da kötüleştirebilir.",
+              "Always give `retry` a hard cap (`tries`) and, where possible, a short wait (`time.sleep`) between attempts. Unlimited or wait-free retries can make a transient failure worse — for example, hammering a server that's already overloaded.",
+            ),
+          ],
+        }),
       ],
     },
   ],
