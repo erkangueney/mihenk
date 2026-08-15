@@ -2737,6 +2737,229 @@ YTD = TOTALYTD([Toplam Satış], Tarih[Date])`,
             }),
           ],
         }),
+        lesson({
+          slug: "var-return-ile-dax",
+          title: L("VAR/RETURN ile okunabilir ve hızlı DAX", "Readable, faster DAX with VAR/RETURN"),
+          summary: L(
+            "Aynı ifadeyi bir ölçüde üç kez tekrar yazmak yerine, bir kere hesaplayıp isimlendir.",
+            "Instead of writing the same expression three times in one measure, compute it once and name it.",
+          ),
+          minutes: 15,
+          premium: true,
+          blocks: [
+            text(
+              "Karmaşık bir ölçüde aynı `CALCULATE` ifadesi birden çok yerde tekrar edebilir — hem okunması zorlaşır hem de motor o ifadeyi **her tekrarda yeniden hesaplar**. **VAR/RETURN**, bir ara sonucu bir kere hesaplayıp isimlendirmeni, sonra `RETURN` içinde o ismi kullanmanı sağlar:\n\n```dax\nBüyüme % =\nVAR BuYil = CALCULATE([Toplam Satış], DATESYTD(Tarih[Date]))\nVAR GecenYil = CALCULATE([Toplam Satış], DATESYTD(SAMEPERIODLASTYEAR(Tarih[Date])))\nRETURN\n    DIVIDE(BuYil - GecenYil, GecenYil)\n```\n\n`BuYil` ve `GecenYil`, ölçünün kendi içinde birer değişkendir — her ikisi de yalnızca **bir kez** hesaplanır ve `RETURN` satırında istediğin kadar kullanılabilir.",
+              "In a complex measure, the same `CALCULATE` expression can repeat in several places — this hurts readability, and the engine **recomputes** that expression every time it repeats. **VAR/RETURN** lets you compute an intermediate result once, name it, and then use that name inside `RETURN`:\n\n```dax\nGrowth % =\nVAR ThisYear = CALCULATE([Total Sales], DATESYTD(Date[Date]))\nVAR LastYear = CALCULATE([Total Sales], DATESYTD(SAMEPERIODLASTYEAR(Date[Date])))\nRETURN\n    DIVIDE(ThisYear - LastYear, LastYear)\n```\n\n`ThisYear` and `LastYear` are variables local to the measure — each is computed **only once** and can be used as many times as you like in the `RETURN` line.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Bir DAX ölçüsünde aynı CALCULATE ifadesini VAR'a almanın performans avantajı nereden gelir?",
+                "Where does the performance benefit of putting a repeated CALCULATE expression into a VAR come from?",
+              ],
+              options: [
+                [
+                  "VAR ifadeyi yalnızca bir kez hesaplar; VAR olmadan aynı ifade her geçtiği yerde motor tarafından yeniden hesaplanır",
+                  "VAR computes the expression only once; without it, the engine recomputes that same expression every place it appears",
+                ],
+                ["VAR kullanmak ölçüyü otomatik olarak Import moduna çevirir", "Using VAR automatically converts the measure to Import mode"],
+                ["VAR yalnızca metin ifadelerinde performans kazandırır", "VAR only improves performance for text expressions"],
+                ["VAR, filtre bağlamını tamamen devre dışı bırakır", "VAR completely disables the filter context"],
+              ],
+              answer: 0,
+              explain: [
+                "Motor, bir VAR ifadesini bir kez değerlendirir ve sonucu bellekte tutar; RETURN içinde o değişkeni kaç kez kullanırsan kullan yeniden hesaplama yapılmaz. Aynı ifade VAR'sız üç yerde tekrar edilseydi, üç kez hesaplanırdı.",
+                "The engine evaluates a VAR expression once and holds the result in memory; using that variable any number of times in RETURN triggers no recomputation. Without VAR, the same expression repeated in three places would be computed three times.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "VAR/RETURN kullanmanın performans dışındaki asıl faydası nedir?",
+                "What's the main benefit of VAR/RETURN besides performance?",
+              ],
+              options: [
+                [
+                  "Ara sonuçlara anlamlı isimler vererek ölçünün mantığını okunur hâle getirir",
+                  "It gives intermediate results meaningful names, making the measure's logic readable",
+                ],
+                ["Ölçünün her zaman doğru sonuç vermesini garanti eder", "It guarantees the measure always returns the correct result"],
+                ["DAX'ta hata ayıklamayı tamamen gereksiz kılar", "It makes debugging DAX completely unnecessary"],
+                ["Yalnızca Power BI Service'te çalışır, Desktop'ta çalışmaz", "It only works in Power BI Service, not Desktop"],
+              ],
+              answer: 0,
+              explain: [
+                "İç içe geçmiş, tekrarlı CALCULATE ifadeleriyle dolu bir ölçüyü altı ay sonra anlamak zordur. `BuYil`, `GecenYil` gibi isimlendirilmiş adımlar, ölçünün mantığını bir tarif gibi baştan sona okunur kılar.",
+                "A measure stuffed with nested, repeated CALCULATE expressions is hard to understand six months later. Named steps like `ThisYear`, `LastYear` turn the measure's logic into something you can read top to bottom, like a recipe.",
+              ],
+            }),
+            order({
+              id: "o1",
+              prompt: [
+                "Bir DAX ölçüsünde VAR/RETURN yapısının parçalarını doğru sıraya diz.",
+                "Put the parts of a VAR/RETURN structure in a DAX measure in the right order.",
+              ],
+              lines: [
+                "VAR BuYil = CALCULATE(...)",
+                "VAR GecenYil = CALCULATE(...)",
+                "RETURN",
+                "DIVIDE(BuYil - GecenYil, GecenYil)",
+              ],
+              xp: 25,
+            }),
+            pitfall(
+              "VAR'lar birbirine referans verebilir ama RETURN'den sonrasına göremez",
+              "VARs can reference each other, but nothing after RETURN can see back into them the other way",
+              "Bir VAR, kendinden önce tanımlanmış başka bir VAR'ı kullanabilir (`VAR Fark = BuYil - GecenYil`, `BuYil` ve `GecenYil`'den sonra tanımlanmışsa). Ama tüm VAR'lar `RETURN`'den önce tanımlanmalıdır — RETURN'den sonra yeni bir VAR açamazsın.",
+              "A VAR can use another VAR defined before it (`VAR Diff = ThisYear - LastYear`, as long as `ThisYear` and `LastYear` were defined earlier). But all VARs must be defined before `RETURN` — you cannot open a new VAR after RETURN.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "alan-parametreleri",
+          title: L("Alan parametreleri: raporu kullanıcının eline vermek", "Field parameters: putting the report in the viewer's hands"),
+          summary: L(
+            "Aynı grafiği metrik/kırılıma göre 5 kez çizmek yerine, kullanıcının bir dilimleyiciyle seçmesine izin ver.",
+            "Instead of drawing the same chart 5 times per metric/breakdown, let the viewer pick with a slicer.",
+          ),
+          minutes: 14,
+          premium: true,
+          blocks: [
+            text(
+              "\"Ciro, kâr, birim satışa göre de aynı grafiği görebilir miyiz?\" sorusu genelde aynı görselin kopyalanıp her metrik için ayrı bir sayfa/görsel yapılmasıyla \"çözülür\" — bu hem bakımı zorlaştırır hem sayfayı kalabalıklaştırır.\n\n**Alan parametreleri (Field parameters)**, birden fazla ölçüyü (veya sütunu) tek bir sanal alanda toplar; bu alanı bir görsele sürükleyip yanına bir **dilimleyici** koyarsın. Kullanıcı dilimleyiciden \"Ciro\"yu \"Kâr\"a değiştirdiğinde, aynı görsel — hiçbir yeni sayfa veya kopya olmadan — farklı metriği çizer.",
+              "\"Can we see the same chart for revenue, profit, and units sold too?\" is usually \"solved\" by copying the same visual and building a separate page/visual per metric — which makes maintenance harder and clutters the report.\n\n**Field parameters** gather several measures (or columns) into a single virtual field; you drag that field onto a visual and place a **slicer** next to it. When the viewer switches the slicer from \"Revenue\" to \"Profit\", the same visual — no new page, no copy — draws the different metric.",
+            ),
+            code(
+              "dax",
+              `-- Modelleme sekmesinde "Yeni Parametre → Alanlar" ile oluşturulur,
+-- arkada bir hesaplanan tablo üretir:
+Metrik Seç = {
+    ("Ciro", NAMEOF([Toplam Ciro]), 0),
+    ("Kâr", NAMEOF([Toplam Kâr]), 1),
+    ("Birim Satış", NAMEOF([Toplam Birim]), 2)
+}`,
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Alan parametreleri temel olarak hangi tekrarlanan işi ortadan kaldırır?",
+                "What repetitive work do field parameters mainly eliminate?",
+              ],
+              options: [
+                [
+                  "Aynı görseli her metrik için ayrı ayrı kopyalayıp bakımını ayrı ayrı yapma zorunluluğunu",
+                  "The need to copy the same visual separately for every metric and maintain each copy separately",
+                ],
+                ["Veri modelindeki ilişkileri kurma işini", "The work of building relationships in the data model"],
+                ["Power Query'deki veri temizleme adımlarını", "The data-cleaning steps in Power Query"],
+                ["Raporu yayınlama işlemini", "The process of publishing the report"],
+              ],
+              answer: 0,
+              explain: [
+                "Alan parametresi olmadan 'aynı grafik, farklı metrik' isteği genelde N tane kopya görsel/sayfa demektir; her biri ayrı ayrı güncellenmelidir. Alan parametresiyle tek bir görsel + bir dilimleyici yeterlidir.",
+                "Without a field parameter, \"same chart, different metric\" usually means N copied visuals/pages, each needing separate updates. With a field parameter, one visual plus one slicer is enough.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "Bir alan parametresi arka planda ne üretir?",
+                "What does a field parameter produce behind the scenes?",
+              ],
+              options: [
+                ["Seçilebilecek alanların adlarını ve sırasını tutan hesaplanan bir tablo", "A calculated table holding the names and order of the selectable fields"],
+                ["Yeni bir fiziksel veri kaynağı bağlantısı", "A new physical data source connection"],
+                ["Otomatik bir DirectQuery modeli", "An automatic DirectQuery model"],
+                ["Bir Power Query sorgu adımı", "A Power Query step"],
+              ],
+              answer: 0,
+              explain: [
+                "Modelleme sekmesindeki 'Yeni Parametre → Alanlar' seçimi, alan raporunuzun modelinde her satırı bir seçilebilir alanı temsil eden hesaplanan bir tablo oluşturur; dilimleyici bu tablonun üzerinde çalışır.",
+                "The \"New Parameter → Fields\" option on the Modeling tab creates a calculated table in your model where each row represents a selectable field; the slicer operates on that table.",
+              ],
+            }),
+            tip(
+              "Alan parametreleri ölçüleri de sütunları da kabul eder",
+              "Field parameters accept both measures and columns",
+              "Yalnızca metrikler için değil, kırılım/boyut değiştirmek için de kullanılabilir: 'Şehre göre mi, Kategoriye göre mi kırılsın?' sorusunu da aynı dilimleyici mantığıyla kullanıcıya bırakabilirsin.",
+              "They're not only for switching metrics — you can also use them to let the viewer switch the breakdown/dimension: \"broken down by City or by Category?\" can be handed to the user with the same slicer pattern.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "power-query-m-ozel-fonksiyon",
+          title: L("Power Query'de M dili: kendi dönüşüm fonksiyonunu yazmak", "M language in Power Query: writing your own transform function"),
+          summary: L(
+            "Aynı temizlik adımlarını her yeni tabloda elle tekrarlamak yerine, bir kere yaz, her yerde çağır.",
+            "Instead of repeating the same cleanup steps by hand on every new table, write it once and call it everywhere.",
+          ),
+          minutes: 16,
+          premium: true,
+          blocks: [
+            text(
+              "Power Query arayüzündeki her adım (Sütun Kaldır, Değiştir, Filtrele) aslında arka planda **M dilinde** bir kod satırı üretir — bunu Gelişmiş Düzenleyici'den (Ana Sayfa → Gelişmiş Düzenleyici) görebilirsin. Aynı temizlik adımlarını her yeni kaynağa elle tekrar uyguluyorsan, bunu bir **özel M fonksiyonu**na çevirebilirsin — tıpkı Excel'deki LAMBDA gibi, ama Power Query tarafında.\n\nBir M fonksiyonu, girdi parametreleri alan ve bir sonuç döndüren bir `let...in` bloğudur; parametre isimleri `(parametre1 as type, parametre2 as type) => ...` ile tanımlanır.",
+              "Every step in the Power Query interface (Remove Columns, Replace Values, Filter Rows) actually generates a line of **M language** code behind the scenes — visible in the Advanced Editor (Home → Advanced Editor). If you're re-applying the same cleanup steps by hand to every new source, you can turn it into a **custom M function** — just like LAMBDA in Excel, but on the Power Query side.\n\nAn M function is a `let...in` block that takes input parameters and returns a result; parameter names are declared with `(param1 as type, param2 as type) => ...`.",
+            ),
+            code(
+              "m",
+              `// "TemizleVeStandartlastir" adıyla ayrı bir sorgu olarak kaydedilir
+(kaynakTablo as table, sehirSutunu as text) as table =>
+let
+    Kucuk = Table.TransformColumns(kaynakTablo, {{sehirSutunu, Text.Proper, type text}}),
+    BosSil = Table.SelectRows(Kucuk, each Record.Field(_, sehirSutunu) <> null)
+in
+    BosSil
+
+// Kullanımı, herhangi bir sorguda:
+= TemizleVeStandartlastir(Kaynak, "Sehir")`,
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Power Query arayüzünde tıklayarak yaptığın her adım (Sütun Kaldır, Filtrele) arka planda ne üretir?",
+                "What does every step you click through in the Power Query interface (Remove Columns, Filter Rows) generate behind the scenes?",
+              ],
+              options: [
+                ["M dilinde bir kod satırı — Gelişmiş Düzenleyici'de görülebilir", "A line of M code — visible in the Advanced Editor"],
+                ["Doğrudan bir DAX ölçüsü", "A DAX measure directly"],
+                ["Bir VBA makrosu", "A VBA macro"],
+                ["Hiçbir şey, yalnızca arayüzde görsel bir kayıt tutulur", "Nothing, it's only a visual record kept in the interface"],
+              ],
+              answer: 0,
+              explain: [
+                "Power Query arayüzü aslında bir M kod editörünün üzerine kurulu görsel bir katmandır. Her tıklama, Gelişmiş Düzenleyici'de görebileceğin bir M ifadesi ekler.",
+                "The Power Query interface is really a visual layer built on top of an M code editor. Every click adds an M expression you can see in the Advanced Editor.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "Tekrar eden bir temizlik dizisini özel bir M fonksiyonuna çevirmenin faydası, Excel'deki LAMBDA'ya nasıl benzer?",
+                "How is the benefit of turning a repeated cleanup sequence into a custom M function similar to LAMBDA in Excel?",
+              ],
+              options: [
+                [
+                  "Mantık tek bir yerde tanımlanır; her yeni kaynakta tekrar elle uygulamak yerine parametrelerle çağrılır",
+                  "The logic is defined in exactly one place and called with parameters, instead of being manually reapplied to every new source",
+                ],
+                ["İkisi de yalnızca sayısal sütunlarda çalışır", "Both only work on numeric columns"],
+                ["İkisi de veri modelini otomatik ilişkilendirir", "Both automatically relate the data model"],
+                ["LAMBDA ile hiçbir benzerliği yoktur", "It has no similarity to LAMBDA at all"],
+              ],
+              answer: 0,
+              explain: [
+                "İki özellik de aynı prensibe dayanır: tekrar eden mantığı bir kere tanımlayıp isimlendirmek, sonra parametrelerle çağırmak — kod tekrarını önleyip bakım noktasını tek yere indirger.",
+                "Both features rest on the same principle: define repeated logic once, name it, then call it with parameters — avoiding duplication and reducing maintenance to a single place.",
+              ],
+            }),
+            pitfall(
+              "Özel fonksiyonlar 'Yalnızca Bağlantı' olarak kaydedilmelidir",
+              "Custom functions should be saved as \"Connection Only\"",
+              "Bir M fonksiyonunu ayrı bir sorgu olarak kaydettiğinde, onu rapora yüklemene gerek yoktur (ve yüklememelisin) — Sorgu Özellikleri'nde \"Yükle\"yi kapat, yalnızca bağlantı olarak kalsın. Aksi hâlde fonksiyonun kendisi anlamsız bir tablo olarak rapora yüklenmeye çalışılır.",
+              "When you save an M function as a separate query, you don't need to (and shouldn't) load it into the report — turn off \"Enable Load\" in Query Properties, leave it as connection-only. Otherwise the function itself gets loaded into the report as a meaningless table.",
+            ),
+          ],
+        }),
       ],
     },
   ],

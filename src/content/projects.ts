@@ -1071,6 +1071,132 @@ DIVIDE([Toplam Ciro], CALCULATE([Toplam Ciro], ALL(Urun[Kategori])))`,
     ],
   }),
 
+  project({
+    slug: "powerbi-alan-parametreli-pano",
+    track: "power-bi",
+    level: "expert",
+    title: ["Yönetici Panosu: Alan Parametreleriyle Tek Görsel, Çok Metrik", "Executive Dashboard: One Visual, Many Metrics via Field Parameters"],
+    stack: ["Power BI", "Field Parameters", "DAX"],
+    hours: 8,
+    xp: 500,
+    summary: [
+      "Ciro, kâr ve birim satışı ayrı ayrı sayfalarda tekrar çizmek yerine, alan parametresiyle tek bir görselde dilimleyerek göster.",
+      "Instead of redrawing revenue, profit and units sold on separate pages, show them in a single visual switched by a slicer using field parameters.",
+    ],
+    dataset: [
+      "En az 3 metriği (ciro, kâr, birim satış gibi) olan herhangi bir satış veri seti.",
+      "Any sales dataset with at least 3 metrics (revenue, profit, units sold).",
+    ],
+    deliverables: [
+      ["En az 3 ölçüyü içeren bir alan parametresi", "A field parameter containing at least 3 measures"],
+      ["Alan parametresiyle beslenen, dilimleyiciyle değişen tek bir görsel", "A single visual driven by the field parameter, switched via a slicer"],
+      ["Aynı deseni bir boyut/kırılım için de uygulayan ikinci bir örnek (şehre göre mi, kategoriye göre mi)", "A second example applying the same pattern to a dimension/breakdown (by city or by category)"],
+      ["'Neden 5 ayrı sayfa yerine bu' başlıklı kısa bir not", "A short note titled \"why this instead of 5 separate pages\""],
+    ],
+    steps: [
+      {
+        title: ["Metrik alan parametresini oluştur", "Create the metric field parameter"],
+        body: [
+          "Modelleme → Yeni Parametre → Alanlar ile en az 3 ölçünü (Toplam Ciro, Toplam Kâr, Toplam Birim) tek bir alan parametresinde topla. Bu, arka planda bir hesaplanan tablo üretir.",
+          "Use Modeling → New Parameter → Fields to gather at least 3 measures (Total Revenue, Total Profit, Total Units) into a single field parameter. This generates a calculated table behind the scenes.",
+        ],
+      },
+      {
+        title: ["Görsele bağla ve dilimleyici ekle", "Wire it to a visual and add a slicer"],
+        body: [
+          "Alan parametresini bir çizgi/çubuk grafiğe sürükle, yanına parametrenin ürettiği tabloyla beslenen bir dilimleyici koy. Kullanıcı dilimleyiciden metrik değiştirdiğinde aynı görsel güncellenmeli — yeni bir görsel eklemeden.",
+          "Drag the field parameter onto a line/bar chart, and place a slicer next to it fed by the table the parameter generated. Switching the metric in the slicer should update the same visual — without adding a new visual.",
+        ],
+      },
+      {
+        title: ["Aynı deseni bir boyuta uygula", "Apply the same pattern to a dimension"],
+        body: [
+          "Bu kez metrik yerine bir kırılımı (Şehir vs Kategori) alan parametresine al ve aynı görselin eksenini kullanıcının değiştirmesine izin ver. İki örnek, alan parametrelerinin hem ölçü hem sütun kabul ettiğini kanıtlar.",
+          "This time, put a breakdown (City vs Category) into a field parameter instead of a metric, and let the viewer switch the same visual's axis. The two examples prove field parameters accept both measures and columns.",
+        ],
+      },
+      {
+        title: ["Kazancı belgele", "Document the payoff"],
+        body: [
+          "5 ayrı sayfa/görsel yerine 1 görsel + 2 dilimleyici kurmanın bakım açısından ne kazandırdığını yaz: yeni bir metrik eklendiğinde kaç yerin güncellenmesi gerekiyor (1 vs 5)?",
+          "Write down what building 1 visual + 2 slicers instead of 5 separate pages/visuals saves in maintenance: when a new metric is added, how many places need updating (1 vs 5)?",
+        ],
+      },
+      githubStep("alan-parametreli-pano"),
+    ],
+    premium: true,
+  }),
+
+  project({
+    slug: "powerbi-dax-performans-denetimi",
+    track: "power-bi",
+    level: "expert",
+    title: ["DAX Performans Denetimi", "DAX Performance Audit"],
+    stack: ["Power BI", "DAX", "VAR", "Performance Analyzer"],
+    hours: 9,
+    xp: 550,
+    summary: [
+      "Yavaş çalışan 3 ölçüyü Performance Analyzer ile tespit et, VAR/RETURN ile yeniden yaz ve öncesi/sonrası render süresini ölç.",
+      "Find 3 slow measures with Performance Analyzer, rewrite them with VAR/RETURN, and measure the before/after render time.",
+    ],
+    dataset: [
+      "İç içe/tekrarlı CALCULATE ifadeleri içeren, karmaşık bir DAX ölçü seti olan herhangi bir model (kendi raporundan veya bu patikanın DAX derslerinden).",
+      "Any model with a set of complex DAX measures containing nested/repeated CALCULATE expressions (from your own report or this track's DAX lessons).",
+    ],
+    deliverables: [
+      ["Performance Analyzer'dan alınmış, en yavaş 3 görsel/ölçünün render süresi", "Performance Analyzer output showing render time for the 3 slowest visuals/measures"],
+      ["Her ölçünün VAR/RETURN ile yeniden yazılmış hâli", "Each measure rewritten with VAR/RETURN"],
+      ["Öncesi/sonrası render süresi karşılaştırma tablosu", "A before/after render-time comparison table"],
+      ["'VAR her zaman hızlandırmaz' başlıklı, ne zaman fark etmediğini anlatan bir not", "A note titled \"VAR doesn't always speed things up\", explaining when it makes no difference"],
+    ],
+    steps: [
+      {
+        title: ["Performance Analyzer ile yavaş görselleri bul", "Find slow visuals with Performance Analyzer"],
+        body: [
+          "Görünüm → Performance Analyzer'ı aç, Yenile'ye bas ve her görselin ne kadar sürdüğünü kaydet. En yavaş 3 görseli/ölçüyü hedefe al — geri kalanını optimize etmek zaman kaybıdır.",
+          "Open View → Performance Analyzer, click Refresh and record how long each visual takes. Target the 3 slowest visuals/measures — optimizing the rest is wasted effort.",
+        ],
+      },
+      {
+        title: ["Tekrarlı CALCULATE ifadelerini bul", "Find the repeated CALCULATE expressions"],
+        body: [
+          "Her yavaş ölçünün DAX'ını oku: aynı `CALCULATE(...)` ifadesi birden fazla yerde mi geçiyor? Geçiyorsa, bu motorun aynı hesabı gereksiz yere tekrarladığının işaretidir.",
+          "Read each slow measure's DAX: does the same `CALCULATE(...)` expression appear more than once? If so, that's a sign the engine is redundantly recomputing the same thing.",
+        ],
+        lang: "dax",
+        code: `-- Önce (tekrarlı):
+Marj % =
+DIVIDE(
+    CALCULATE([Toplam Satış], Urun[Kategori] = "Elektronik") - CALCULATE([Maliyet], Urun[Kategori] = "Elektronik"),
+    CALCULATE([Toplam Satış], Urun[Kategori] = "Elektronik")
+)
+
+-- Sonra (VAR ile):
+Marj % =
+VAR Satis = CALCULATE([Toplam Satış], Urun[Kategori] = "Elektronik")
+VAR Maliyet = CALCULATE([Maliyet], Urun[Kategori] = "Elektronik")
+RETURN
+    DIVIDE(Satis - Maliyet, Satis)`,
+      },
+      {
+        title: ["VAR/RETURN ile yeniden yaz ve tekrar ölç", "Rewrite with VAR/RETURN and re-measure"],
+        body: [
+          "Her ölçüyü VAR/RETURN'e çevir, Performance Analyzer'ı tekrar çalıştır. Fark özellikle CALCULATE'in pahalı olduğu (büyük tablo, karmaşık filtre) ölçülerde belirgin olur.",
+          "Convert each measure to VAR/RETURN, rerun Performance Analyzer. The difference is most visible on measures where CALCULATE is expensive (large table, complex filter).",
+        ],
+      },
+      {
+        title: ["Ne zaman fark etmediğini yaz", "Note when it makes no difference"],
+        body: [
+          "Küçük bir tabloda veya CALCULATE ucuzsa VAR'ın ölçülebilir bir fark yaratmadığı ölçüleri de raporla — bu, \"her zaman VAR kullan\" gibi kör bir kurala değil, ölçerek karar vermeye dayanan bir alışkanlık kazandırır.",
+          "Also report the measures where VAR made no measurable difference, on a small table or where CALCULATE is cheap — this builds the habit of deciding by measurement, not a blind \"always use VAR\" rule.",
+        ],
+      },
+      githubStep("dax-performans-denetimi"),
+    ],
+    premium: true,
+  }),
+
   /* --------------------------- Fabric --------------------------- */
   project({
     slug: "fabric-lakehouse-pipeline",
