@@ -1487,6 +1487,118 @@ kontrol_et(silver_satis, "siparis_id", ["tarih", "tutar", "musteri_id"])`,
     ],
   }),
 
+  project({
+    slug: "fabric-orkestre-edilmis-medallion-hatti",
+    track: "microsoft-fabric",
+    level: "expert",
+    title: ["Orkestre Edilmiş Medallion Hattı", "An Orchestrated Medallion Pipeline"],
+    stack: ["Microsoft Fabric", "Data Factory", "PySpark", "Medallion"],
+    hours: 12,
+    xp: 650,
+    summary: [
+      "Bronze → Silver → Gold adımlarını elle sırayla çalıştırmak yerine, bağımlılıkları ve zamanlanmış tetikleyicisi olan tek bir Data Factory pipeline'ında birleştir.",
+      "Instead of running Bronze → Silver → Gold by hand in order, chain them into a single Data Factory pipeline with dependencies and a scheduled trigger.",
+    ],
+    dataset: [
+      "Herhangi bir ham veri kaynağı (CSV/API); bu patikanın medallion dersindeki örnek akışı temel alabilirsin.",
+      "Any raw data source (CSV/API); you can build on this track's medallion lesson's example flow.",
+    ],
+    deliverables: [
+      ["Bronze, Silver, Gold katmanlarını üreten 3 ayrı not defteri", "3 separate notebooks producing the Bronze, Silver and Gold layers"],
+      ["Bu 3 not defterini bağımlılıklarla ('yalnızca önceki başarılıysa') zincirleyen bir Data Factory pipeline'ı", "A Data Factory pipeline chaining the 3 notebooks with dependencies (\"only if the previous succeeded\")"],
+      ["Günlük çalışacak bir zamanlanmış tetikleyici", "A scheduled trigger to run daily"],
+      ["Bir adım başarısız olursa ne olacağını anlatan bir hata senaryosu notu", "A failure-scenario note explaining what happens if a step fails"],
+    ],
+    steps: [
+      {
+        title: ["Üç katman not defterini yaz", "Write the three layer notebooks"],
+        body: [
+          "Bronze (ham veriyi olduğu gibi al), Silver (temizle, tiple, tekilleştir) ve Gold (iş mantığına göre özetle) için ayrı ayrı not defterleri hazırla. Her biri kendi başına elle çalıştırılabilir olmalı.",
+          "Prepare separate notebooks for Bronze (land the raw data as-is), Silver (clean, type, deduplicate) and Gold (summarize per business logic). Each should be runnable on its own by hand.",
+        ],
+      },
+      {
+        title: ["Pipeline'da zincirle", "Chain them in a pipeline"],
+        body: [
+          "Yeni bir Data Factory pipeline'ında üç 'Not Defteri Çalıştır' etkinliği ekle. Silver'ı Bronze'a, Gold'u Silver'a 'Başarılı' bağımlılığıyla bağla — bir öncekinin bittiğinden emin olmadan bir sonraki asla başlamamalı.",
+          "In a new Data Factory pipeline, add three \"Run Notebook\" activities. Connect Silver to Bronze and Gold to Silver with a \"Succeeded\" dependency — the next step should never start without the previous one confirmed done.",
+        ],
+      },
+      {
+        title: ["Zamanlanmış tetikleyici ekle", "Add a scheduled trigger"],
+        body: [
+          "Pipeline'a günlük çalışacak bir zamanlanmış tetikleyici bağla. Üst üste binmeyi önlemek için eşzamanlılık ayarını kontrol et — bir çalışma normalden uzun sürerse ikinci bir çalışmanın üstüne binmemesi gerekir.",
+          "Attach a daily scheduled trigger to the pipeline. Check the concurrency setting to prevent overlap — if one run takes longer than usual, a second run shouldn't stack on top of it.",
+        ],
+      },
+      {
+        title: ["Hata senaryosunu düşün ve belgele", "Think through and document the failure scenario"],
+        body: [
+          "Silver adımı başarısız olursa Gold'un çalışmaması gerektiğini doğrula (bağımlılık ayarını test et: Silver'ı bilerek bozup pipeline'ı çalıştır). Bunu ve genel hata bildirim planını (kim, nasıl haberdar olur) bir notta yaz.",
+          "Verify that Gold does NOT run if Silver fails (test the dependency by deliberately breaking Silver and running the pipeline). Write this, plus the general failure-notification plan (who gets notified, how), in a short note.",
+        ],
+      },
+      githubStep("orkestre-edilmis-medallion-hatti"),
+    ],
+    premium: true,
+  }),
+
+  project({
+    slug: "fabric-semantic-link-uyum-kontrolu",
+    track: "microsoft-fabric",
+    level: "expert",
+    title: ["Semantic Link ile Uyum Kontrolü", "A Reconciliation Check with Semantic Link"],
+    stack: ["Microsoft Fabric", "Semantic Link", "Python", "Power BI"],
+    hours: 8,
+    xp: 550,
+    summary: [
+      "Bir Power BI semantic modelindeki ölçüleri Semantic Link ile bir Python not defterine çek ve Gold katmanındaki ham hesaplamayla otomatik karşılaştır.",
+      "Pull a Power BI semantic model's measures into a Python notebook with Semantic Link and automatically compare them against the raw calculation in the Gold layer.",
+    ],
+    dataset: [
+      "Zaten yayınlanmış bir Power BI semantic modeli (bu patikanın Gold katmanı örneğinden üretilebilir) ve aynı verinin Gold tablosu.",
+      "An already-published Power BI semantic model (can be built from this track's Gold layer example) and the same data's Gold table.",
+    ],
+    deliverables: [
+      ["Semantic Link ile çekilen en az 3 ölçünün pandas DataFrame'i", "A pandas DataFrame of at least 3 measures pulled via Semantic Link"],
+      ["Gold tablosundan doğrudan pandas ile hesaplanan aynı 3 metrik", "The same 3 metrics computed directly from the Gold table with pandas"],
+      ["İkisini otomatik karşılaştıran bir uyum kontrolü (fark varsa uyarı veren)", "An automated reconciliation check comparing the two (raising a warning on any mismatch)"],
+      ["Bulunan bir uyuşmazlığın kök nedenini anlatan bir not (ör. filtre farkı, tarih aralığı farkı)", "A note explaining the root cause of any mismatch found (e.g. a filter difference, a date-range difference)"],
+    ],
+    steps: [
+      {
+        title: ["Semantic Link ile ölçüleri çek", "Pull the measures with Semantic Link"],
+        body: [
+          "`sempy.fabric.evaluate_measure()` ile semantic modelden en az 3 ölçüyü (ör. toplam ciro, müşteri sayısı, ortalama sipariş) uygun bir kırılımla çek.",
+          "Use `sempy.fabric.evaluate_measure()` to pull at least 3 measures (e.g. total revenue, customer count, average order) from the semantic model at a suitable breakdown.",
+        ],
+      },
+      {
+        title: ["Aynı metrikleri Gold tablosundan hesapla", "Compute the same metrics from the Gold table"],
+        body: [
+          "Aynı 3 metriği bu kez semantic modele hiç dokunmadan, doğrudan Gold tablosu üzerinde pandas ile hesapla. İki hesaplama bağımsız yollardan aynı sonuca ulaşmalı.",
+          "Compute the same 3 metrics this time without touching the semantic model at all, directly on the Gold table with pandas. The two calculations should arrive at the same result via independent paths.",
+        ],
+      },
+      {
+        title: ["Otomatik uyum kontrolü yaz", "Write an automated reconciliation check"],
+        body: [
+          "İki sonucu birleştirip farkı hesapla; fark bir toleransı (ör. yuvarlama hatası payı) aşarsa uyarı bassın. Bu kontrol, tek seferlik bir karşılaştırma değil, her çalıştırıldığında tekrar kullanılabilir bir sağlık kontrolüdür.",
+          "Merge the two results and compute the difference; raise a warning if it exceeds a tolerance (a rounding-error margin). This check isn't a one-off comparison — it's a health check reusable every time it runs.",
+        ],
+      },
+      {
+        title: ["Uyuşmazlığın kök nedenini bul", "Find the mismatch's root cause"],
+        body: [
+          "Bilerek bir uyuşmazlık senaryosu yarat (ör. Power BI tarafında bir filtre etkin bırak) ve kontrolün bunu yakaladığını göster. Kök nedeni (filtre, tarih aralığı, NULL işleme farkı) bir notta açıkla — bu, gerçek bir üretim uyuşmazlığını hızlı teşhis etme becerisidir.",
+          "Deliberately create a mismatch scenario (e.g. leave a filter active on the Power BI side) and show the check catches it. Explain the root cause (filter, date range, NULL-handling difference) in a note — this is the skill of diagnosing a real production discrepancy quickly.",
+        ],
+      },
+      githubStep("semantic-link-uyum-kontrolu"),
+    ],
+    premium: true,
+  }),
+
   /* ---------------------------- Excel --------------------------- */
   project({
     slug: "excel-satis-ozeti",

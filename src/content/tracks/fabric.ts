@@ -2085,6 +2085,201 @@ GROUP BY FORMAT(tarih, 'yyyy-MM'), kategori;`,
             }),
           ],
         }),
+        lesson({
+          slug: "kql-ile-gercek-zamanli-sorgulama",
+          title: L("KQL ile gerçek zamanlı sorgulama", "Real-time querying with KQL"),
+          summary: L(
+            "Real-Time Intelligence'ın KQL veritabanına, SQL'e benzeyen ama boru hattı mantığıyla çalışan bir dille sorgu yazmak.",
+            "Writing queries against Real-Time Intelligence's KQL database, in a language that resembles SQL but works like a pipeline.",
+          ),
+          minutes: 17,
+          premium: true,
+          blocks: [
+            text(
+              "Daha önce Real-Time Intelligence'ın KQL veritabanı (Eventhouse) kullandığını gördün. **KQL (Kusto Query Language)**, bu veritabanını sorgulamanın dilidir — SQL'e benzer bir amaç taşır ama sözdizimi tamamen farklıdır: sorgu, `|` (boru) ile birbirine bağlanan bir dizi **adımdan** oluşur, tıpkı bir Unix komut boru hattı gibi. Her adım, bir öncekinin çıktısını girdi olarak alır.\n\n```kql\nOlaylar\n| where Zaman > ago(1h)\n| where Sehir == \"İstanbul\"\n| summarize ToplamSatis = sum(Tutar) by bin(Zaman, 5m)\n| order by Zaman asc\n```\n\nBu sorgu \"son 1 saatte\" filtreler, \"İstanbul\"a daraltır, 5 dakikalık aralıklarla toplar ve sıralar — SQL'deki `WHERE` + `GROUP BY` + `ORDER BY`'ın aynısını yapar ama akış hâlinde okunur.",
+              "You've already seen that Real-Time Intelligence uses a KQL database (Eventhouse). **KQL (Kusto Query Language)** is the language for querying it — it serves the same purpose as SQL, but the syntax is entirely different: a query is a series of **steps** chained with `|` (pipe), much like a Unix command pipeline. Each step takes the previous one's output as its input.\n\n```kql\nEvents\n| where Time > ago(1h)\n| where City == \"Istanbul\"\n| summarize TotalSales = sum(Amount) by bin(Time, 5m)\n| order by Time asc\n```\n\nThis query filters to \"the last 1 hour\", narrows to \"Istanbul\", aggregates in 5-minute buckets, and sorts — doing exactly what SQL's `WHERE` + `GROUP BY` + `ORDER BY` do, but read as a pipeline.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "KQL sorgusundaki `|` (boru) işareti ne anlama gelir?",
+                "What does the `|` (pipe) symbol mean in a KQL query?",
+              ],
+              options: [
+                [
+                  "Bir önceki adımın çıktısını bir sonraki adıma girdi olarak aktarır — sorgu adım adım işlenen bir boru hattıdır",
+                  "It passes the previous step's output as input to the next step — the query is a pipeline processed step by step",
+                ],
+                ["VEYA (OR) mantıksal işlemini ifade eder", "It represents the logical OR operator"],
+                ["Yorum satırı başlatır", "It starts a comment line"],
+                ["İki farklı tabloyu JOIN eder", "It JOINs two different tables"],
+              ],
+              answer: 0,
+              explain: [
+                "KQL, SQL'in aksine iç içe alt sorgular yerine sıralı bir boru hattı kullanır. `Olaylar | where ... | summarize ...` ifadesi, önce filtrele, sonra o filtrelenmiş sonucu özetle demektir — her `|` bir sonraki adıma geçiştir.",
+                "Unlike SQL's nested subqueries, KQL uses a sequential pipeline. `Events | where ... | summarize ...` means: first filter, then summarize that filtered result — each `|` is a handoff to the next step.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "`summarize ToplamSatis = sum(Tutar) by bin(Zaman, 5m)` ifadesi ne yapar?",
+                "What does `summarize TotalSales = sum(Amount) by bin(Time, 5m)` do?",
+              ],
+              options: [
+                [
+                  "Veriyi 5 dakikalık zaman aralıklarına böler ve her aralık için tutarları toplar — SQL'deki GROUP BY'ın zaman eksenindeki karşılığıdır",
+                  "It buckets the data into 5-minute time windows and sums the amount for each — the time-axis counterpart of SQL's GROUP BY",
+                ],
+                ["Yalnızca son 5 dakikayı gösterir, geri kalanını siler", "It only shows the last 5 minutes and deletes the rest"],
+                ["5 dakikada bir sorguyu otomatik olarak yeniden çalıştırır", "It automatically reruns the query every 5 minutes"],
+                ["Tutar sütununu 5 dakikaya böler", "It divides the Amount column by 5 minutes"],
+              ],
+              answer: 0,
+              explain: [
+                "`bin(Zaman, 5m)`, zaman damgalarını 5 dakikalık kovalara yuvarlar; `summarize ... by` bu kovalara göre gruplar. Bu, zaman serisi akış verisinde en sık kullanılan kalıptır — SQL'deki `GROUP BY strftime(...)` desenine denktir (bkz. SQL patikası).",
+                "`bin(Time, 5m)` rounds timestamps into 5-minute buckets; `summarize ... by` groups by those buckets. This is the most common pattern for time-series streaming data — the equivalent of SQL's `GROUP BY strftime(...)` pattern (see the SQL track).",
+              ],
+            }),
+            order({
+              id: "o1",
+              prompt: [
+                "Bir KQL sorgusunun boru hattı adımlarını mantıklı bir sırayla diz: önce filtrele, sonra özetle, sonra sırala.",
+                "Order a KQL query's pipeline steps logically: filter first, then summarize, then sort.",
+              ],
+              lines: [
+                "Olaylar",
+                "| where Zaman > ago(1h)",
+                "| summarize ToplamSatis = sum(Tutar) by bin(Zaman, 5m)",
+                "| order by Zaman asc",
+              ],
+              xp: 25,
+            }),
+            pitfall(
+              "KQL'de büyük/küçük harf duyarlılığı SQL'den farklıdır",
+              "KQL's case sensitivity differs from SQL's",
+              "KQL, tablo ve sütun adlarında **büyük/küçük harfe duyarlıdır** (`Zaman` ile `zaman` farklı sütunlardır) — çoğu SQL lehçesinin aksine. Bir sorgu \"sütun bulunamadı\" hatası veriyorsa ilk kontrol edilmesi gereken şey harf uyumudur.",
+              "KQL is **case-sensitive** for table and column names (`Time` and `time` are different columns) — unlike most SQL dialects. If a query throws a \"column not found\" error, case mismatch is the first thing to check.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "data-factory-orkestrasyon",
+          title: L("Data Factory ile orkestrasyon: pipeline, bağımlılık, zamanlama", "Orchestration with Data Factory: pipelines, dependencies, scheduling"),
+          summary: L(
+            "Beş ayrı yükleme adımını her sabah elle sırayla tetiklemek yerine, birbirine bağlı otomatik bir akış kurmak.",
+            "Instead of manually triggering five load steps in order every morning, build a connected automatic flow.",
+          ),
+          minutes: 16,
+          premium: true,
+          blocks: [
+            text(
+              "Bir medallion mimarisinde (Bronze → Silver → Gold) her adım bir öncekinin bitmesini bekler — Silver, Bronze bitmeden başlarsa eksik veri üzerinde çalışır. **Data Factory pipeline'ı**, bu adımları **etkinlikler (activities)** olarak bağlar ve her etkinliğin bir öncekinin **başarı/başarısızlığına** bağlı olarak çalışıp çalışmayacağını tanımlar.\n\nBir pipeline üç şeyden oluşur:\n\n1. **Etkinlikler** — bir not defterini çalıştır, bir veriyi kopyala, bir uyarı gönder\n2. **Bağımlılıklar (dependencies)** — \"B, ancak A **başarıyla** biterse çalışsın\" (veya: A başarısız olursa çalışsın — hata bildirimi gibi senaryolarda)\n3. **Tetikleyici (trigger)** — pipeline'ı ne zaman çalıştıracak: zamanlanmış (her gün 06:00), olay tabanlı (yeni dosya geldiğinde) veya elle",
+              "In a medallion architecture (Bronze → Silver → Gold), each step waits for the one before it to finish — if Silver starts before Bronze is done, it works on incomplete data. A **Data Factory pipeline** chains these steps as **activities** and defines whether each activity runs depending on the previous one's **success or failure**.\n\nA pipeline is made of three things:\n\n1. **Activities** — run a notebook, copy data, send an alert\n2. **Dependencies** — \"B only runs if A finishes **successfully**\" (or: runs if A fails — for scenarios like error notification)\n3. **Trigger** — when the pipeline runs: scheduled (every day at 06:00), event-based (when a new file arrives), or manual",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Bir pipeline'da 'B etkinliği, yalnızca A başarıyla biterse çalışsın' kuralı hangi kavramı ifade eder?",
+                "The rule \"activity B only runs if A finishes successfully\" in a pipeline expresses which concept?",
+              ],
+              options: [
+                ["Bağımlılık (dependency)", "Dependency"],
+                ["Tetikleyici (trigger)", "Trigger"],
+                ["Medallion mimarisi", "The medallion architecture"],
+                ["KQL sorgusu", "A KQL query"],
+              ],
+              answer: 0,
+              explain: [
+                "Bir etkinliğin bir öncekinin sonucuna (başarı/başarısızlık) bağlı olarak çalışıp çalışmayacağını tanımlamak, bağımlılık kurmaktır. Tetikleyici ise pipeline'ın kendisinin NE ZAMAN başlayacağını belirler — farklı bir kavramdır.",
+                "Defining whether an activity runs based on the previous one's outcome (success/failure) is setting up a dependency. A trigger, by contrast, decides WHEN the pipeline itself starts — a different concept.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "Medallion mimarisinde Silver adımının Bronze'dan ÖNCE veya PARALEL çalışması neden risklidir?",
+                "Why is it risky for the Silver step to run BEFORE or IN PARALLEL with Bronze in a medallion architecture?",
+              ],
+              options: [
+                [
+                  "Silver, Bronze'un ürettiği veriyi girdi olarak kullanır; Bronze tamamlanmadan çalışırsa eksik/eski veri üzerinde işlem yapar",
+                  "Silver consumes the data Bronze produces; running before Bronze finishes means it operates on incomplete/stale data",
+                ],
+                ["Hiçbir risk yoktur, sıra önemli değildir", "There's no risk at all, order doesn't matter"],
+                ["Bu yalnızca maliyeti artırır, veri doğruluğunu etkilemez", "It only raises cost, it doesn't affect data correctness"],
+                ["Fabric bu sırayı otomatik olarak zorunlu kılar, elle bağımlılık kurmaya gerek yoktur", "Fabric enforces this order automatically, no manual dependency is needed"],
+              ],
+              answer: 0,
+              explain: [
+                "Medallion katmanları birbirinin girdisidir. Bağımlılık kurulmazsa, Fabric'in kendisi bu sırayı garanti etmez — pipeline tasarımcısının etkinlikleri doğru sırayla ve doğru bağımlılıklarla bağlaması gerekir.",
+                "Medallion layers are each other's input. Without an explicit dependency, Fabric itself does not guarantee this order — it's the pipeline designer's job to chain activities in the right order with the right dependencies.",
+              ],
+            }),
+            pitfall(
+              "Zamanlanmış tetikleyici, önceki çalışma bitmeden yenisini başlatabilir",
+              "A scheduled trigger can start a new run before the previous one finishes",
+              "Bir pipeline normalde 20 dakika sürerken bir gün 2 saat sürerse ve tetikleyici her saat çalışacak şekilde kurulmuşsa, üst üste binen iki çalışma aynı tabloya aynı anda yazmaya çalışabilir. Üst üste binmeyi önleyen eşzamanlılık ayarını (concurrency/Skip if still running gibi) kontrol etmek, özellikle uzun sürebilecek pipeline'larda şarttır.",
+              "If a pipeline normally takes 20 minutes but takes 2 hours one day, and the trigger is set to run hourly, two overlapping runs can end up writing to the same table at the same time. Checking the setting that prevents overlap (concurrency / \"skip if still running\") is essential, especially for pipelines that can occasionally run long.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "semantic-link-notebooktan-power-bi",
+          title: L("Semantic Link: not defterinden Power BI modeline bağlanmak", "Semantic Link: reaching a Power BI model from a notebook"),
+          summary: L(
+            "Bir Power BI semantic modelindeki ölçüleri, veriyi tekrar çıkarmadan doğrudan bir Python not defterinde okumak.",
+            "Reading measures straight out of a Power BI semantic model inside a Python notebook, without re-extracting the data.",
+          ),
+          minutes: 14,
+          premium: true,
+          blocks: [
+            text(
+              "Bir Power BI semantic modelinde zaten tanımlanmış ölçüler (DAX) vardır — \"Toplam Ciro\", \"Müşteri Kaybı Oranı\". Bu sayıları bir Python analizinde de kullanmak istersen, klasik yol veriyi yeniden dışa aktarıp pandas'ta yeniden hesaplamaktır — hem zaman kaybı hem de iki yerde farklı sonuç çıkma riski (\"neden Python'da %12, Power BI'da %13 çıkıyor?\").\n\n**Semantic Link (`sempy` kütüphanesi)**, bir Fabric not defterinden doğrudan bir Power BI semantic modeline bağlanıp, modelde tanımlı ölçüleri **olduğu gibi** bir pandas DataFrame'e çeker. Hesaplama mantığı tek bir yerde (semantic modelde) kalır; Python yalnızca sonucu okur.",
+              "A Power BI semantic model already has measures (DAX) defined in it — \"Total Revenue\", \"Churn Rate\". If you also want those numbers in a Python analysis, the classic route is re-exporting the data and recomputing it in pandas — wasted effort, and a risk of the two disagreeing (\"why does Python say 12% but Power BI says 13%?\").\n\n**Semantic Link** (the `sempy` library) lets a Fabric notebook connect directly to a Power BI semantic model and pull its defined measures **as they are** into a pandas DataFrame. The calculation logic stays in exactly one place (the semantic model); Python just reads the result.",
+            ),
+            code(
+              "python",
+              `import sempy.fabric as fabric
+
+# Semantic modeldeki ölçüyü, şehre göre kırılımlı olarak doğrudan çek:
+df = fabric.evaluate_measure(
+    "Satis Modeli",
+    measure="Toplam Ciro",
+    groupby_columns=["Musteri[Sehir]"],
+)
+print(df)
+# Sonuç zaten Power BI'daki ölçüyle birebir aynıdır — Python'da yeniden hesaplanmaz`,
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Semantic Link'in çözdüğü temel sorun nedir?",
+                "What core problem does Semantic Link solve?",
+              ],
+              options: [
+                [
+                  "Aynı hesaplama mantığının Power BI'da ve Python'da ayrı ayrı yazılıp farklı sonuç verme riskini — hesap tek yerde (semantic model) kalır",
+                  "The risk of the same calculation logic being written separately in Power BI and Python and disagreeing — the calculation stays in one place (the semantic model)",
+                ],
+                ["Power BI raporlarını otomatik olarak Python'a çevirir", "It automatically converts Power BI reports into Python"],
+                ["Yalnızca görselleştirme hızını artırır", "It only improves visualization speed"],
+                ["Fabric kapasitesinin maliyetini düşürür", "It reduces the cost of Fabric capacity"],
+              ],
+              answer: 0,
+              explain: [
+                "Semantic Link olmadan, bir analistin Python'da da aynı 'Toplam Ciro' mantığını yeniden yazması gerekir — bu iki ayrı bakım noktası ve tutarsızlık riski demektir. Semantic Link, tanımlı ölçüyü olduğu gibi çekerek bu tekrarı ortadan kaldırır.",
+                "Without Semantic Link, an analyst would have to rewrite the same \"Total Revenue\" logic in Python too — two separate maintenance points and a risk of drift. Semantic Link removes the duplication by pulling the defined measure as-is.",
+              ],
+            }),
+            tip(
+              "Semantic Link, model keşfi için de kullanılabilir",
+              "Semantic Link is also useful for exploring a model",
+              "`sempy.fabric`, yalnızca ölçü çekmekle kalmaz — bir semantic modelin tablolarını, ilişkilerini ve ölçü listesini de Python'dan sorgulayabilirsin (`fabric.list_measures(...)`). Bu, elle Power BI Desktop'ı açmadan bir modelin ne içerdiğini hızlıca keşfetmek için kullanışlıdır.",
+              "`sempy.fabric` doesn't only pull measures — you can also query a semantic model's tables, relationships and list of measures from Python (`fabric.list_measures(...)`). This is handy for quickly discovering what a model contains without opening Power BI Desktop by hand.",
+            ),
+          ],
+        }),
       ],
     },
   ],
