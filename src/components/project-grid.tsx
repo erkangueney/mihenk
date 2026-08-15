@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { useProgress } from "@/components/progress-provider";
 import { levelOrder } from "@/lib/content";
+import { canAccessProject } from "@/lib/entitlements";
+import { usePlanInfo } from "@/lib/entitlements-client";
 import { ui, type DictKey } from "@/lib/i18n";
 import type { LevelId, Locale } from "@/lib/types";
 
@@ -11,6 +13,7 @@ export interface ProjectCardData {
   slug: string;
   title: string;
   summary: string;
+  trackSlug: string;
   trackName: string;
   trackColor: string;
   trackIcon: string;
@@ -28,6 +31,7 @@ export function ProjectGrid({
   locale: Locale;
 }) {
   const { progress, ready } = useProgress();
+  const { ready: planReady, ...planInfo } = usePlanInfo();
   const [level, setLevel] = useState<LevelId | "all">("all");
 
   // Filtreler veriden türetilir: projesi olmayan bir kademe boş sekme olarak
@@ -64,6 +68,7 @@ export function ProjectGrid({
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map((project) => {
           const done = ready && progress.projects.includes(project.slug);
+          const locked = planReady && !canAccessProject(project, planInfo);
           return (
             <Link
               key={project.slug}
@@ -86,7 +91,14 @@ export function ProjectGrid({
                 <span className="rounded-full bg-surface-2 px-2.5 py-1 font-medium text-muted">
                   {ui(`level.${project.level}` as DictKey, locale)}
                 </span>
-                {done ? (
+                {locked ? (
+                  <span
+                    className="ml-auto rounded-full bg-accent/15 px-2 py-0.5 font-semibold text-accent"
+                    title={locale === "tr" ? "Premium gerekir" : "Requires Premium"}
+                  >
+                    💎 {locale === "tr" ? "Premium" : "Premium"}
+                  </span>
+                ) : done ? (
                   <span className="ml-auto font-bold text-[var(--success)]" aria-hidden>
                     ✓
                   </span>

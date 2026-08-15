@@ -303,6 +303,7 @@ function project(value: unknown): Project {
         lang: step.lang === undefined ? undefined : str(step.lang, `${stepPath}.lang`),
       };
     }),
+    freeSample: record.freeSample === true,
   };
 }
 

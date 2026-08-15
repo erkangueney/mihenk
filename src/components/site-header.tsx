@@ -31,6 +31,7 @@ const navItems: NavItem[] = [
   { href: "/projects", key: "nav.projects" },
   { href: "/roadmap", key: "nav.roadmap" },
   { href: "/leaderboard", key: "nav.leaderboard" },
+  { href: "/premium", key: "nav.premium" },
 ];
 
 /**

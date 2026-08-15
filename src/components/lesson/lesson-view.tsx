@@ -2,13 +2,16 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
+import { PremiumLockNotice } from "@/components/premium-gate";
 import { useProgress } from "@/components/progress-provider";
 import { CodeCard } from "@/components/ui/code-view";
 import { Markdown } from "@/components/ui/markdown";
 import { ProgressBar } from "@/components/ui/progress";
+import { canAccessLevel } from "@/lib/entitlements";
+import { usePlanInfo } from "@/lib/entitlements-client";
 import { t, ui } from "@/lib/i18n";
 import { LESSON_BONUS_XP, taskKeyOf } from "@/lib/content";
-import type { Block, Lesson, Locale } from "@/lib/types";
+import type { Block, Lesson, LevelId, Locale } from "@/lib/types";
 import { ExerciseBlock } from "./exercise-block";
 import { OrderBlock } from "./order-block";
 import { PlaygroundBlock } from "./playground-block";
@@ -30,19 +33,26 @@ const calloutStyles: Record<string, { border: string; bg: string; icon: string }
 export function LessonView({
   track,
   lesson,
+  levelId,
   locale,
   prev,
   next,
 }: {
   track: TrackRef;
   lesson: Lesson;
+  levelId: LevelId;
   locale: Locale;
   prev: { slug: string; title: string } | null;
   next: { slug: string; title: string } | null;
 }) {
   const { isTaskDone, isLessonDone, completeLesson } = useProgress();
+  const { ready: planReady, ...planInfo } = usePlanInfo();
   const lessonKey = `${track.slug}/${lesson.slug}`;
   const finished = isLessonDone(lessonKey);
+  // Kilitliyken görev blokları hiç render edilmez — DOM'a girmediği için
+  // "Dersi tamamla" butonu da ayrıca gizlenir, aksi halde görevsiz bir ders
+  // (yalnızca metin) kilitliyken bile XP kazandırırdı.
+  const locked = planReady && !canAccessLevel(track.slug, levelId, planInfo);
 
   const taskBlocks = useMemo(
     () =>
@@ -105,20 +115,24 @@ export function LessonView({
         ) : null}
       </header>
 
-      <div className="space-y-6">
-        {lesson.blocks.map((block, index) => (
-          <BlockRenderer
-            key={index}
-            block={block}
-            track={track}
-            lesson={lesson}
-            locale={locale}
-          />
-        ))}
-      </div>
+      {locked ? (
+        <PremiumLockNotice locale={locale} />
+      ) : (
+        <div className="space-y-6">
+          {lesson.blocks.map((block, index) => (
+            <BlockRenderer
+              key={index}
+              block={block}
+              track={track}
+              lesson={lesson}
+              locale={locale}
+            />
+          ))}
+        </div>
+      )}
 
       <footer className="mt-10 border-t border-border pt-8">
-        {finished ? (
+        {locked ? null : finished ? (
           <p className="rounded-xl border border-[var(--success)]/40 bg-[var(--success)]/10 p-4 text-center text-sm font-semibold text-[var(--success)]">
             ✓ {ui("lesson.finished", locale)}
           </p>

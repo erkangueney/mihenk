@@ -191,6 +191,8 @@ export interface Project {
   /** Projeyi bitmiş saymak için karşılanması gereken çıktılar. */
   deliverables: Localized[];
   steps: ProjectStep[];
+  /** true ise ücretsiz kullanıcıya da açık (bkz. src/lib/entitlements.ts). */
+  freeSample?: boolean;
 }
 
 /* ------------------------------------------------------------------ */

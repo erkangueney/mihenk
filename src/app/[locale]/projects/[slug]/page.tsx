@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PremiumGate } from "@/components/premium-gate";
 import { ProjectComplete } from "@/components/project-complete";
 import { CodeCard } from "@/components/ui/code-view";
 import { Markdown } from "@/components/ui/markdown";
@@ -132,35 +133,40 @@ export default async function ProjectPage({
         </ul>
       </section>
 
-      <section className="mt-10">
-        <h2 className="mb-5 text-xl font-bold tracking-tight sm:text-2xl">
-          {ui("projects.steps", locale)}
-        </h2>
-        <ol className="space-y-6">
-          {project.steps.map((step, index) => (
-            <li key={index} className="relative border-l border-border pb-1 pl-6 sm:pl-8">
-              <span
-                aria-hidden
-                className="absolute top-0 -left-3 grid h-6 w-6 place-items-center rounded-full text-xs font-bold"
-                style={{ backgroundColor: color, color: "#0a0f1c" }}
-              >
-                {index + 1}
-              </span>
-              <h3 className="font-bold">{t(step.title, locale)}</h3>
-              <Markdown text={t(step.body, locale)} className="mt-2 text-sm" />
-              {step.code ? (
-                <div className="mt-3">
-                  <CodeCard code={step.code} lang={step.lang ?? "text"} />
-                </div>
-              ) : null}
-            </li>
-          ))}
-        </ol>
-      </section>
+      <PremiumGate
+        target={{ kind: "project", trackSlug: project.trackSlug, slug: project.slug }}
+        locale={locale}
+      >
+        <section className="mt-10">
+          <h2 className="mb-5 text-xl font-bold tracking-tight sm:text-2xl">
+            {ui("projects.steps", locale)}
+          </h2>
+          <ol className="space-y-6">
+            {project.steps.map((step, index) => (
+              <li key={index} className="relative border-l border-border pb-1 pl-6 sm:pl-8">
+                <span
+                  aria-hidden
+                  className="absolute top-0 -left-3 grid h-6 w-6 place-items-center rounded-full text-xs font-bold"
+                  style={{ backgroundColor: color, color: "#0a0f1c" }}
+                >
+                  {index + 1}
+                </span>
+                <h3 className="font-bold">{t(step.title, locale)}</h3>
+                <Markdown text={t(step.body, locale)} className="mt-2 text-sm" />
+                {step.code ? (
+                  <div className="mt-3">
+                    <CodeCard code={step.code} lang={step.lang ?? "text"} />
+                  </div>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+        </section>
 
-      <div className="mt-10">
-        <ProjectComplete slug={project.slug} xp={project.xp} locale={locale} />
-      </div>
+        <div className="mt-10">
+          <ProjectComplete slug={project.slug} xp={project.xp} locale={locale} />
+        </div>
+      </PremiumGate>
     </article>
   );
 }

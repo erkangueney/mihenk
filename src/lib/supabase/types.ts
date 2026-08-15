@@ -7,6 +7,9 @@
 export type UserRole = "member" | "admin";
 export type ContentKind = "track" | "project";
 
+export type Plan = "free" | "premium";
+export type PlanSource = "none" | "trial" | "iyzico" | "manual";
+
 export type ProfileRow = {
   id: string;
   email: string;
@@ -16,6 +19,12 @@ export type ProfileRow = {
   suspended: boolean;
   note: string;
   created_at: string;
+  plan: Plan;
+  plan_expires_at: string | null;
+  plan_source: PlanSource;
+  trial_used: boolean;
+  free_track_choice: string | null;
+  free_track_choice_changed_at: string | null;
 };
 
 export type ProgressRow = {
@@ -85,6 +94,11 @@ export type AdminMemberRow = {
   suspended: boolean;
   note: string;
   created_at: string;
+  plan: Plan;
+  plan_expires_at: string | null;
+  plan_source: PlanSource;
+  trial_used: boolean;
+  free_track_choice: string | null;
   xp: number;
   lessons_done: number;
   projects_done: number;

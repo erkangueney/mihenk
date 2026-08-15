@@ -46,6 +46,11 @@ export function SiteFooter({ locale }: { locale: Locale }) {
                 {ui("roadmap.title", locale)}
               </Link>
             </li>
+            <li>
+              <Link className="hover:text-text" href={link("/premium")}>
+                {ui("nav.premium", locale)}
+              </Link>
+            </li>
           </ul>
         </div>
 

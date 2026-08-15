@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useProgress } from "@/components/progress-provider";
 import { ProgressRing } from "@/components/ui/progress";
+import { usePlanInfo } from "@/lib/entitlements-client";
 import { ui } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
 
@@ -21,12 +22,16 @@ export interface TrackCardData {
 
 export function TrackCard({ track, locale }: { track: TrackCardData; locale: Locale }) {
   const { progress, ready } = useProgress();
+  const { ready: planReady, isPremium, freeTrackChoice } = usePlanInfo();
 
   const done = ready
     ? track.lessonKeys.filter((key) => progress.lessons.includes(key)).length
     : 0;
   const ratio = track.lessons === 0 ? 0 : done / track.lessons;
   const started = done > 0;
+  // Temel seviye her zaman serbest; ötesi premium ya da kullanıcının seçtiği
+  // tek ücretsiz patika gerektirir (bkz. src/lib/entitlements.ts).
+  const premiumLocked = planReady && !isPremium && freeTrackChoice !== track.slug;
 
   return (
     <Link
@@ -48,7 +53,18 @@ export function TrackCard({ track, locale }: { track: TrackCardData; locale: Loc
           {track.icon}
         </span>
         <div className="min-w-0 flex-1">
-          <h3 className="text-lg font-bold tracking-tight">{track.name}</h3>
+          <h3 className="flex items-center gap-1.5 text-lg font-bold tracking-tight">
+            {track.name}
+            {premiumLocked ? (
+              <span
+                aria-hidden
+                title={locale === "tr" ? "Temel seviye ücretsiz, ötesi Premium" : "Foundation is free, the rest is Premium"}
+                className="rounded-full bg-accent/15 px-1.5 py-0.5 text-[11px] text-accent"
+              >
+                💎
+              </span>
+            ) : null}
+          </h3>
           <p className="mt-1 text-sm leading-relaxed text-muted">{track.tagline}</p>
         </div>
         {started ? (

@@ -37,6 +37,7 @@ export default async function ProjectsPage({
       slug: project.slug,
       title: t(project.title, locale),
       summary: t(project.summary, locale),
+      trackSlug: project.trackSlug,
       trackName: track?.name ?? project.trackSlug,
       trackColor: track?.color ?? "var(--accent)",
       trackIcon: track?.icon ?? "📦",

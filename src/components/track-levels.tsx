@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useProgress } from "@/components/progress-provider";
 import { ProgressBar } from "@/components/ui/progress";
 import { UNLOCK_RATIO } from "@/lib/content";
+import { canAccessLevel } from "@/lib/entitlements";
+import { usePlanInfo } from "@/lib/entitlements-client";
 import { ui, type DictKey } from "@/lib/i18n";
 import type { Locale, LevelId } from "@/lib/types";
 
@@ -37,6 +39,7 @@ export function TrackLevels({
   locale: Locale;
 }) {
   const { progress, ready } = useProgress();
+  const { ready: planReady, ...planInfo } = usePlanInfo();
 
   const doneIn = (level: LevelData) =>
     level.lessons.filter((lesson) => progress.lessons.includes(lesson.key)).length;
@@ -51,7 +54,9 @@ export function TrackLevels({
         const previous = levels[index - 1];
         const previousRatio =
           previous && previous.lessons.length > 0 ? doneIn(previous) / previous.lessons.length : 1;
-        const locked = ready && index > 0 && previousRatio < UNLOCK_RATIO;
+        const xpLocked = ready && index > 0 && previousRatio < UNLOCK_RATIO;
+        const premiumLocked = planReady && !canAccessLevel(trackSlug, level.id, planInfo);
+        const locked = xpLocked || premiumLocked;
 
         return (
           <section key={level.id} className="card overflow-hidden">
@@ -73,7 +78,14 @@ export function TrackLevels({
               </div>
               <p className="mt-2 text-sm leading-relaxed text-muted">{level.description}</p>
               <ProgressBar value={ratio} className="mt-4" />
-              {locked ? (
+              {premiumLocked ? (
+                <p className="mt-3 text-xs text-muted">
+                  💎{" "}
+                  <Link href={`/${locale}/premium`} className="font-semibold text-accent hover:underline">
+                    {locale === "tr" ? "Bu seviye Premium'da" : "This level is Premium"}
+                  </Link>
+                </p>
+              ) : xpLocked ? (
                 <p className="mt-3 text-xs text-muted">🔒 {ui("tracks.unlockHint", locale)}</p>
               ) : null}
             </header>

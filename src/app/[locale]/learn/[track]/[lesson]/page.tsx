@@ -58,6 +58,7 @@ export default async function LessonPage({
     <LessonView
       track={{ slug: track.slug, name: track.name }}
       lesson={found.lesson}
+      levelId={found.level.id}
       locale={locale}
       prev={previous ? { slug: previous.slug, title: previous.title } : null}
       next={next ? { slug: next.slug, title: next.title } : null}

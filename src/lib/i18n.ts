@@ -389,6 +389,58 @@ const dictionary = {
     tr: "Sıralama şu anda yüklenemedi. Sayfayı yenilemeyi dene.",
     en: "The ranking could not be loaded. Try refreshing the page.",
   },
+
+  /* Premium ---------------------------------------------------------- */
+  "nav.premium": { tr: "Premium", en: "Premium" },
+  "premium.title": { tr: "Premium'a geç", en: "Upgrade to Premium" },
+  "premium.subtitle": {
+    tr: "Her patikanın Temel seviyesi ve seçtiğin bir patika her zaman ücretsiz. Premium; 12 patikanın tamamını, tüm seviyeleri, 24 projenin tamamını ve reklamsız deneyimi açar.",
+    en: "Every track's Foundation level and one track of your choice are always free. Premium unlocks all 12 tracks, every level, all 24 projects and an ad-free experience.",
+  },
+  "premium.free.title": { tr: "Ücretsiz", en: "Free" },
+  "premium.free.price": { tr: "₺0", en: "$0" },
+  "premium.premium.title": { tr: "Premium", en: "Premium" },
+  "premium.monthly": { tr: "aylık", en: "monthly" },
+  "premium.yearly": { tr: "yıllık", en: "yearly" },
+  "premium.trial": {
+    tr: "7 gün ücretsiz dene — kart bilgisi istemez",
+    en: "Try 7 days free — no card required",
+  },
+  "premium.trialCta": { tr: "Ücretsiz denemeyi başlat", en: "Start free trial" },
+  "premium.trialUsed": { tr: "Deneme hakkın kullanıldı", en: "You've already used your trial" },
+  "premium.subscribeMonthly": { tr: "Aylık abone ol", en: "Subscribe monthly" },
+  "premium.subscribeYearly": { tr: "Yıllık abone ol", en: "Subscribe yearly" },
+  "premium.comingSoon": { tr: "Çok yakında", en: "Coming soon" },
+  "premium.active": { tr: "Premium'a sahipsin", en: "You have Premium" },
+  "premium.activeUntil": { tr: "Yenileme/geçerlilik", en: "Renews/valid until" },
+  "premium.feature.tracks": {
+    tr: "12 patikanın tamamı, tüm seviyeler",
+    en: "All 12 tracks, every level",
+  },
+  "premium.feature.projects": { tr: "24 projenin tamamı", en: "All 24 projects" },
+  "premium.feature.ads": { tr: "Reklamsız deneyim", en: "Ad-free experience" },
+  "premium.feature.avatar": {
+    tr: "Premium-özel avatar parçaları",
+    en: "Premium-exclusive avatar parts",
+  },
+  "premium.feature.badge": { tr: "Profilde Premium rozeti", en: "Premium badge on profile" },
+  "premium.freeTrack.title": { tr: "Ücretsiz patikan", en: "Your free track" },
+  "premium.freeTrack.subtitle": {
+    tr: "Ücretsiz katmanda SQL veya Python'dan birini tamamen açık tutabilirsin.",
+    en: "On the free tier you can keep either SQL or Python fully unlocked.",
+  },
+  "premium.freeTrack.saved": { tr: "Kaydedildi", en: "Saved" },
+
+  /* Reklam ------------------------------------------------------------ */
+  "consent.title": { tr: "Çerez ve reklam onayı", en: "Cookie & ad consent" },
+  "consent.body": {
+    tr: "Ücretsiz katmanı sürdürebilmek için bağlamsal reklam gösteriyoruz. Kabul edersen reklamlar yüklenir; reddedersen reklam gösterilmez.",
+    en: "We show contextual ads to keep the free tier running. Accept to load ads, or decline to see none.",
+  },
+  "consent.accept": { tr: "Kabul et", en: "Accept" },
+  "consent.decline": { tr: "Reddet", en: "Decline" },
+  "lesson.interstitial.title": { tr: "Devam etmeden önce", en: "Before you continue" },
+  "lesson.interstitial.continue": { tr: "Devam et", en: "Continue" },
 } as const satisfies Record<string, Localized>;
 
 export type DictKey = keyof typeof dictionary;
