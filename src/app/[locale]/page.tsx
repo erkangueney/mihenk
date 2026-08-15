@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdSlot } from "@/components/ads/ad-slot";
+import { BrandMark } from "@/components/brand";
 import { HeroCta, type ResumeTarget } from "@/components/hero-cta";
 import { IconBook, IconClipboard, IconCompass, IconPlay } from "@/components/ui/icons";
 import { TrackCard } from "@/components/track-card";
@@ -132,21 +133,31 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <>
-      {/* ---------------------------- Hero ---------------------------- */}
+      {/* ---------------------------- Hero ----------------------------
+          Tez: mihenk taşı bir logo değil, gerçek bir alet. Sağdaki amblem
+          küçük bir simge değil, sayfanın kendisini kanıtlayan nesne olarak
+          büyütülür — üzerindeki üç altın iz Temel→Uzman kademelerinin
+          gerçek karşılığıdır (bkz. brand.tsx). */}
       <section className="mx-auto w-full max-w-7xl px-4 pt-16 pb-20 sm:px-6 sm:pt-28">
-        <div className="max-w-3xl">
-          <span className="inline-flex items-center gap-2.5 rounded-full border border-accent/30 bg-surface/70 px-4 py-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_10px_2px_var(--accent)]" aria-hidden />
-            <span className="eyebrow">{ui("home.badge", locale)}</span>
-          </span>
-          <h1 className="font-display mt-6 text-5xl leading-[1.04] font-semibold tracking-tight text-balance sm:text-7xl">
-            <span className="gradient-text">{ui("home.title", locale)}</span>
-          </h1>
-          <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
-            {ui("home.subtitle", locale)}
-          </p>
+        <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-2.5 rounded-full border border-border-strong bg-surface px-4 py-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
+              <span className="eyebrow">{ui("home.badge", locale)}</span>
+            </span>
+            <h1 className="font-display mt-6 text-5xl leading-[0.98] font-bold tracking-tight text-balance sm:text-7xl">
+              {ui("home.title", locale)}
+            </h1>
+            <p className="mt-6 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+              {ui("home.subtitle", locale)}
+            </p>
 
-          <HeroCta locale={locale} resume={resume} />
+            <HeroCta locale={locale} resume={resume} />
+          </div>
+
+          <div className="relative mx-auto hidden aspect-square w-full max-w-sm items-center justify-center lg:flex">
+            <BrandMark size={320} className="drop-shadow-[0_30px_60px_rgba(0,0,0,0.55)]" />
+          </div>
         </div>
 
         <dl className="card mt-16 grid grid-cols-2 overflow-hidden lg:grid-cols-4">
@@ -162,10 +173,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 index >= 2 ? "max-lg:border-t" : ""
               } ${index > 0 ? "lg:border-l" : ""}`}
             >
-              <dt className="font-display text-3xl font-semibold tracking-tight text-accent sm:text-4xl">
+              <dt className="font-mono text-3xl font-bold tracking-tight text-accent tabular-nums sm:text-4xl">
                 {item.value}
               </dt>
               <dd className="mt-1.5 text-xs tracking-wide text-muted sm:text-sm">{item.label}</dd>
+              <div className="scale-track mt-3" aria-hidden>
+                <div
+                  className="scale-fill"
+                  style={{ ["--fill" as string]: (55 + index * 12) / 100 }}
+                />
+              </div>
             </div>
           ))}
         </dl>
@@ -217,13 +234,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             >
               <span
                 aria-hidden
-                className="grid h-11 w-11 place-items-center rounded-xl bg-accent/10 text-accent"
+                className="grid h-11 w-11 place-items-center rounded-lg border border-border-strong text-accent"
               >
-                <item.icon size={22} />
+                <item.icon size={20} />
               </span>
               <span className="mt-4 font-bold tracking-tight">{item.title}</span>
               <span className="mt-2 text-sm leading-relaxed text-muted">{item.body}</span>
-              <span className="mt-4 text-xs font-semibold text-accent">{item.meta}</span>
+              <span className="mt-4 font-mono text-xs font-semibold text-accent">{item.meta}</span>
             </Link>
           ))}
         </div>
@@ -239,12 +256,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <div key={item.title} className="card group p-6 transition hover:border-accent/40">
               <div className="flex items-center justify-between">
                 <span
-                  className="grid h-12 w-12 place-items-center rounded-2xl bg-accent/10 text-2xl ring-1 ring-accent/20"
+                  className="grid h-12 w-12 place-items-center rounded-lg border border-border-strong text-2xl"
                   aria-hidden
                 >
                   {item.icon}
                 </span>
-                <span className="font-display text-sm font-semibold text-muted/60" aria-hidden>
+                <span className="font-mono text-sm font-semibold text-tick" aria-hidden>
                   {String(index + 1).padStart(2, "0")}
                 </span>
               </div>

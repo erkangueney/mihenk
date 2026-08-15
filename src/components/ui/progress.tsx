@@ -57,30 +57,30 @@ export function ProgressRing({
   );
 }
 
-/** Yatay ilerleme çubuğu. */
+/** Ayar skalası — kalibre edilmiş cetvel. Düz "progress bar" değil,
+ *  taşa sürülen altın çizginin genel amaçlı karşılığı (bkz. DESIGN.md). */
 export function ProgressBar({
   value,
   className = "",
-  gradient = true,
+  color,
 }: {
   value: number;
   className?: string;
-  gradient?: boolean;
+  /** İçerik-taksonomisi rengi (ör. patika rengi); verilmezse birincil altın kullanılır. */
+  color?: string;
 }) {
   const clamped = Math.max(0, Math.min(1, value));
   return (
     <div
-      className={`h-2 w-full overflow-hidden rounded-full bg-surface-2 ${className}`}
+      className={`scale-track ${className}`}
       role="progressbar"
       aria-valuenow={Math.round(clamped * 100)}
       aria-valuemin={0}
       aria-valuemax={100}
     >
       <div
-        className={`h-full rounded-full transition-[width] duration-700 ease-out ${
-          gradient ? "bg-gradient-to-r from-accent to-accent-2" : "bg-accent"
-        }`}
-        style={{ width: `${clamped * 100}%` }}
+        className="scale-fill"
+        style={{ ["--fill" as string]: clamped, ...(color ? { background: color } : {}) }}
       />
     </div>
   );

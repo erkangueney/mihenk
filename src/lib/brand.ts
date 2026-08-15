@@ -15,9 +15,9 @@ export const BRAND_WORDMARK = "MİHENK";
 /** Amblemin sabit renkleri. Tema değişse de taş her zaman koyu kalır —
  *  mihenk taşı tanımı gereği siyahtır ve bu marka tutarlılığını korur. */
 export const BRAND_COLORS = {
-  stoneTop: "#1c1f2a",
-  stoneBottom: "#07080d",
-  goldDeep: "#b98630",
-  goldLight: "#f0d795",
-  gold: "#d9a84e",
+  stoneTop: "#241d14",
+  stoneBottom: "#120e09",
+  goldDeep: "#a67c3d",
+  goldLight: "#e0bd76",
+  gold: "#c9a153",
 } as const;

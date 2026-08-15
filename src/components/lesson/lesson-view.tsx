@@ -162,7 +162,7 @@ export function LessonView({
               type="button"
               disabled={!allDone}
               onClick={() => completeLesson(lessonKey, LESSON_BONUS_XP)}
-              className="w-full rounded-xl bg-gradient-to-r from-accent to-accent-2 px-6 py-3.5 text-base font-semibold text-on-accent transition disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
+              className="w-full rounded-xl bg-accent px-6 py-3.5 text-base font-semibold text-on-accent transition hover:bg-accent-2 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
             >
               {ui("lesson.finish", locale)} · +{LESSON_BONUS_XP} XP
             </button>

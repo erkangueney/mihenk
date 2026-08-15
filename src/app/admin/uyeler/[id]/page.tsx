@@ -106,11 +106,8 @@ export default async function MemberDetailPage({
                       {done}/{total}
                     </span>
                   </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-accent-2 to-accent"
-                      style={{ width: `${Math.round((done / total) * 100)}%` }}
-                    />
+                  <div className="scale-track">
+                    <div className="scale-fill" style={{ ["--fill" as string]: done / total }} />
                   </div>
                 </li>
               ))}
@@ -134,7 +131,7 @@ export default async function MemberDetailPage({
                   title={badge.description.tr}
                   className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs ${
                     has
-                      ? "border-accent/40 bg-accent/10 text-text"
+                      ? "border-accent text-text"
                       : "border-border bg-surface-2 text-muted opacity-60"
                   }`}
                 >

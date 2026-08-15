@@ -61,7 +61,7 @@ export function AvatarStudio({ locale }: { locale: Locale }) {
         <div className="flex flex-col items-center gap-4 p-6">
           <div className="relative">
             <Avatar state={progress.avatar} size={168} />
-            <span className="absolute -right-1 -bottom-1 grid h-10 w-10 place-items-center rounded-full border-2 border-bg bg-gradient-to-br from-accent-2 to-accent text-sm font-black text-on-accent">
+            <span className="border-bg bg-accent text-on-accent absolute -right-1 -bottom-1 grid h-10 w-10 place-items-center rounded-full border-2 font-mono text-sm font-bold">
               {info.level}
             </span>
           </div>
@@ -237,7 +237,7 @@ function PartCard({
           <button
             type="button"
             onClick={onUnlock}
-            className="ml-auto rounded-lg bg-gradient-to-r from-accent to-accent-2 px-3 py-1.5 text-xs font-bold text-on-accent"
+            className="ml-auto rounded-lg bg-accent px-3 py-1.5 text-xs font-bold text-on-accent transition hover:bg-accent-2"
           >
             {status.cost > 0
               ? `${ui("avatar.unlock", locale)} · ${status.cost.toLocaleString(locale)} XP`

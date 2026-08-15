@@ -80,7 +80,7 @@ export function AccountMenu({ locale }: { locale: Locale }) {
         aria-haspopup="menu"
         className="flex h-9 items-center gap-2 rounded-lg border border-border bg-surface-2 pr-3 pl-1.5 text-sm font-semibold transition hover:border-border-strong"
       >
-        <span className="grid h-6 w-6 place-items-center rounded-md bg-gradient-to-br from-accent-2 to-accent text-[10px] font-black text-on-accent">
+        <span className="bg-accent text-on-accent grid h-6 w-6 place-items-center rounded-md font-mono text-[10px] font-bold">
           {initials(user.displayName, user.email)}
         </span>
         <span className="max-w-[9rem] truncate">{user.displayName || user.email}</span>

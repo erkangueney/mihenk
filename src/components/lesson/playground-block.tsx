@@ -185,7 +185,7 @@ export function Playground({
             type="button"
             onClick={run}
             disabled={running}
-            className="rounded-lg bg-gradient-to-r from-accent to-accent-2 px-4 py-2 text-sm font-semibold text-on-accent disabled:opacity-60"
+            className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition hover:bg-accent-2 disabled:opacity-60"
           >
             {running ? ui("code.running", locale) : `▶ ${ui("code.run", locale)}`}
           </button>

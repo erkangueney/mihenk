@@ -76,7 +76,7 @@ export function ProfileView({
               title={ui("avatar.cta", locale)}
             >
               <Avatar state={progress.avatar} size={80} />
-              <span className="absolute -right-1 -bottom-1 grid h-7 w-7 place-items-center rounded-full border-2 border-surface bg-gradient-to-br from-accent-2 to-accent text-[11px] font-black text-on-accent">
+              <span className="border-surface bg-accent text-on-accent absolute -right-1 -bottom-1 grid h-7 w-7 place-items-center rounded-full border-2 font-mono text-[11px] font-bold">
                 {info.level}
               </span>
             </Link>
@@ -174,7 +174,7 @@ export function ProfileView({
               <div
                 className={`h-10 rounded-lg border transition ${
                   day.active
-                    ? "border-transparent bg-gradient-to-br from-accent to-accent-2"
+                    ? "border-transparent bg-accent"
                     : "border-border bg-surface-2"
                 }`}
                 title={day.key}

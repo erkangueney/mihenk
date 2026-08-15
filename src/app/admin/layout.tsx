@@ -36,7 +36,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Link href="/admin" className="flex items-center gap-2 font-display text-lg font-semibold">
             <span
               aria-hidden
-              className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-accent-2 to-accent text-sm text-on-accent"
+              className="bg-accent text-on-accent grid h-8 w-8 place-items-center rounded-lg text-sm"
             >
               ⚙
             </span>

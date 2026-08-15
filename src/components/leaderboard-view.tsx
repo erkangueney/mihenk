@@ -138,10 +138,8 @@ export function LeaderboardView({ locale }: { locale: Locale }) {
                   >
                     <td className="px-4 py-3 sm:px-6">
                       <span
-                        className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
-                          row.rank <= 3
-                            ? "bg-gradient-to-br from-accent to-accent-2 text-on-accent"
-                            : "bg-surface-2 text-muted"
+                        className={`grid h-7 w-7 place-items-center rounded-full font-mono text-xs font-bold ${
+                          row.rank <= 3 ? "bg-accent text-on-accent" : "bg-surface-2 text-muted"
                         }`}
                       >
                         {row.rank}

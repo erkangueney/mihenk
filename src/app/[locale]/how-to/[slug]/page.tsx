@@ -140,7 +140,7 @@ export default async function HowToPage({
             <li key={index} className="flex gap-4">
               <span
                 aria-hidden
-                className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-accent-2 to-accent text-sm font-black text-on-accent"
+                className="bg-accent text-on-accent mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full font-mono text-sm font-bold"
               >
                 {index + 1}
               </span>

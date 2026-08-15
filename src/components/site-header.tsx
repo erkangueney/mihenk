@@ -141,11 +141,11 @@ export function SiteHeader({ locale }: { locale: Locale }) {
             >
               <span className="relative">
                 <Avatar state={progress.avatar} size={28} animated={false} />
-                <span className="absolute -right-1 -bottom-1 grid h-4 w-4 place-items-center rounded-full bg-gradient-to-br from-accent-2 to-accent text-[9px] font-black text-on-accent">
+                <span className="absolute -right-1 -bottom-1 grid h-4 w-4 place-items-center rounded-full border border-bg bg-accent font-mono text-[9px] font-bold text-on-accent">
                   {info.level}
                 </span>
               </span>
-              <span>{progress.xp.toLocaleString(locale)} XP</span>
+              <span className="font-mono tabular-nums">{progress.xp.toLocaleString(locale)} XP</span>
             </Link>
           ) : null}
 

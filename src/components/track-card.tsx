@@ -48,8 +48,8 @@ export function TrackCard({ track, locale }: { track: TrackCardData; locale: Loc
       <div className="flex items-start gap-4">
         <span
           aria-hidden
-          className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-2xl ring-1 transition duration-300 group-hover:scale-105 ring-[color:color-mix(in_oklab,var(--track)_35%,transparent)]"
-          style={{ backgroundColor: `color-mix(in oklab, ${track.color} 16%, transparent)` }}
+          className="grid h-12 w-12 shrink-0 place-items-center rounded-lg border-[1.5px] text-2xl transition duration-300 group-hover:scale-105"
+          style={{ borderColor: `color-mix(in oklab, ${track.color} 55%, transparent)` }}
         >
           {track.icon}
         </span>
@@ -60,9 +60,9 @@ export function TrackCard({ track, locale }: { track: TrackCardData; locale: Loc
               <span
                 aria-hidden
                 title={locale === "tr" ? "Bu patika Premium" : "This track is Premium"}
-                className="rounded-full bg-accent/15 px-1.5 py-0.5 text-[11px] text-accent"
+                className="border-border-strong text-tick rounded border px-1.5 py-0.5 font-mono text-[10px]"
               >
-                💎
+                PREMIUM
               </span>
             ) : null}
           </h3>

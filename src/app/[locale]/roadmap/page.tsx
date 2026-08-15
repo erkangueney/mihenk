@@ -44,7 +44,7 @@ export default async function RoadmapPage({ params }: { params: Promise<{ locale
           <li key={phase.id} className="card overflow-hidden">
             <header className="border-b border-border p-5 sm:p-6">
               <div className="flex flex-wrap items-center gap-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-accent to-accent-2 text-sm font-black text-on-accent">
+                <span className="bg-accent text-on-accent grid h-9 w-9 shrink-0 place-items-center rounded-lg font-mono text-sm font-bold">
                   {phaseIndex + 1}
                 </span>
                 <h2 className="text-lg font-bold tracking-tight">{t(phase.title, locale)}</h2>

@@ -121,7 +121,7 @@ export function OrderBlock({
           <button
             type="button"
             onClick={check}
-            className="rounded-lg bg-gradient-to-r from-accent to-accent-2 px-4 py-2 text-sm font-semibold text-on-accent"
+            className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition hover:bg-accent-2"
           >
             {ui("order.check", locale)}
           </button>

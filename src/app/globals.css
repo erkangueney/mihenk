@@ -1,48 +1,52 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------ */
-/* Tema değişkenleri                                                   */
+/* Tema değişkenleri — "Mihenk Taşı: Ayar Atölyesi"                    */
 /* Koyu tema varsayılan; açık tema <html class="light"> ile açılır.    */
-/* Dil: derin obsidiyen zemin + şampanya altını vurgu.                 */
+/* Restrained renk stratejisi: sıcak bazalt-siyahı zemin + TEK sıcak    */
+/* vurgu (22 ayar altın), yalnızca aktif/kazanılmış durumda kullanılır. */
+/* İkincil yapısal ton soğuk kalay-gri (skala çizgileri, alet hatları). */
 /* ------------------------------------------------------------------ */
 
 :root {
-  --bg: #07080d;
-  --bg-soft: #0c0e15;
-  --surface: #10131c;
-  --surface-2: #181c28;
-  --border: #262c3d;
-  --border-strong: #35405c;
-  --text: #f3f1e9;
-  --muted: #9aa1b5;
-  --accent: #d9a84e;
-  --accent-2: #f0d795;
-  --on-accent: #201604;
-  --success: #3ecf8e;
-  --warning: #fbbf24;
-  --danger: #f87171;
-  --shadow: 0 24px 70px -24px rgba(0, 0, 0, 0.9);
-  --glow: 0 12px 42px -12px color-mix(in oklab, var(--accent) 55%, transparent);
+  --bg: #15110c;
+  --bg-soft: #1b160f;
+  --surface: #221b13;
+  --surface-2: #2a2116;
+  --border: #3c3122;
+  --border-strong: #52432c;
+  --text: #ede4d3;
+  --muted: #a89880;
+  --tick: #7c7466;
+  --accent: #c9a153;
+  --accent-2: #e0bd76;
+  --on-accent: #211705;
+  --success: #7f9c66;
+  --warning: #c3893f;
+  --danger: #b1523a;
+  --shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.85);
+  --glow: 0 8px 28px -10px color-mix(in oklab, var(--accent) 45%, transparent);
   color-scheme: dark;
 }
 
 html.light {
-  --bg: #faf8f2;
-  --bg-soft: #f3efe5;
-  --surface: #ffffff;
-  --surface-2: #f6f2e8;
-  --border: #e6dfcc;
-  --border-strong: #d3c7a8;
-  --text: #1a1610;
-  --muted: #6e6753;
-  --accent: #9a6d1c;
-  --accent-2: #7c5714;
-  --on-accent: #fffcf3;
-  --success: #059669;
-  --warning: #b45309;
-  --danger: #dc2626;
-  --shadow: 0 20px 50px -24px rgba(60, 47, 18, 0.28);
-  --glow: 0 12px 36px -14px color-mix(in oklab, var(--accent) 45%, transparent);
+  --bg: #f4efe4;
+  --bg-soft: #ece4d3;
+  --surface: #fbf8f1;
+  --surface-2: #f1ead9;
+  --border: #ddd0b3;
+  --border-strong: #c4b48c;
+  --text: #241c11;
+  --muted: #6e6248;
+  --tick: #8c8168;
+  --accent: #8c6a29;
+  --accent-2: #6f5620;
+  --on-accent: #fffaf0;
+  --success: #4f7a3d;
+  --warning: #93601f;
+  --danger: #93402a;
+  --shadow: 0 20px 46px -24px rgba(52, 40, 16, 0.25);
+  --glow: 0 8px 24px -12px color-mix(in oklab, var(--accent) 35%, transparent);
   color-scheme: light;
 }
 
@@ -55,6 +59,7 @@ html.light {
   --color-border-strong: var(--border-strong);
   --color-text: var(--text);
   --color-muted: var(--muted);
+  --color-tick: var(--tick);
   --color-accent: var(--accent);
   --color-accent-2: var(--accent-2);
   --color-on-accent: var(--on-accent);
@@ -86,40 +91,31 @@ body {
   overflow-x: hidden;
 }
 
-/* Dekoratif arka plan: altın ışıma + çok ince doku — sabit katman,
-   kaydırmada yeniden boyanmaz. */
+/* Tek çalışma lambası: atölyedeki taşın üzerine düşen tek, sıcak ışık
+   noktası — sayfanın köşelerinden fışkıran "SaaS ışıması" değil, tek bir
+   kaynaktan gelen gerçekçi bir aydınlatma. Sabit katman, kaydırmada yeniden
+   boyanmaz. */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: -1;
-  background:
-    radial-gradient(
-      55rem 38rem at 18% -12%,
-      color-mix(in oklab, var(--accent) 16%, transparent),
-      transparent 62%
-    ),
-    radial-gradient(
-      48rem 34rem at 92% -4%,
-      color-mix(in oklab, var(--accent-2) 10%, transparent),
-      transparent 58%
-    ),
-    radial-gradient(
-      70rem 50rem at 50% 115%,
-      color-mix(in oklab, var(--accent) 7%, transparent),
-      transparent 60%
-    );
+  background: radial-gradient(
+    62rem 46rem at 50% -18%,
+    color-mix(in oklab, var(--accent) 10%, transparent),
+    transparent 60%
+  );
 }
 
-/* Kumlu film dokusu — "düz dijital" hissini kırar, pahalı baskı hissi verir. */
+/* Taş dokusu — kumlu, mineralli bir zemin hissi. Kağıt/parşömen değil, taş. */
 body::after {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: -1;
-  opacity: 0.035;
+  opacity: 0.05;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -153,62 +149,56 @@ body::after {
 /* Yardımcı sınıflar                                                   */
 /* ------------------------------------------------------------------ */
 
-/* Kart: yüzeyin üstünde hafif ışık, kılcal kenarlık, derin yumuşak gölge. */
+/* Kart: düz taş plaka — camsı degrade/parlama yok, tek kılcal üst hat ve
+   içe düşen doğal gölge, kesme taş bloğu hissi. */
 @utility card {
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--surface-2) 55%, transparent),
-      transparent 45%
-    ),
-    var(--surface);
+  background: var(--surface);
   border: 1px solid var(--border);
+  border-top-color: color-mix(in oklab, var(--border-strong) 70%, transparent);
   border-radius: var(--radius-card);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 1px 0 0 color-mix(in oklab, var(--text) 4%, transparent);
 }
 
-/* Başlıklar için altın degrade metin. */
+/* Başlıklar: eskiden degrade metindi (SaaS klişesi); artık tek katı ton —
+   taşa kazınmış tek renk. Sınıf adı geri uyumluluk için korunur. */
 @utility gradient-text {
-  background-image: linear-gradient(
-    105deg,
-    var(--text) 0%,
-    var(--accent-2) 45%,
-    var(--accent) 80%
-  );
-  background-clip: text;
-  color: transparent;
+  color: var(--accent-2);
 }
 
-/* Küçük, aralıklı büyük harfli etiket — bölüm girişleri için. */
+/* Küçük, aralıklı büyük harfli etiket — alet üzerindeki serigrafi yazısı
+   gibi: mono font, sıkı izleme. */
 @utility eyebrow {
+  font-family: var(--font-mono-stack, ui-monospace, monospace);
   font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--tick);
 }
 
-/* Birincil eylem: altın degrade, koyu mürekkep metin, ışıma. */
+/* Birincil eylem: dövme altın — düz dolgu, degrade yok; basılan bir damga
+   gibi hover'da hafifçe içeri çöker. */
 @utility btn-gold {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   border-radius: 999px;
-  background-image: linear-gradient(120deg, var(--accent-2), var(--accent) 60%);
+  background: var(--accent);
   color: var(--on-accent);
   font-weight: 600;
-  box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.35),
-    var(--glow);
+  box-shadow: var(--glow);
   transition:
-    filter 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
+    background-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.1s ease;
 }
 .btn-gold:hover {
-  filter: brightness(1.06);
-  transform: translateY(-1px);
+  background: var(--accent-2);
+}
+.btn-gold:active {
+  transform: translateY(1px) scale(0.99);
+  box-shadow: none;
 }
 
 /* İkincil eylem: sessiz, kılcal kenarlıklı. */
@@ -242,6 +232,81 @@ body::after {
   overflow-wrap: normal;
 }
 
+/* ------------------------------------------------------------------ */
+/* Ayar skalası — ilerlemenin taşa sürülen bir çizgi olarak gösterildiği */
+/* tekrar eden bileşen ailesi. İlerleme çubuğu değil, kalibre edilmiş    */
+/* bir cetvel: kalın hatlar dereceleri işaretler, altın çizgi ne kadar   */
+/* uzadıysa o kadar ilerleme kaydedilmiştir, ok işareti "şu an burada"   */
+/* göstergesidir (step-row meydan okuyucusundan gelen katkı).           */
+/* ------------------------------------------------------------------ */
+
+.scale-track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.scale-track::before {
+  /* Kalibrasyon dişleri — eşit aralıklı ince çizgiler. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--tick) 55%, transparent) 0,
+    color-mix(in oklab, var(--tick) 55%, transparent) 1px,
+    transparent 1px,
+    transparent calc(100% / 12)
+  );
+  opacity: 0.5;
+}
+
+.scale-fill {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transform: scaleX(var(--fill, 0));
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Ayar damgası — rozet. Kazanılmış: dolu altın disk + kazınmış numara.
+   Kazanılmamış: boş damga kalıbı (kilit ikonu değil, henüz basılmamış
+   bir alet). */
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  font-family: var(--font-mono-stack, ui-monospace, monospace);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  border: 1.5px solid var(--border-strong);
+  color: var(--muted);
+  background: var(--surface-2);
+}
+
+.stamp[data-earned="true"] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: var(--glow);
+}
+
+.stamp[data-earned="false"] {
+  border-style: dashed;
+  background: transparent;
+}
+
 @keyframes va-rise {
   from {
     opacity: 0;
@@ -269,7 +334,7 @@ body::after {
 }
 
 .animate-toast {
-  animation: va-toast-in 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.4) both;
+  animation: va-toast-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes va-pop {
