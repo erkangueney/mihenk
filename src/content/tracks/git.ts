@@ -2270,6 +2270,174 @@ jobs:
             }),
           ],
         }),
+        lesson({
+          slug: "interaktif-rebase",
+          title: L("İnteraktif rebase: commit geçmişini temizlemek", "Interactive rebase: cleaning up commit history"),
+          summary: L(
+            "'wip', 'düzeltme', 'tekrar düzeltme' gibi 8 dağınık commit'i, incelemesi kolay 2 anlamlı commit'e dönüştürmek.",
+            "Turning 8 messy commits like 'wip', 'fix', 'fix again' into 2 meaningful commits that are easy to review.",
+          ),
+          minutes: 17,
+          premium: true,
+          blocks: [
+            text(
+              "Bir özellik üzerinde çalışırken commit'lerin genelde düzensizdir: \"wip\", \"düzeltme\", \"typo\", \"gerçekten düzeltme\". Bunları PR açmadan önce temizlemek, inceleyen kişiye çok daha okunur bir geçmiş sunar. **`git rebase -i`** (interactive rebase) tam bunun için var:\n\n```bash\ngit rebase -i HEAD~5   # son 5 commit'i düzenlemeye aç\n```\n\nBu, bir metin editöründe her commit'in yanında bir komutla bir liste açar:\n\n- **pick** — commit'i olduğu gibi bırak\n- **squash (s)** — bu commit'i bir öncekiyle birleştir\n- **reword (r)** — yalnızca commit mesajını değiştir\n- **drop (d)** — commit'i tamamen sil\n\nSekiz \"wip\"li commit'i `squash` ile birleştirip tek bir anlamlı mesajla (\"CSV'den müşteri verisi içe aktarma eklendi\") bırakabilirsin.",
+              "While working on a feature, commits are usually messy: \"wip\", \"fix\", \"typo\", \"actually fix\". Cleaning these up before opening a PR gives the reviewer a far more readable history. **`git rebase -i`** (interactive rebase) exists exactly for this:\n\n```bash\ngit rebase -i HEAD~5   # open the last 5 commits for editing\n```\n\nThis opens a list in a text editor, with a command next to each commit:\n\n- **pick** — leave the commit as is\n- **squash (s)** — merge this commit into the one before it\n- **reword (r)** — change only the commit message\n- **drop (d)** — remove the commit entirely\n\nYou can `squash` eight \"wip\" commits together and leave a single meaningful message (\"add customer data import from CSV\").",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "İnteraktif rebase listesinde bir commit'in yanına `squash` yazmak ne yapar?",
+                "What does writing `squash` next to a commit in the interactive rebase list do?",
+              ],
+              options: [
+                ["O commit'i bir öncekiyle birleştirir", "It merges that commit into the one before it"],
+                ["O commit'i tamamen siler", "It deletes that commit entirely"],
+                ["O commit'i yeni bir dala taşır", "It moves that commit to a new branch"],
+                ["Yalnızca commit mesajını değiştirir, içeriği etkilemez", "It only changes the commit message, not the content"],
+              ],
+              answer: 0,
+              explain: [
+                "`squash`, o commit'in değişikliklerini bir önceki commit'e katar ve ikisi tek bir commit hâline gelir; mesajları birleştirmen istenir. Yalnızca mesajı değiştirmek istiyorsan doğru komut `reword`'dür, içeriği tamamen atmak istiyorsan `drop`'tur.",
+                "`squash` folds that commit's changes into the previous one, and the two become a single commit; you're prompted to combine their messages. If you only want to change the message, the right command is `reword`; to discard the content entirely, it's `drop`.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "`git rebase -i` ile geçmişi temizlemenin en önemli kısıtı nedir?",
+                "What's the most important restriction on cleaning up history with `git rebase -i`?",
+              ],
+              options: [
+                [
+                  "Zaten başkalarıyla paylaşılmış (push edilmiş, PR'a bağlı) commit'lerde yapılmamalıdır — geçmişi değiştirir ve başkalarının kopyasıyla çakışır",
+                  "It shouldn't be done on commits already shared with others (pushed, part of an open PR) — it rewrites history and conflicts with everyone else's copy",
+                ],
+                ["Yalnızca main dalında çalışır", "It only works on the main branch"],
+                ["En fazla 2 commit'i aynı anda düzenleyebilirsin", "You can only edit 2 commits at a time"],
+                ["Hiçbir kısıtı yoktur, her zaman güvenlidir", "There's no restriction, it's always safe"],
+              ],
+              answer: 0,
+              explain: [
+                "Rebase, commit'lerin kimliğini (hash'ini) değiştirir. Bu commit'ler zaten push edilip başkaları onların üzerine kendi işlerini kurduysa, geçmişi değiştirmek onların dalını bozar. Altın kural: yalnızca henüz kimseyle paylaşmadığın, kendi dalındaki commit'leri rebase et.",
+                "Rebase changes commits' identity (hash). If those commits were already pushed and others have built work on top of them, rewriting history breaks their branch. The golden rule: only rebase commits on your own branch that you haven't shared with anyone yet.",
+              ],
+            }),
+            pitfall(
+              "Push edilmiş bir dalı rebase ettikten sonra normal push çalışmaz",
+              "After rebasing an already-pushed branch, a normal push won't work",
+              "Rebase commit geçmişini yeniden yazdığı için, uzak sunucudaki eski geçmişle uyuşmaz ve `git push` reddedilir. Yalnızca **kendi** dalındaysan ve kimse üzerine iş kurmadıysa `git push --force-with-lease` kullanılabilir — `--force` değil, `--force-with-lease`: bu, aradan biri push etmişse seni uyarıp durur, kör bir üzerine yazmayı önler.",
+              "Because rebase rewrites commit history, it no longer matches the old history on the remote, and a plain `git push` gets rejected. Only if it's **your own** branch and nobody has built on it can you use `git push --force-with-lease` — not `--force`, but `--force-with-lease`: it warns and stops if someone else pushed in the meantime, preventing a blind overwrite.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "git-bisect-ile-hata-avi",
+          title: L("git bisect ile hatayı bulmak", "Finding the bug with git bisect"),
+          summary: L(
+            "200 commit içinde hangisi bir şeyi bozdu? Elle her birine bakmak yerine ikili aramayla bulmak.",
+            "Which of 200 commits broke something? Finding it with binary search instead of checking each one by hand.",
+          ),
+          minutes: 14,
+          premium: true,
+          blocks: [
+            text(
+              "\"Bu rapor geçen ay doğruydu, şimdi yanlış — ama hangi commit'te bozuldu bilmiyorum\" durumu tanıdıktır. 200 commit'in her birini elle kontrol etmek saatler alır. **`git bisect`**, ikili arama mantığıyla bunu birkaç adıma indirir:\n\n```bash\ngit bisect start\ngit bisect bad              # şu an bozuk (HEAD)\ngit bisect good v1.2.0      # bu etiket/commit'te iyiydi\n# Git seni ortadaki bir commit'e atar; test edip sonucu bildirirsin:\ngit bisect good   # ya da\ngit bisect bad\n# Git aralığı yarıya indirir, süreç tekrarlanır\ngit bisect reset             # bitince normale dön\n```\n\n200 commit'lik bir aralık, ikili arama sayesinde yalnızca ~8 testte (log₂200 ≈ 7,6) tek bir suçlu commit'e iner.",
+              "\"This report was correct last month, it's wrong now — but I don't know which commit broke it\" is a familiar situation. Checking each of 200 commits by hand takes hours. **`git bisect`** reduces this to a handful of steps using binary search:\n\n```bash\ngit bisect start\ngit bisect bad              # currently broken (HEAD)\ngit bisect good v1.2.0      # this tag/commit was fine\n# Git checks out a commit in the middle; you test it and report back:\ngit bisect good   # or\ngit bisect bad\n# Git halves the range, the process repeats\ngit bisect reset             # back to normal when done\n```\n\nA range of 200 commits narrows to a single guilty commit in only ~8 tests (log₂200 ≈ 7.6), thanks to binary search.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "git bisect neden 200 commit'i tek tek değil, yalnızca ~8 adımda tarayabilir?",
+                "Why can git bisect scan 200 commits in only ~8 steps, instead of one by one?",
+              ],
+              options: [
+                [
+                  "İkili arama yapar — her adımda aralığı yarıya indirir, doğrusal değil logaritmik sayıda test gerekir",
+                  "It performs binary search — each step halves the range, requiring a logarithmic, not linear, number of tests",
+                ],
+                ["Yalnızca son 8 commit'i kontrol eder, gerisini yok sayar", "It only checks the last 8 commits and ignores the rest"],
+                ["Testleri otomatik olarak paralel çalıştırır", "It automatically runs the tests in parallel"],
+                ["Yapay zeka ile hangi commit'in bozuk olduğunu tahmin eder", "It uses AI to guess which commit is broken"],
+              ],
+              answer: 0,
+              explain: [
+                "Her `good`/`bad` cevabından sonra bisect aralığı yarıya indirir — tıpkı sıralı bir listede ikili arama gibi. 200 commit için gereken test sayısı log₂(200) ≈ 7,6'ya, yani pratikte 8 teste iner; tek tek kontrol 200 test gerektirirdi.",
+                "After every `good`/`bad` answer, bisect halves the range — exactly like binary search on a sorted list. For 200 commits the number of tests needed drops to log₂(200) ≈ 7.6, roughly 8 in practice; checking one by one would need 200 tests.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "git bisect'in çalışması için başlangıçta ne belirtmen gerekir?",
+                "What do you need to specify at the start for git bisect to work?",
+              ],
+              options: [
+                [
+                  "Şu anki (bozuk) durumu ve geçmişte bilinen iyi bir noktayı (`bisect bad` / `bisect good`)",
+                  "The current (broken) state and a known-good point in the past (`bisect bad` / `bisect good`)",
+                ],
+                ["Hangi dosyanın bozuk olduğunu", "Which file is broken"],
+                ["Kaç kişinin projede çalıştığını", "How many people work on the project"],
+                ["Hiçbir şey, bisect otomatik başlar", "Nothing, bisect starts automatically"],
+              ],
+              answer: 0,
+              explain: [
+                "Bisect'in ikili arama yapabilmesi için bir aralığa ihtiyacı vardır: 'şu an kötü' ve 'şurada iyiydi'. Bu iki uç nokta olmadan Git nereden nereye arama yapacağını bilemez.",
+                "For bisect to run its binary search it needs a range: \"currently bad\" and \"was good at this point\". Without these two endpoints, Git has no idea where to search from and to.",
+              ],
+            }),
+            tip(
+              "Test adımını bir betiğe bağlarsan bisect tamamen otomatikleşir",
+              "Wire the test step to a script and bisect runs fully automatically",
+              "Her adımda elle `good`/`bad` yazmak yerine, doğru/yanlışı otomatik tespit eden bir komut dosyası verebilirsin: `git bisect run pytest test_rapor.py`. Git, betiğin çıkış koduna (0 = iyi, sıfırdan farklı = kötü) bakarak süreci baştan sona otomatik tamamlar — sen kahveni içerken.",
+              "Instead of typing `good`/`bad` by hand at every step, you can hand bisect a script that detects right/wrong automatically: `git bisect run pytest test_report.py`. Git reads the script's exit code (0 = good, non-zero = bad) and runs the whole process to completion on its own — while you get coffee.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "cherry-pick-ile-secici-tasima",
+          title: L("Cherry-pick: bir commit'i başka bir dala taşımak", "Cherry-pick: moving a single commit to another branch"),
+          summary: L(
+            "Bütün dalı birleştirmeden, yalnızca ihtiyacın olan tek bir commit'i alıp başka bir dala uygulamak.",
+            "Without merging a whole branch, taking just the one commit you need and applying it to another branch.",
+          ),
+          minutes: 13,
+          premium: true,
+          blocks: [
+            text(
+              "Bir hata düzeltmesini `main`'de yaptın ama aynı hata, henüz birleşmemiş eski bir `release/1.2` dalında da var — o dalın **tamamını** `main`'den birleştirmek istemiyorsun, çünkü içinde henüz yayınlanmaya hazır olmayan başka değişiklikler de var. **`git cherry-pick`**, tek bir commit'i **kendi hash'iyle** seçip başka bir dala uygular:\n\n```bash\ngit checkout release/1.2\ngit cherry-pick a1b2c3d      # yalnızca bu commit'i buraya da uygula\n```\n\nBu, o commit'in değişikliklerini alır ve şu anki dala **yeni bir commit** olarak (farklı bir hash'le) ekler — orijinal commit'in kendisi taşınmaz, bir kopyası oluşturulur.",
+              "You fixed a bug on `main`, but the same bug also exists on an old, not-yet-merged `release/1.2` branch — you don't want to merge **all** of `main` into it, because it contains other changes not ready to ship yet. **`git cherry-pick`** picks a single commit **by its own hash** and applies it to another branch:\n\n```bash\ngit checkout release/1.2\ngit cherry-pick a1b2c3d      # apply just this one commit here too\n```\n\nThis takes that commit's changes and adds them to the current branch as a **new commit** (with a different hash) — the original commit itself isn't moved, a copy of it is created.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Cherry-pick edilen bir commit, hedef daldaki hâliyle orijinaliyle aynı hash'e mi sahiptir?",
+                "Does a cherry-picked commit share the same hash as the original, once it's on the target branch?",
+              ],
+              options: [
+                [
+                  "Hayır — aynı değişikliği taşıyan ama farklı bir hash'e sahip YENİ bir commit oluşturulur",
+                  "No — a NEW commit is created carrying the same change but with a different hash",
+                ],
+                ["Evet, commit birebir aynı hash ile iki dalda birden bulunur", "Yes, the commit exists identically, with the same hash, on both branches"],
+                ["Hash yalnızca merge'de değişir, cherry-pick'te değişmez", "The hash only changes on merge, not on cherry-pick"],
+                ["Cherry-pick commit'i taşır, kopyalamaz — orijinalinden kaybolur", "Cherry-pick moves the commit rather than copying it — it disappears from the original"],
+              ],
+              answer: 0,
+              explain: [
+                "Cherry-pick, commit'in içeriğini (diff'ini) alıp hedef daldaki mevcut geçmişin üzerine yeni bir commit olarak uygular. Bu yeni commit'in ebeveyni farklı olduğu için hash'i de orijinalinden farklıdır — aynı değişiklik, iki farklı kimlikle iki yerde durur.",
+                "Cherry-pick takes the commit's content (its diff) and applies it as a new commit on top of the target branch's existing history. Because that new commit's parent differs, its hash differs from the original too — the same change ends up living in two places under two different identities.",
+              ],
+            }),
+            pitfall(
+              "Cherry-pick'i düzenli birleştirmenin yerine kullanma",
+              "Don't use cherry-pick as a substitute for regular merging",
+              "Cherry-pick, tek seferlik ve istisnai bir araçtır (bir hotfix'i geriye taşımak gibi). Onu sürekli iki dalı senkronize tutmak için kullanmak, aynı değişikliğin farklı hash'lerle birden fazla yerde durmasına ve gelecekte gerçek bir birleştirmede kafa karıştırıcı çakışmalara yol açar. Sürekli senkronizasyon için doğru araç düzenli `merge` veya `rebase`'dir.",
+              "Cherry-pick is a one-off, exceptional tool (like backporting a hotfix). Using it to keep two branches continuously in sync leads to the same change living in multiple places under different hashes, and confusing conflicts down the line when a real merge eventually happens. For ongoing synchronization, the right tool is a regular `merge` or `rebase`.",
+            ),
+          ],
+        }),
       ],
     },
   ],
