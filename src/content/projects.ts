@@ -1522,6 +1522,137 @@ print(f"Grup başına gereken kullanıcı: {n:.0f}")`,
     ],
   }),
 
+  project({
+    slug: "istatistik-bootstrap-guven-araligi",
+    track: "istatistik",
+    level: "expert",
+    title: ["Bootstrap: Formülsüz Güven Aralıkları", "Bootstrap: Formula-Free Confidence Intervals"],
+    stack: ["Python", "Bootstrap", "NumPy"],
+    hours: 8,
+    xp: 550,
+    summary: [
+      "Çarpık bir metrik (kullanıcı başı gelir gibi) için hem klasik formülle hem bootstrap ile güven aralığı hesapla, ikisinin ne zaman anlaşıp ne zaman ayrıştığını göster.",
+      "Compute a confidence interval both the classic formula way and via bootstrap for a skewed metric (like revenue per user), and show when the two agree and when they diverge.",
+    ],
+    dataset: [
+      "Kullanıcı başı gelir, oturum süresi gibi sağa çarpık (birkaç yüksek değerin çoğunluğu çektiği) bir metrik; kendi ürün verinden veya Kaggle'dan.",
+      "A right-skewed metric (a handful of high values pulling the rest) such as revenue per user or session duration; from your own product data or Kaggle.",
+    ],
+    deliverables: [
+      ["Metriğin dağılım grafiği ve çarpıklık ölçümü", "A distribution plot of the metric with its skewness measured"],
+      ["Klasik formülle (ortalama ± 1,96×standart hata) hesaplanan %95 GA", "A 95% CI computed with the classic formula (mean ± 1.96×standard error)"],
+      ["Bootstrap ile (en az 5000 yeniden örneklem) hesaplanan %95 GA", "A 95% CI computed via bootstrap (at least 5000 resamples)"],
+      ["İki aralığın karşılaştırması ve ne zaman güvenilmemesi gerektiğine dair not", "A comparison of the two intervals and a note on when not to trust the formula one"],
+    ],
+    steps: [
+      {
+        title: ["Metriği seç ve çarpıklığını ölç", "Pick the metric and measure its skew"],
+        body: [
+          "Sağa çarpık bir metrik seç (birkaç büyük harcayan kullanıcının çektiği bir ortalama tipik örnektir). Histogramını çiz ve çarpıklık katsayısını hesapla — klasik formül, normal dağılıma yakın veri varsayar; yüksek çarpıklıkta bu varsayım çöker.",
+          "Pick a right-skewed metric (a mean pulled by a few big-spending users is a typical example). Plot its histogram and compute the skewness coefficient — the classic formula assumes near-normal data; with high skew that assumption breaks down.",
+        ],
+      },
+      {
+        title: ["Klasik formülle güven aralığı", "Confidence interval via the classic formula"],
+        body: [
+          "`ortalama ± 1,96 × (standart_sapma / sqrt(n))` ile %95 güven aralığını hesapla. Bu formül hızlıdır ama dağılımın normale yakın olduğunu **varsayar**.",
+          "Compute the 95% CI with `mean ± 1.96 × (std / sqrt(n))`. This formula is fast, but it **assumes** the distribution is close to normal.",
+        ],
+      },
+      {
+        title: ["Bootstrap ile güven aralığı", "Confidence interval via bootstrap"],
+        body: [
+          "Aynı veriden en az 5000 kez yerine koyarak yeniden örnekle, her seferinde ortalamayı hesapla ve %2,5/%97,5 yüzdelik dilimlerini al. Bu yöntem dağılım şekli hakkında hiçbir varsayım yapmaz.",
+          "Resample the same data with replacement at least 5000 times, computing the mean each time, then take the 2.5th/97.5th percentiles. This method makes no assumption about the shape of the distribution.",
+        ],
+        lang: "python",
+        code: `import numpy as np
+
+rng = np.random.default_rng(42)
+yeniden_ortalamalar = [
+    rng.choice(veri, size=len(veri), replace=True).mean()
+    for _ in range(5000)
+]
+alt, ust = np.percentile(yeniden_ortalamalar, [2.5, 97.5])
+print(f"Bootstrap %95 GA: {alt:.2f} - {ust:.2f}")`,
+      },
+      {
+        title: ["Karşılaştır ve yorumla", "Compare and interpret"],
+        body: [
+          "İki aralığı yan yana koy. Çarpıklık yüksekse bootstrap aralığı genelde asimetriktir (formül aralığı her zaman simetriktir) — bu fark, formülün neyi kaçırdığının somut kanıtıdır. Raporunda hangi aralığa güveneceğini ve nedenini yaz.",
+          "Place the two intervals side by side. With high skew the bootstrap interval is usually asymmetric (the formula interval is always symmetric) — that difference is concrete evidence of what the formula misses. In your report, state which interval you'd trust and why.",
+        ],
+      },
+      githubStep("bootstrap-guven-araligi"),
+    ],
+    premium: true,
+  }),
+
+  project({
+    slug: "istatistik-coklu-metrik-paneli",
+    track: "istatistik",
+    level: "expert",
+    title: ["Çoklu Metrik Paneli: Yanlış Keşifleri Kontrol Altında Tutmak", "Multi-Metric Panel: Keeping False Discoveries in Check"],
+    stack: ["Python", "Bonferroni", "İstatistiksel İzleme Planı"],
+    hours: 9,
+    xp: 600,
+    summary: [
+      "15-20 metriği aynı anda test eden bir deney panelini ele al: Bonferroni düzeltmesi uygula ve testi ne zaman/nasıl kontrol edeceğine dair önceden yazılmış bir izleme planı kur.",
+      "Take an experiment dashboard that tests 15-20 metrics at once: apply the Bonferroni correction and set up a pre-written monitoring plan for when and how you'll check the test.",
+    ],
+    dataset: [
+      "Bir deneyin (A/B testi) 15-20 metrikli sonuç tablosu; her metrik için p-değeri, etki büyüklüğü. Kendi verin yoksa gerçekçi bir simülasyon üret.",
+      "A 15-20 metric result table from an experiment (A/B test): p-value and effect size per metric. If you don't have your own, generate a realistic simulation.",
+    ],
+    deliverables: [
+      ["Düzeltmesiz vs Bonferroni-düzeltmeli 'anlamlı' metrik listesi karşılaştırması", "A comparison of the 'significant' metric list, uncorrected vs Bonferroni-corrected"],
+      ["Hangi metriklerin birincil/ikincil olduğuna dair önceden yazılmış bir sınıflandırma", "A pre-written classification of which metrics are primary vs secondary"],
+      ["Sabit ufuklu (fixed-horizon) bir izleme planı: ne zaman, kaç kez kontrol edilecek", "A fixed-horizon monitoring plan: when and how many times the test will be checked"],
+      ["'Neden erken durmadık' başlıklı 1 sayfalık gerekçe notu", "A one-page rationale titled \"why we didn't stop early\""],
+    ],
+    steps: [
+      {
+        title: ["Metrikleri birincil/ikincil olarak sınıflandır", "Classify metrics as primary or secondary"],
+        body: [
+          "Testten ÖNCE (ya da bu proje kapsamında, analizden önce), 15-20 metrikten yalnızca 1-2 tanesini **birincil karar metriği** olarak işaretle; geri kalanı **keşifsel** say. Bu ayrım, hangi metriklere ne kadar sıkı bir eşik uygulayacağını belirler.",
+          "BEFORE the test (or, within this project, before the analysis), mark only 1-2 of the 15-20 metrics as the **primary decision metric**; treat the rest as **exploratory**. This split determines how strict a threshold applies to which metric.",
+        ],
+      },
+      {
+        title: ["Bonferroni düzeltmesini uygula", "Apply the Bonferroni correction"],
+        body: [
+          "İkincil/keşifsel metriklere Bonferroni düzeltmesi (`α / n`) uygula. Birincil metriğe düzeltme gerekmez — zaten tek bir karar testi. Düzeltmesiz ve düzeltmeli 'anlamlı' listelerini yan yana koy; farkı göstermek raporun en güçlü parçasıdır.",
+          "Apply the Bonferroni correction (`α / n`) to the secondary/exploratory metrics. The primary metric needs no correction — it's already a single decision test. Put the uncorrected and corrected 'significant' lists side by side; showing that gap is the most convincing part of the report.",
+        ],
+        lang: "python",
+        code: `n_ikincil = len(ikincil_metrikler)
+esik = 0.05 / n_ikincil
+
+duzeltmesiz = [m for m in ikincil_metrikler if m["p"] < 0.05]
+duzeltilmis = [m for m in ikincil_metrikler if m["p"] < esik]
+
+print(f"Düzeltmesiz 'anlamlı': {len(duzeltmesiz)}")
+print(f"Bonferroni sonrası 'anlamlı': {len(duzeltilmis)}")`,
+      },
+      {
+        title: ["İzleme planını önceden yaz", "Write the monitoring plan in advance"],
+        body: [
+          "Testin ne zaman biteceğini (tarih veya örneklem büyüklüğü) ve sonuca yalnızca o noktada bakılacağını yaz. Sürekli izleme gerçekten gerekliyse, bunun için tasarlanmamış bir sabit eşiği (α=0,05) günlük kontrol etmenin peeking tuzağı olduğunu raporda açıkça belirt.",
+          "Write down when the test will end (a date or sample size) and that the result will only be looked at then. If continuous monitoring is genuinely needed, explicitly note in the report that checking a plain fixed threshold (α=0.05) daily — when it wasn't designed for that — is the peeking trap.",
+        ],
+      },
+      {
+        title: ["Gerekçe notunu yaz", "Write the rationale note"],
+        body: [
+          "Test bitmeden önce ekipten biri erken bir 'anlamlı' sinyal görüp durdurmak isteseydi ne cevap verirdin? Bu senaryoyu ve neden izleme planına sadık kalman gerektiğini bir sayfada anlat — bu, gelecekteki bir tartışmada elinde hazır bir belge olur.",
+          "If someone on the team wanted to stop early after seeing a 'significant' signal before the test ended, what would you say? Write that scenario and why sticking to the monitoring plan matters, in one page — this becomes a ready document for a future argument.",
+        ],
+      },
+      githubStep("coklu-metrik-paneli"),
+    ],
+    premium: true,
+  }),
+
   /* ----------------------- Makine Öğrenmesi --------------------- */
   project({
     slug: "ml-musteri-kaybi",

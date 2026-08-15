@@ -3567,6 +3567,320 @@ print(f"35 birim reklamda beklenen satis: {tahmin:.0f}")`,
             }),
           ],
         }),
+        lesson({
+          slug: "coklu-karsilastirma-bonferroni",
+          title: L("Çoklu karşılaştırma: Bonferroni düzeltmesi", "Multiple comparisons: the Bonferroni correction"),
+          summary: L(
+            "20 farklı şeyi test edersen, hiçbir gerçek etki olmasa bile %5 değil %64 ihtimalle 'anlamlı' bir şey bulursun.",
+            "Test 20 different things and, even with no real effect anywhere, you'll find something 'significant' with 64% chance, not 5%.",
+          ),
+          minutes: 16,
+          premium: true,
+          blocks: [
+            text(
+              "α = 0,05 eşiği, **tek bir test** için \"yanlış pozitif olasılığı %5\" demektir. Ama bir A/B test panelinde aynı anda 20 metriği test edersen (dönüşüm, sepet tutarı, tıklama oranı, oturum süresi…), her birinin yanlış pozitif verme ihtimali hâlâ %5'tir — ama **en az birinin** yanlış pozitif vermesi ihtimali çok daha yüksektir:\n\n$$1 - (1 - 0{,}05)^{20} \\approx 0{,}64$$\n\nYani hiçbir gerçek etki olmasa bile, 20 metrikten en az biri %64 ihtimalle \"anlamlı\" görünür. Buna **çoklu karşılaştırma problemi** denir.\n\n**Bonferroni düzeltmesi** basit bir çözümdür: eşiği test sayısına böl — `α / n`. 20 test için yeni eşik `0,05 / 20 = 0,0025` olur; yalnızca bundan daha küçük p-değerleri anlamlı sayılır.",
+              "The α = 0.05 threshold means \"5% false-positive chance\" for **a single test**. But if an A/B test dashboard checks 20 metrics at once (conversion, basket size, click rate, session length…), each one still has a 5% false-positive chance — yet the chance that **at least one** comes up a false positive is much higher:\n\n$$1 - (1 - 0.05)^{20} \\approx 0.64$$\n\nSo even with no real effect anywhere, at least one of the 20 metrics will look \"significant\" with 64% probability. This is the **multiple comparisons problem**.\n\nThe **Bonferroni correction** is a simple fix: divide the threshold by the number of tests — `α / n`. For 20 tests the new threshold is `0.05 / 20 = 0.0025`; only p-values smaller than that count as significant.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "20 bağımsız metriği α = 0,05 ile ayrı ayrı test edersen, hiçbir gerçek etki olmasa bile en az birinin 'anlamlı' çıkma ihtimali nedir?",
+                "If you test 20 independent metrics separately at α = 0.05, what's the chance at least one looks 'significant' even with no real effect anywhere?",
+              ],
+              options: [
+                ["Yaklaşık %64 — %5 değil", "About 64% — not 5%"],
+                ["Tam olarak %5", "Exactly 5%"],
+                ["Yaklaşık %0,05", "About 0.05%"],
+                ["Test sayısından bağımsız, her zaman %5", "Independent of test count, always 5%"],
+              ],
+              answer: 0,
+              explain: [
+                "Her testin ayrı ayrı yanlış pozitif olasılığı %5 olsa da, 'en az bir tanesi' olasılığı 1 - (0,95)^20 ≈ 0,64'tür. Test sayısı arttıkça bu olasılık hızla 1'e yaklaşır.",
+                "Even though each individual test has a 5% false-positive chance, the probability that 'at least one' does is 1 - (0.95)^20 ≈ 0.64. As the number of tests grows, this probability rushes toward 1.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "Bonferroni düzeltmesi pratikte ne yapar?",
+                "What does the Bonferroni correction actually do?",
+              ],
+              options: [
+                [
+                  "Anlamlılık eşiğini test sayısına böler (α/n), böylece anlamlı sayılmak zorlaşır",
+                  "Divides the significance threshold by the number of tests (α/n), making it harder to count as significant",
+                ],
+                ["p-değerlerini otomatik olarak küçültür", "Automatically shrinks the p-values themselves"],
+                ["Örneklem büyüklüğünü artırır", "Increases the sample size"],
+                ["Yalnızca en büyük etkiyi test eder, diğerlerini yok sayar", "Only tests the largest effect and ignores the rest"],
+              ],
+              answer: 0,
+              explain: [
+                "Bonferroni, p-değerlerine dokunmaz — eşiği sıkılaştırır (α/n). Bu, çoklu karşılaştırmadan doğan 'en az biri yanlış pozitif' riskini tek bir teste geri indirger.",
+                "Bonferroni doesn't touch the p-values — it tightens the threshold (α/n). This brings the 'at least one false positive' risk from multiple comparisons back down to that of a single test.",
+              ],
+            }),
+            pyTask({
+              id: "t1",
+              prompt: [
+                "5 metrik için p-değerleri `p_degerleri` listesinde. Bonferroni düzeltmesiyle (`0.05 / 5`) hangilerinin hâlâ anlamlı olduğunu bul: anlamlı p-değerlerini `anlamli` listesine, kaç tane olduğunu `sayisi`'ye yaz.",
+                "P-values for 5 metrics are in `p_degerleri`. Using the Bonferroni correction (`0.05 / 5`), find which are still significant: put the significant p-values in `anlamli` and their count in `sayisi`.",
+              ],
+              starter: `p_degerleri = [0.001, 0.03, 0.04, 0.2, 0.6]
+n_test = len(p_degerleri)
+esik = 0.05 / n_test
+
+anlamli =
+sayisi =
+print(anlamli, sayisi)`,
+              solution: `p_degerleri = [0.001, 0.03, 0.04, 0.2, 0.6]
+n_test = len(p_degerleri)
+esik = 0.05 / n_test
+
+anlamli = [p for p in p_degerleri if p < esik]
+sayisi = len(anlamli)
+print(anlamli, sayisi)`,
+              hint: [
+                "Düzeltilmiş eşik 0,05/5 = 0,01. Yalnızca bundan küçük p-değerleri kalır.",
+                "The corrected threshold is 0.05/5 = 0.01. Only p-values smaller than that remain.",
+              ],
+              checks: [
+                {
+                  code: "sayisi == 1",
+                  msg: [
+                    "Düzeltmeden sonra yalnızca 1 metrik anlamlı kalmalı (düzeltmesiz 3 tane 'anlamlı' görünüyordu)",
+                    "After correction only 1 metric should remain significant (uncorrected, 3 looked 'significant')",
+                  ],
+                },
+                {
+                  code: "anlamli == [0.001]",
+                  msg: ["Kalan tek değer 0.001 olmalı", "The one remaining value must be 0.001"],
+                },
+              ],
+              xp: 40,
+            }),
+            pitfall(
+              "Bonferroni fazla temkinlidir — her zaman doğru araç değil",
+              "Bonferroni is overly conservative — not always the right tool",
+              "Test sayısı çok artınca (yüzlerce metrik, genom taraması vb.) Bonferroni gerçek etkilerin çoğunu da eler (yanlış negatif oranı yükselir). Böyle durumlarda **Benjamini-Hochberg (yanlış keşif oranı / FDR)** yöntemi tercih edilir — o da çoklu testi düzeltir ama daha az temkinlidir. Bonferroni; az sayıda (birkaç ile birkaç düzine) test için iyi bir varsayılandır.",
+              "When the number of tests grows very large (hundreds of metrics, genome scans, etc.), Bonferroni also filters out most real effects (the false-negative rate rises). In those cases the **Benjamini-Hochberg (false discovery rate / FDR)** method is preferred — it also corrects for multiple testing but is less conservative. Bonferroni is a fine default for a small number (a few to a few dozen) of tests.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "bootstrap-yeniden-ornekleme",
+          title: L("Bootstrap: yeniden örnekleme ile güven aralığı", "Bootstrap: confidence intervals via resampling"),
+          summary: L(
+            "Dağılımı bilmiyorsan veya formülü hatırlamıyorsan: elindeki örneklemden binlerce kez yeniden örnekle.",
+            "When you don't know the distribution or don't remember the formula: resample your own sample thousands of times.",
+          ),
+          minutes: 18,
+          premium: true,
+          blocks: [
+            text(
+              "Bir ortalamanın güven aralığını hesaplamanın klasik yolu bir formül gerektirir (`ortalama ± 1,96 × standart hata`) ve veri normal dağılıma yakın olmalıdır. **Bootstrap**, formülsüz bir alternatiftir:\n\n1. Elindeki örneklemden, **yerine koyarak** (aynı gözlem birden fazla kez seçilebilir) aynı boyutta yeni bir örneklem çek\n2. İstediğin istatistiği (ortalama, medyan, oran…) hesapla\n3. Bunu binlerce kez tekrarla — elinde istatistiğin bir **dağılımı** oluşur\n4. Bu dağılımın %2,5 ve %97,5 yüzdelik dilimleri, %95 güven aralığının alt ve üst sınırıdır\n\n\"Yerine koyarak\" seçim kritiktir: bu, elindeki örneklemin kendisini bir mini-evren gibi kullanmanı sağlar — her yeniden örneklem biraz farklı çıkar, bu farklılık gerçek örnekleme belirsizliğini taklit eder.",
+              "The classic way to compute a confidence interval for a mean needs a formula (`mean ± 1.96 × standard error`) and data close to normally distributed. The **bootstrap** is a formula-free alternative:\n\n1. From your sample, draw a new sample of the same size **with replacement** (the same observation can be picked more than once)\n2. Compute the statistic you care about (mean, median, proportion…)\n3. Repeat this thousands of times — you now have a **distribution** of the statistic\n4. That distribution's 2.5th and 97.5th percentiles are the lower and upper bounds of a 95% confidence interval\n\n\"With replacement\" is the key part: it lets you treat your own sample as a stand-in for the population — each resample comes out slightly different, and that variation mimics real sampling uncertainty.",
+            ),
+            code(
+              "python",
+              `import random
+
+random.seed(42)
+ornek = [12, 15, 14, 22, 18, 25, 13, 19, 16, 21]
+
+ortalamalar = []
+for _ in range(1000):
+    yeniden = random.choices(ornek, k=len(ornek))  # yerine koyarak örnekle
+    ortalamalar.append(sum(yeniden) / len(yeniden))
+
+ortalamalar.sort()
+print("95% GA:", round(ortalamalar[24], 1), "-", round(ortalamalar[974], 1))`,
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Bootstrap'ta 'yerine koyarak örnekleme' (with replacement) ne anlama gelir ve neden gereklidir?",
+                "What does 'sampling with replacement' mean in the bootstrap, and why is it necessary?",
+              ],
+              options: [
+                [
+                  "Aynı gözlem birden fazla kez seçilebilir; bu, örneklemi bir mini-evren gibi kullanıp örneklemeler arasında gerçekçi bir farklılık yaratır",
+                  "The same observation can be picked more than once; this treats the sample like a mini-population and creates realistic variation across resamples",
+                ],
+                ["Her gözlem yalnızca bir kez seçilebilir", "Each observation can only be picked once"],
+                ["Yalnızca en büyük değerler seçilir", "Only the largest values get picked"],
+                ["Örneklem boyutunu küçültmek için kullanılır", "It's used to shrink the sample size"],
+              ],
+              answer: 0,
+              explain: [
+                "Yerine koymadan (replacement olmadan) her yeniden örneklem orijinal örneklemin birebir aynısı olurdu — hiç farklılık, dolayısıyla hiç belirsizlik tahmini olmazdı. Yerine koyarak seçim, her seferinde biraz farklı bir bileşim üretir.",
+                "Without replacement, every resample would be an exact copy of the original sample — no variation, hence no uncertainty estimate. Sampling with replacement produces a slightly different composition each time.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "1000 yeniden örneklemden elde edilen 1000 ortalamanın %2,5 ve %97,5 yüzdelik dilimleri ne işe yarar?",
+                "What are the 2.5th and 97.5th percentiles of the 1000 means from 1000 resamples used for?",
+              ],
+              options: [
+                ["%95 güven aralığının alt ve üst sınırını verir", "They give the lower and upper bounds of a 95% confidence interval"],
+                ["Ortalamanın kendisini verir", "They give the mean itself"],
+                ["Örneklem büyüklüğünü verir", "They give the sample size"],
+                ["p-değerini verir", "They give the p-value"],
+              ],
+              answer: 0,
+              explain: [
+                "Bootstrap dağılımının ortadaki %95'i (uçlardan %2,5'ini kesince kalan) formülsüz bir %95 güven aralığıdır — dağılımın şekli her ne olursa olsun çalışır.",
+                "The middle 95% of the bootstrap distribution (after trimming 2.5% off each tail) is a formula-free 95% confidence interval — it works no matter the shape of the distribution.",
+              ],
+            }),
+            pyTask({
+              id: "t1",
+              prompt: [
+                "Yukarıdaki bootstrap kodunu tamamla: `random.seed(42)` ile başlayıp `ornek` listesinden 1000 kez yerine koyarak örnekle, her seferinde ortalamayı `ortalamalar` listesine ekle. Sonra sıralayıp %2,5 ve %97,5 yüzdelik dilimlerini (1000 elemanlı sıralı listede 25. ve 975. indeksler) `alt` ve `ust` değişkenlerine yaz (1 ondalığa yuvarla).",
+                "Complete the bootstrap code above: starting with `random.seed(42)`, resample from `ornek` with replacement 1000 times, appending each mean to `ortalamalar`. Then sort and write the 2.5th and 97.5th percentiles (indices 25 and 975 in the sorted 1000-item list — i.e. positions 24 and 974) into `alt` and `ust` (round to 1 decimal).",
+              ],
+              starter: `import random
+
+random.seed(42)
+ornek = [12, 15, 14, 22, 18, 25, 13, 19, 16, 21]
+
+ortalamalar = []
+for _ in range(1000):
+    yeniden = random.choices(ornek, k=len(ornek))
+    ortalamalar.append(sum(yeniden) / len(yeniden))
+
+ortalamalar.sort()
+alt = round(ortalamalar[24], 1)
+ust = round(ortalamalar[974], 1)
+print(alt, ust)`,
+              solution: `import random
+
+random.seed(42)
+ornek = [12, 15, 14, 22, 18, 25, 13, 19, 16, 21]
+
+ortalamalar = []
+for _ in range(1000):
+    yeniden = random.choices(ornek, k=len(ornek))
+    ortalamalar.append(sum(yeniden) / len(yeniden))
+
+ortalamalar.sort()
+alt = round(ortalamalar[24], 1)
+ust = round(ortalamalar[974], 1)
+print(alt, ust)`,
+              hint: [
+                "`random.choices(ornek, k=len(ornek))` yerine koyarak aynı boyutta bir örneklem çeker. `random.seed(42)` sonuçların herkeste aynı çıkmasını sağlar.",
+                "`random.choices(ornek, k=len(ornek))` draws a same-size sample with replacement. `random.seed(42)` makes the result identical for everyone.",
+              ],
+              checks: [
+                { code: "alt == 14.9", msg: ["Alt sınır 14.9 olmalı (seed=42 ile)", "Lower bound must be 14.9 (with seed=42)"] },
+                { code: "ust == 20.2", msg: ["Üst sınır 20.2 olmalı (seed=42 ile)", "Upper bound must be 20.2 (with seed=42)"] },
+              ],
+              xp: 45,
+            }),
+          ],
+        }),
+        lesson({
+          slug: "sirali-test-etme-tuzagi",
+          title: L("Sıralı test etme tuzağı: 'her gün kontrol etmek' neden yalan söyler", "The peeking trap: why 'checking every day' lies to you"),
+          summary: L(
+            "Bir A/B testini her gün kontrol edip ilk anlamlı sonuçta durmak, %5 hata oranını %30'lara çıkarabilir.",
+            "Checking an A/B test every day and stopping at the first significant result can push a 5% error rate up toward 30%.",
+          ),
+          minutes: 15,
+          premium: true,
+          blocks: [
+            text(
+              "α = 0,05 eşiği, testi **önceden belirlenmiş bir örneklem büyüklüğüne/süreye kadar bir kez** çalıştırdığında geçerlidir. Ama gerçekte insanlar bir A/B testini her gün kontrol eder ve `p < 0,05` görür görmez durur. Buna **peeking** (gözetleme) veya \"isteğe bağlı durdurma\" (optional stopping) denir — ve p-değerinin garantisini bozar.\n\nSebep şu: test devam ettikçe p-değeri rastgele yukarı aşağı gezinir. Onu yeterince sık kontrol edersen, hiçbir gerçek etki olmasa bile p'nin bir noktada şans eseri 0,05'in altına düşme ihtimali, testi yalnızca bir kez (sonunda) kontrol etmenden çok daha yüksektir. Günlük kontrolle 2 haftalık bir testte, gerçek yanlış pozitif oranı %5 değil %20-30'lara çıkabilir.",
+              "The α = 0.05 threshold is valid when you run the test **once, up to a pre-decided sample size/duration**. But in practice people check an A/B test every day and stop the moment they see `p < 0.05`. This is called **peeking** or \"optional stopping\" — and it breaks the p-value's guarantee.\n\nHere's why: as the test runs, the p-value randomly wanders up and down. If you check it often enough, the chance that p dips below 0.05 by pure luck at *some* point is far higher than the chance of it being below 0.05 if you only check once, at the end. With daily checks over a 2-week test, the real false-positive rate can climb from 5% to 20-30%.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Bir A/B testini her gün kontrol edip ilk `p < 0,05` gördüğünde durmanın sorunu nedir?",
+                "What's the problem with checking an A/B test daily and stopping at the first `p < 0.05`?",
+              ],
+              options: [
+                [
+                  "p-değeri rastgele dalgalanır; sık kontrol, hiçbir gerçek etki olmasa bile şans eseri 0,05 altına düşme fırsatını çoğaltır ve gerçek yanlış pozitif oranını yükseltir",
+                  "The p-value fluctuates randomly; frequent checks multiply the chances it dips below 0.05 by luck even with no real effect, raising the true false-positive rate",
+                ],
+                ["Testin sonucu değişmez, sadece daha yavaş öğrenirsin", "Nothing changes about the result, you just learn slower"],
+                ["p-değeri zamanla yalnızca küçülür, asla artmaz", "The p-value only ever shrinks over time, never rises"],
+                ["Bu yalnızca çok küçük örneklemlerde bir sorundur", "This is only a problem with very small samples"],
+              ],
+              answer: 0,
+              explain: [
+                "α = 0,05'in '%5 yanlış pozitif' garantisi, testi bir kez kontrol etmeyi varsayar. Her kontrol ayrı bir 'şans' turudur; kaç kez kontrol edersen, en az birinde şans eseri eşiğin altına düşme ihtimalin o kadar artar.",
+                "The '5% false positive' guarantee of α = 0.05 assumes you check the test once. Every check is another roll of the dice; the more times you check, the higher the chance that at least one of them dips below the threshold by luck.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "Peeking sorununu önlemenin en basit yolu nedir?",
+                "What's the simplest way to avoid the peeking problem?",
+              ],
+              options: [
+                [
+                  "Örneklem büyüklüğünü/test süresini teste BAŞLAMADAN ÖNCE belirleyip sonuna kadar beklemek (sabit ufuk), ya da bunun için tasarlanmış sıralı test yöntemleri kullanmak",
+                  "Decide the sample size/test duration BEFORE starting and wait until the end (a fixed horizon), or use sequential-testing methods designed for this",
+                ],
+                ["Testi hiç kontrol etmemek", "Never checking the test at all"],
+                ["α eşiğini 0,10'a yükseltmek", "Raising the α threshold to 0.10"],
+                ["Testi mümkün olduğunca kısa tutmak", "Keeping the test as short as possible"],
+              ],
+              answer: 0,
+              explain: [
+                "En yaygın çözüm: örneklem büyüklüğünü/süreyi önceden hesapla (bkz. etki büyüklüğü ve güç dersi), testi bitene kadar sonuca bakma. Sürekli izlemek istiyorsan, α harcamasını zamana yayan sıralı test yöntemleri (alpha-spending) kullanılmalı — sıradan α = 0,05 eşiğiyle günlük bakmak değil.",
+                "The most common fix: compute the sample size/duration in advance (see the effect size and power lesson) and don't look at the result until the test ends. If you want continuous monitoring, use sequential-testing methods that spread the α budget over time (alpha-spending) — not a plain α = 0.05 threshold checked daily.",
+              ],
+            }),
+            pyTask({
+              id: "t1",
+              prompt: [
+                "`gunluk_p` listesi, bir testin 14 günü boyunca ölçülen p-değerlerini tutuyor. 'İlk p < 0,05 gördüğünde dur' kuralını simüle et: bu koşulu sağlayan ilk günün indeksini (0'dan başlayarak) `durma_gunu`'ne yaz. Hiçbiri sağlamıyorsa `durma_gunu = -1` olsun.",
+                "`gunluk_p` holds the p-value measured on each of a test's 14 days. Simulate the 'stop at the first p < 0.05' rule: write the index (0-based) of the first day meeting that condition into `durma_gunu`. If none do, `durma_gunu` should be `-1`.",
+              ],
+              starter: `gunluk_p = [0.42, 0.31, 0.28, 0.19, 0.24, 0.11, 0.04, 0.15, 0.09, 0.21, 0.33, 0.18, 0.27, 0.20]
+
+durma_gunu = -1
+for gun, p in enumerate(gunluk_p):
+    # buraya yaz
+    pass
+print(durma_gunu)`,
+              solution: `gunluk_p = [0.42, 0.31, 0.28, 0.19, 0.24, 0.11, 0.04, 0.15, 0.09, 0.21, 0.33, 0.18, 0.27, 0.20]
+
+durma_gunu = -1
+for gun, p in enumerate(gunluk_p):
+    if p < 0.05:
+        durma_gunu = gun
+        break
+print(durma_gunu)`,
+              hint: [
+                "`enumerate(gunluk_p)` ile gün indeksini ve p-değerini birlikte gez; `p < 0.05` olan ilk günde `break` ile döngüden çık.",
+                "Walk `gunluk_p` with `enumerate` to get both the day index and the p-value; `break` out of the loop on the first day where `p < 0.05`.",
+              ],
+              checks: [
+                {
+                  code: "durma_gunu == 6",
+                  msg: [
+                    "Testi 7. günde (indeks 6, p=0.04) durdurmuş olurdun — testin geri kalanında p tekrar 0,05 üstüne çıkıyor, yani bu erken 'anlamlı' an büyük olasılıkla gürültüydü",
+                    "You would have stopped on day 7 (index 6, p=0.04) — the rest of the test's p climbs back above 0.05, meaning that early 'significant' moment was most likely noise",
+                  ],
+                },
+              ],
+              xp: 40,
+            }),
+            tip(
+              "Peeking her zaman yasak değildir — ama plansız olmamalı",
+              "Peeking isn't always forbidden — but it shouldn't be unplanned",
+              "Sürekli izleme gerçek bir ihtiyaçsa (ör. bir hatayı erken yakalamak için), buna özel tasarlanmış yöntemler var: sıralı olasılık oranı testi (SPRT), alpha-spending fonksiyonları veya Bayesci A/B test araçları. Sorun izlemenin kendisi değil, sıradan bir sabit-eşik testini izleme niyetiyle tasarlanmamışken izlemektir.",
+              "If continuous monitoring is a genuine need (e.g. to catch a bug early), there are methods designed for exactly that: the sequential probability ratio test (SPRT), alpha-spending functions, or Bayesian A/B testing tools. The problem isn't monitoring itself — it's monitoring a plain fixed-threshold test that was never designed to be monitored.",
+            ),
+          ],
+        }),
       ],
     },
   ],
