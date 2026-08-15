@@ -14,9 +14,16 @@
     "db:start": "supabase start",
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
-    "db:studio": "open http://127.0.0.1:54323"
+    "db:studio": "open http://127.0.0.1:54323",
+    "cap:sync": "cap sync",
+    "cap:ios": "cap open ios",
+    "cap:android": "cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/ios": "^8.5.0",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.9",
     "next": "16.2.12",

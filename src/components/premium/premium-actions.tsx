@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { startTrialAction } from "@/lib/entitlements-actions";
 import { usePlanInfo } from "@/lib/entitlements-client";
+import { isNativePlatform } from "@/lib/platform";
 import { emptyActionResult } from "@/lib/auth/types";
 import { ui } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
@@ -86,6 +87,7 @@ export function PremiumActions({
 
       {checkoutError ? <p className="text-sm text-danger">{checkoutError}</p> : null}
 
+      {isNativePlatform() ? null : (
       <div className="grid gap-3 sm:grid-cols-2">
         <button
           type="button"
@@ -108,6 +110,7 @@ export function PremiumActions({
           {!checkoutEnabled ? ` · ${ui("premium.comingSoon", locale)}` : ""}
         </button>
       </div>
+      )}
     </div>
   );
 }

@@ -162,7 +162,29 @@ Bu adım atlanırsa şifre sıfırlama bağlantıları localhost'a döner.
 
 ---
 
-## 5. Ücretsiz katmanın sınırları
+## 5. Mobil uygulama (iOS/Android)
+
+Repoda `ios/` ve `android/` klasörleri hazır — [Capacitor](https://capacitorjs.com) ile
+kurulmuş, native kabuk canlı adresi (`capacitor.config.ts`'teki `server.url`) bir
+WebView'da açıyor. Statik dosya paketlemiyor; site SSR/auth kullandığı için bu şart.
+
+1. `capacitor.config.ts`'teki `server.url`'i kendi canlı adresinle güncelle (varsayılan
+   `https://mihenk-xi.vercel.app`), sonra `npm run cap:sync`.
+2. **iOS**: App Store'dan tam Xcode kur (bu ortamda yalnızca Command Line Tools var,
+   yeterli değil), sonra `npm run cap:ios` ile Xcode'da aç. Signing için Apple Developer
+   Program (yıllık $99) hesabı gerekir.
+3. **Android**: Android Studio kur, `npm run cap:android` ile aç. Yayın için Google Play
+   Developer (tek seferlik $25) hesabı gerekir.
+4. Uygulama içi satın alma (abonelik) henüz **kurulu değil** — `src/lib/iap.ts` bir stub.
+   Apple/Google, dijital abonelikte kendi ödeme sistemlerini (IAP/Play Billing, ~%15-30
+   komisyon) zorunlu kılıyor; `/premium` sayfası bu yüzden native uygulamada satın alma
+   butonlarını hiç göstermiyor (yalnızca web'de İyzico ile çalışıyor).
+5. Reklam: AdSense native uygulama içinde gösterilmiyor (Google politikası — AdMob
+   gerekir, ayrı bir iş). Mobil app şu an reklamsız.
+
+---
+
+## 6. Ücretsiz katmanın sınırları
 
 Bilerek girmen için:
 
@@ -179,7 +201,7 @@ uğraman yeterli.
 
 ---
 
-## 6. Kurulum doğru mu?
+## 7. Kurulum doğru mu?
 
 Canlıda sırayla dene:
 
