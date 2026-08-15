@@ -1890,6 +1890,198 @@ export const vizTrack: Track = {
             }),
           ],
         }),
+        lesson({
+          slug: "kucuk-coklular-ile-karsilastirma",
+          title: L("Küçük çoklular ile karşılaştırmalı düzen", "Comparative layout with small multiples"),
+          summary: L(
+            "12 şehri tek bir karmakarışık grafikte üst üste bindirmek yerine, aynı küçük grafiği 12 kez yan yana çiz.",
+            "Instead of overlaying 12 cities on one tangled chart, draw the same small chart 12 times side by side.",
+          ),
+          minutes: 15,
+          premium: true,
+          blocks: [
+            text(
+              "12 şehrin aylık cirosunu **tek bir çizgi grafikte** üst üste çizersen, 12 renkli çizgi birbirine karışır — hangi çizginin hangi şehir olduğunu ayırt etmek imkânsızlaşır. **Küçük çoklular (small multiples)**, tam tersini yapar: aynı küçük grafiği, aynı eksenlerle, her kategori için **ayrı ayrı** çizip bir ızgarada yan yana koyar.\n\nBu yöntem, algı sıralamasında konumdan hemen sonra gelen \"aynı ölçekte ama ayrı eksende konum\" kodlamasına dayanır (bkz. Algı ve Kodlama dersi) — her panel kendi başına okunur, ama aynı ızgarada olduğu için karşılaştırma da kolaydır. Edward Tufte'nin deyişiyle: \"aynı sorunun, farklı bir değişkenle tekrar tekrar sorulmuş hâli.\"",
+              "Overlay 12 cities' monthly revenue on **one line chart** and the 12 coloured lines tangle together — telling which line is which city becomes impossible. **Small multiples** do the opposite: draw the same small chart, on the same axes, **separately** for each category, and lay them out side by side in a grid.\n\nThe technique relies on the encoding that ranks right after position on perception's accuracy scale — \"position on identical but non-aligned scales\" (see the Perception and Encoding lesson) — each panel reads on its own, yet sits in the same grid so comparison stays easy. In Edward Tufte's words: \"the same question, asked repeatedly, for a different variable.\"",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "12 şehri tek bir üst üste bindirilmiş çizgi grafiğinde göstermek yerine küçük çoklular kullanmanın asıl sebebi nedir?",
+                "What's the main reason to use small multiples instead of 12 overlaid lines on one chart?",
+              ],
+              options: [
+                [
+                  "Çok sayıda çizgi üst üste bindiğinde birbirinden ayırt edilemez hâle gelir; ayrı paneller her kategoriyi kendi başına okunur kılar",
+                  "Too many overlaid lines become indistinguishable from each other; separate panels make each category readable on its own",
+                ],
+                ["Küçük çoklular her zaman daha az yer kaplar", "Small multiples always take up less space"],
+                ["Tek grafikte en fazla 2 kategori gösterilebilir, bu bir Excel kuralıdır", "A single chart can only show 2 categories, this is an Excel rule"],
+                ["Küçük çoklular yalnızca coğrafi verilerde kullanılır", "Small multiples are only used for geographic data"],
+              ],
+              answer: 0,
+              explain: [
+                "5-6'dan fazla çizgi/kategori aynı grafikte üst üste bindiğinde 'spagetti grafik' denen okunamaz bir karmaşa oluşur. Küçük çoklular her kategoriye kendi panelini vererek bu karmaşayı çözer, ızgara düzeni sayesinde karşılaştırmayı da korur.",
+                "Overlay more than 5-6 lines/categories on one chart and you get what's called a \"spaghetti chart\" — unreadable. Small multiples solve this by giving each category its own panel, while the grid layout still preserves comparability.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "Küçük çoklular tasarlarken tüm panellerde ORTAK olması gereken şey nedir?",
+                "When designing small multiples, what must be COMMON across every panel?",
+              ],
+              options: [
+                [
+                  "Eksen ölçeği (min/maks) ve grafik türü — aksi hâlde paneller arası karşılaştırma yanıltıcı olur",
+                  "The axis scale (min/max) and chart type — otherwise comparing across panels becomes misleading",
+                ],
+                ["Yalnızca renk", "Only the color"],
+                ["Yalnızca başlık yazı tipi", "Only the title font"],
+                ["Hiçbir şeyin ortak olması gerekmez", "Nothing needs to be common"],
+              ],
+              answer: 0,
+              explain: [
+                "Her panelin ekseni farklı bir ölçekte olursa (biri 0-100, diğeri 0-10.000), iki panelin görsel olarak benzer görünen eğimleri tamamen farklı büyüklükleri temsil edebilir — bu, kesilmiş eksenle aynı yanıltma riskini taşır. Ortak ölçek, küçük çoklu tekniğinin ön koşuludur.",
+                "If each panel's axis uses a different scale (one 0-100, another 0-10,000), two panels with visually similar slopes can represent completely different magnitudes — carrying the same misleading risk as a truncated axis. A shared scale is a precondition of the small-multiples technique.",
+              ],
+            }),
+            pitfall(
+              "Çok fazla panel, küçük çoklu'yu da okunamaz yapar",
+              "Too many panels make small multiples unreadable too",
+              "Küçük çoklular 6-20 kategori arasında iyi çalışır. 50 şehrin her biri için ayrı panel açmak, sorunu \"üst üste binen çizgiler\"den \"gözle taranamayan kalabalık bir ızgara\"ya taşır. Kategori sayısı çok fazlaysa önce en önemli 8-12 tanesini seç, gerisini 'Diğer' altında topla veya bir filtre/arama ekle.",
+              "Small multiples work well between 6 and 20 categories. Opening a separate panel for each of 50 cities just moves the problem from \"overlapping lines\" to \"a grid too crowded to scan\". If there are too many categories, pick the top 8-12 that matter most and group the rest under \"Other\", or add a filter/search instead.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "belirsizligi-cizmek",
+          title: L("Belirsizliği çizmek: hata çubukları ve güven bantları", "Drawing uncertainty: error bars and confidence bands"),
+          summary: L(
+            "Tek bir çizgi kesinlik iddia eder; oysa her tahminin bir belirsizlik payı vardır — onu görünür kılmanın yolları.",
+            "A single line claims certainty; but every estimate carries uncertainty — here's how to make it visible.",
+          ),
+          minutes: 16,
+          premium: true,
+          blocks: [
+            text(
+              "Bir önceki kademede, belirsizliği **sözle** ifade etmenin (\"±%3, n=1.240\") güvenilirliği artırdığını gördün. Bu ders, belirsizliği **görsel olarak** çizmenin üç yaygın yolunu ele alır:\n\n1. **Hata çubukları (error bars)** — bir nokta tahmininin üstüne/altına, güven aralığını gösteren dikey çizgiler eklenir. Tekil noktaları (ör. anket sonuçları) karşılaştırırken en nettir.\n2. **Güven bandı (confidence ribbon)** — bir çizgi grafiğinin etrafına, zamanla değişen belirsizliği gösteren yarı saydam bir şerit çizilir. Zaman serisi tahminlerinde (bir sonraki 6 ay gibi) standarttır — bant, geleceğe gittikçe genelde genişler.\n3. **Gradyan/olası sonuç grafiği** — tek bir çizgi yerine, olası birden çok yörüngeyi soluk çizgilerle veya yoğunluk gradyanıyla üst üste çizmek. \"Kesin bir gelecek yok, olası bir aralık var\" fikrini en güçlü ileten yöntemdir.",
+              "At the previous stage you saw that stating uncertainty **in words** (\"±3%, n=1,240\") increases credibility. This lesson covers three common ways to draw uncertainty **visually**:\n\n1. **Error bars** — vertical lines added above/below a point estimate, showing its confidence interval. Clearest when comparing individual points (like survey results).\n2. **Confidence ribbon** — a semi-transparent band drawn around a line chart, showing uncertainty that changes over time. Standard for time-series forecasts (like the next 6 months) — the band usually widens further into the future.\n3. **Gradient / hypothetical outcome plot** — instead of one line, overlay several plausible trajectories as faint lines or a density gradient. The strongest way to convey \"there is no single certain future, only a plausible range\".",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Bir zaman serisi tahmininde (gelecek 6 ay), güven bandının zamanla genişlemesi neyi ifade eder?",
+                "In a time-series forecast (the next 6 months), what does the confidence band widening over time express?",
+              ],
+              options: [
+                [
+                  "Tahmin ne kadar uzağa gidiyorsa belirsizlik o kadar artar — yakın gelecek uzak gelecekten daha güvenilir tahmin edilir",
+                  "The further out the forecast reaches, the more uncertainty grows — the near future is estimated more reliably than the far future",
+                ],
+                ["Bir çizim hatasıdır, düzeltilmelidir", "It's a drawing error and should be fixed"],
+                ["Veri miktarının azaldığını gösterir", "It shows the amount of data is decreasing"],
+                ["Bandın genişlemesinin hiçbir anlamı yoktur", "The band widening has no meaning at all"],
+              ],
+              answer: 0,
+              explain: [
+                "Bir tahmin modeli ne kadar ileriye gidiyorsa, dayandığı varsayımlar o kadar kırılgan hâle gelir; bu yüzden güven bandı genelde huni şeklinde genişler. Bandın genişlemesi bir hata değil, dürüst bir belirsizlik gösterimidir.",
+                "The further a forecast model projects, the shakier its underlying assumptions become — which is why the confidence band typically widens into a funnel. The widening band isn't a mistake, it's an honest depiction of uncertainty.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "Tekil anket sonuçlarını (ör. 5 farklı şehrin memnuniyet skoru) karşılaştırırken hangi belirsizlik gösterimi en nettir?",
+                "When comparing individual survey results (e.g. satisfaction scores from 5 different cities), which uncertainty display is clearest?",
+              ],
+              options: [
+                ["Hata çubukları — her nokta tahmininin kendi güven aralığını gösterir", "Error bars — each point estimate shows its own confidence interval"],
+                ["Güven bandı — yalnızca zaman serilerinde anlamlıdır", "A confidence ribbon — only meaningful for time series"],
+                ["Hiçbiri, tekil sonuçlarda belirsizlik gösterilmez", "None — uncertainty isn't shown for individual results"],
+                ["Yalnızca 3B grafikler belirsizlik gösterebilir", "Only 3D charts can show uncertainty"],
+              ],
+              answer: 0,
+              explain: [
+                "Güven bandı bir çizginin (zaman ekseni boyunca değişen bir büyüklüğün) etrafını sarar; ayrı ayrı noktalarda (5 şehir) bu kavram uygulanamaz. Hata çubukları her noktaya kendi belirsizliğini ekler ve nokta karşılaştırmalarında standart yöntemdir.",
+                "A confidence ribbon wraps around a line — a quantity that varies along a time axis; the concept doesn't apply to separate points (5 cities). Error bars attach uncertainty to each point individually and are the standard method for comparing points.",
+              ],
+            }),
+            tip(
+              "Belirsizlik göstermek okuru boğmak zorunda değil",
+              "Showing uncertainty doesn't have to overwhelm the reader",
+              "Her sayının yanına istatistiksel jargon dolu bir açıklama koymak gerekmez. Bir hata çubuğu veya soluk bir bant, çoğu izleyiciye 'bu sayı kesin değil, bir aralık içinde' mesajını görsel olarak, hiç metin okumadan verir. Görsel, sözlü açıklamanın yükünü hafifletir.",
+              "You don't need to attach a jargon-heavy explanation to every number. An error bar or a faint band tells most viewers \"this number isn't exact, it sits within a range\" visually, without reading a word of text. The visual carries the load the verbal explanation would otherwise need to.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "kademeli-acigacikarma-tooltip-drilldown",
+          title: L(
+            "Kademeli açığa çıkarma: tooltip ve drill-down tasarımı",
+            "Progressive disclosure: designing tooltips and drill-down",
+          ),
+          summary: L(
+            "Her şeyi tek ekranda göstermeye çalışmak yerine, izleyicinin merak ettiğini sorduğunda cevap vermek.",
+            "Instead of trying to show everything on one screen, answer the viewer's question only when they ask it.",
+          ),
+          minutes: 14,
+          premium: true,
+          blocks: [
+            text(
+              "İyi bir gösterge panosu tasarımının zor kısmı, neyin **ana görünümde**, neyin **isteğe bağlı ayrıntıda** olacağına karar vermektir. Her sayıyı ekrana basmaya çalışan bir pano kalabalıklaşır ve asıl mesajı boğar. **Kademeli açığa çıkarma (progressive disclosure)** ilkesi şunu söyler: ana görünümde yalnızca **özeti** göster, ayrıntıyı yalnızca izleyici onu istediğinde (üzerine gelince, tıklayınca) ver.\n\nBunun iki temel aracı vardır:\n\n- **Tooltip (ipucu)** — fareyle bir noktanın üzerine gelince, o noktaya özel ek bilgi görünür. Ana görünümü hiç kirletmez.\n- **Drill-down** — bir kategoriye tıklayınca, o kategorinin alt kırılımına inersin (Bölge → Şehir → Mağaza gibi). İzleyici yalnızca merak ettiği dalı açar, diğerleri kapalı kalır.",
+              "The hard part of good dashboard design is deciding what belongs in the **main view** and what belongs in **optional detail**. A dashboard that tries to print every number becomes cluttered and drowns out the main message. The **progressive disclosure** principle says: show only the **summary** in the main view, and reveal detail only when the viewer asks for it (by hovering, by clicking).\n\nIt has two main tools:\n\n- **Tooltip** — hovering over a point reveals extra information specific to that point. It never clutters the main view.\n- **Drill-down** — clicking a category descends into its sub-breakdown (Region → City → Store). The viewer opens only the branch they're curious about; the rest stays collapsed.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Kademeli açığa çıkarma (progressive disclosure) ilkesinin temel fikri nedir?",
+                "What's the core idea behind the progressive disclosure principle?",
+              ],
+              options: [
+                [
+                  "Ana görünümde yalnızca özeti göster, ayrıntıyı yalnızca izleyici isteyince (hover/tıklama ile) ortaya çıkar",
+                  "Show only the summary in the main view; reveal detail only when the viewer asks for it, via hover/click",
+                ],
+                ["Tüm sayıları tek ekranda, mümkün olduğunca küçük yazıyla sığdırmak", "Fit all numbers on one screen, in as small a font as possible"],
+                ["Her grafiği animasyonla art arda oynatmak", "Play every chart in sequence with animation"],
+                ["Yalnızca yöneticilere ayrıntı göstermek, diğer kullanıcılara özet vermek", "Show detail only to executives, and only summary to other users"],
+              ],
+              answer: 0,
+              explain: [
+                "İlke, bilgiyi gizlemek değil, doğru sırada sunmaktır: önce özet (herkesin ihtiyacı), sonra ayrıntı (yalnızca merak edenin talebiyle). Bu, ana görünümü sade tutarken ayrıntıyı kaybetmez.",
+                "The principle isn't about hiding information, it's about sequencing it correctly: summary first (what everyone needs), then detail (only on request from someone curious). This keeps the main view clean without losing the detail.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "Bir tooltip ile bir drill-down arasındaki temel fark nedir?",
+                "What's the core difference between a tooltip and a drill-down?",
+              ],
+              options: [
+                [
+                  "Tooltip geçicidir ve ana görünümü değiştirmez; drill-down görünümün kendisini alt kırılıma indirir",
+                  "A tooltip is transient and doesn't change the main view; a drill-down descends the view itself into a sub-breakdown",
+                ],
+                ["İkisi birebir aynı etkileşimdir", "They're exactly the same interaction"],
+                ["Tooltip yalnızca metinde, drill-down yalnızca sayılarda çalışır", "Tooltips only work on text, drill-downs only on numbers"],
+                ["Drill-down fare gerektirmez, yalnızca klavye kullanır", "Drill-down requires no mouse, only keyboard"],
+              ],
+              answer: 0,
+              explain: [
+                "Tooltip fareyi çektiğin anda kaybolur, altındaki görünüm hiç değişmez. Drill-down ise görünümün kendisini kalıcı olarak değiştirir — geri dönene kadar o alt kırılımda kalırsın.",
+                "A tooltip disappears the moment you move the mouse away; the view underneath never changes. A drill-down permanently changes the view itself — you stay in that sub-breakdown until you navigate back.",
+              ],
+            }),
+            pitfall(
+              "Tooltip'e ana görünümde olması gereken bir bilgiyi saklama",
+              "Don't hide information in a tooltip that belongs in the main view",
+              "Kademeli açığa çıkarma, kritik bir sayıyı gizlemek için bahane olmamalı. Bir karar için gereken bilgi (ör. bu ayın hedefe göre durumu) tooltip'te değil, doğrudan görünür olmalı — tooltip yalnızca 'merak edilirse iyi olur' türü destekleyici bilgi içindir.",
+              "Progressive disclosure shouldn't become an excuse to bury a critical number. Information needed to make a decision (like this month's status against target) belongs directly in view, not in a tooltip — tooltips are only for supporting \"nice to know if curious\" information.",
+            ),
+          ],
+        }),
       ],
     },
   ],
