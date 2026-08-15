@@ -2621,4 +2621,127 @@ def yukle(tarih: str, kayitlar: list[dict]):
       githubStep("etl-pipeline-airflow"),
     ],
   }),
+
+  project({
+    slug: "de-cdc-akis-hatti",
+    track: "veri-muhendisligi",
+    level: "expert",
+    title: ["CDC Akış Hattı: Değişiklikleri Yakalamak", "A CDC Streaming Pipeline: Capturing Changes"],
+    stack: ["PostgreSQL", "Debezium", "Kafka", "Python"],
+    hours: 14,
+    xp: 700,
+    summary: [
+      "Bir kaynak veritabanının işlem günlüğünden değişiklikleri Debezium ile yakala, Kafka'ya akıt ve idempotent bir tüketiciyle hedef tabloya uygula.",
+      "Capture changes from a source database's transaction log with Debezium, stream them into Kafka, and apply them to a destination table with an idempotent consumer.",
+    ],
+    dataset: [
+      "Docker ile çalıştırılan yerel bir PostgreSQL veritabanı; sık güncellenen bir 'siparişler' benzeri tablo.",
+      "A local PostgreSQL database run via Docker; a frequently updated table like 'orders'.",
+    ],
+    deliverables: [
+      ["Debezium ile kurulmuş, PostgreSQL'in WAL'ını okuyan bir CDC bağlayıcısı", "A CDC connector set up with Debezium, reading PostgreSQL's WAL"],
+      ["Değişikliklerin aktığı bir Kafka topic'i", "A Kafka topic the changes stream into"],
+      ["Bu topic'i okuyup hedef tabloya idempotent şekilde uygulayan bir Python tüketicisi", "A Python consumer reading that topic and applying changes to a destination table idempotently"],
+      ["Aynı mesajı iki kez işleyip veri tekrarlanmadığını kanıtlayan bir test", "A test proving that processing the same message twice doesn't duplicate data"],
+    ],
+    steps: [
+      {
+        title: ["Kaynağı ve Debezium'u kur", "Set up the source and Debezium"],
+        body: [
+          "Docker Compose ile PostgreSQL, Kafka ve Debezium Connect'i ayağa kaldır. PostgreSQL'de mantıksal replikasyonu (`wal_level = logical`) etkinleştir — Debezium'un WAL'ı okuyabilmesi için ön koşul budur.",
+          "Bring up PostgreSQL, Kafka and Debezium Connect with Docker Compose. Enable logical replication (`wal_level = logical`) on PostgreSQL — this is the precondition for Debezium to read the WAL.",
+        ],
+      },
+      {
+        title: ["CDC bağlayıcısını yapılandır", "Configure the CDC connector"],
+        body: [
+          "Debezium'un PostgreSQL bağlayıcısını, izlenecek tabloyu belirterek kaydet. Tabloya bir `INSERT`/`UPDATE` yap ve değişikliğin Kafka topic'inde saniyeler içinde belirdiğini gözle doğrula.",
+          "Register Debezium's PostgreSQL connector, specifying the table to watch. Do an `INSERT`/`UPDATE` on the table and visually confirm the change appears on the Kafka topic within seconds.",
+        ],
+        lang: "python",
+        code: `# Debezium konnektör yapılandırması (REST API ile kaydedilir)
+{
+  "name": "siparisler-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres",
+    "table.include.list": "public.siparisler",
+    "topic.prefix": "cdc"
+  }
+}`,
+      },
+      {
+        title: ["İdempotent bir tüketici yaz", "Write an idempotent consumer"],
+        body: [
+          "Kafka topic'ini okuyan bir Python tüketicisi yaz. Her mesajı hedef tabloya `INSERT` yerine `UPSERT`/`MERGE` ile uygula — aynı mesaj ağ hatası yüzünden iki kez işlense bile sonuç değişmemeli.",
+          "Write a Python consumer reading the Kafka topic. Apply each message to the destination table with `UPSERT`/`MERGE` instead of plain `INSERT` — the result must stay the same even if the same message gets processed twice due to a network hiccup.",
+        ],
+      },
+      {
+        title: ["Tekrarlanan mesaj testi yaz", "Write a duplicate-message test"],
+        body: [
+          "Aynı Kafka mesajını tüketiciye elle iki kez besleyip hedef tablodaki satır sayısının/değerinin değişmediğini doğrulayan bir test yaz. Bu, akışın gerçekten idempotent olduğunun kanıtıdır — 'çalışıyor gibi görünmek' yetmez.",
+          "Write a test that feeds the same Kafka message to the consumer twice by hand and verifies the destination table's row count/value doesn't change. This is the proof the pipeline is genuinely idempotent — \"looking like it works\" isn't enough.",
+        ],
+      },
+      githubStep("cdc-akis-hatti"),
+    ],
+    premium: true,
+  }),
+
+  project({
+    slug: "de-backfill-orkestrasyonu",
+    track: "veri-muhendisligi",
+    level: "expert",
+    title: ["Backfill Orkestrasyonu", "Backfill Orchestration"],
+    stack: ["Python", "Airflow", "Bölümleme (Partitioning)"],
+    hours: 10,
+    xp: 600,
+    summary: [
+      "Kasıtlı olarak bozuk bir dönüşüm mantığını düzelt, sonra 6 aylık geçmişi gün gün, hataya dayanıklı bir backfill akışıyla yeniden işle.",
+      "Fix a deliberately broken transformation, then reprocess 6 months of history day by day with a fault-tolerant backfill flow.",
+    ],
+    dataset: [
+      "6 aylık sentetik günlük satış verisi; bir dönüşüm adımında bilerek bir hata (ör. yanlış KDV oranı) bulunmalı.",
+      "6 months of synthetic daily sales data; one transformation step should contain a deliberate bug (e.g. a wrong VAT rate).",
+    ],
+    deliverables: [
+      ["Bulunan hatanın açıklaması ve düzeltmesi", "A description of the bug found, and the fix"],
+      ["Her günü ayrı bir görev olarak işleyen, Airflow ile parametreli çalıştırılabilen bir backfill DAG'ı", "A backfill DAG, parameterized and runnable in Airflow, that processes each day as its own task"],
+      ["Bilerek bozulan bir günün yeniden denenip yalnızca onun düzeldiğini gösteren bir kanıt", "Evidence that a deliberately broken day retries and only that day gets fixed"],
+      ["Backfill'in üretim işleriyle çakışmaması için alınan bir önlem (ayrı öncelik/pencere)", "A measure taken so the backfill doesn't collide with production jobs (separate priority/window)"],
+    ],
+    steps: [
+      {
+        title: ["Hatayı bul ve düzelt", "Find and fix the bug"],
+        body: [
+          "6 aylık veride hangi günden itibaren dönüşüm mantığının yanlış olduğunu tespit et (ör. bir tarihten sonra KDV oranı değişmiş ama kod güncellenmemiş). Kod düzeltmesini yap ve düzeltmenin doğruluğunu birkaç örnek satırla kanıtla.",
+          "Find from which day onward the transformation logic was wrong in the 6 months of data (e.g. the VAT rate changed after some date but the code wasn't updated). Fix the code and prove the fix's correctness with a few sample rows.",
+        ],
+      },
+      {
+        title: ["Günlük parçalara ayrılmış bir backfill DAG'ı kur", "Build a backfill DAG split into daily pieces"],
+        body: [
+          "Airflow'da, başlangıç ve bitiş tarihi parametre olarak alan ve her günü ayrı bir görev olarak çalıştıran bir DAG yaz. Her görev kendi bölümünü (o günün verisini) silip yeniden yazmalı — idempotent akış dersindeki desenin aynısı.",
+          "In Airflow, write a DAG that takes a start and end date as parameters and runs each day as its own task. Each task should delete and rewrite its own partition (that day's data) — the same pattern from the idempotent-pipeline lesson.",
+        ],
+      },
+      {
+        title: ["Bir günü bilerek bozup yeniden dene", "Deliberately break one day and retry"],
+        body: [
+          "Backfill çalışırken bir günün görevini bilerek başarısız olacak şekilde ayarla (ör. geçici bir dosya erişim hatası simüle et), sonra yalnızca o günü yeniden çalıştır. Diğer günlerin ilerlemesinin korunduğunu göster.",
+          "While the backfill runs, deliberately make one day's task fail (simulate a temporary file-access error), then rerun just that day. Show that the other days' progress was preserved.",
+        ],
+      },
+      {
+        title: ["Üretimle çakışmayı önle", "Avoid colliding with production"],
+        body: [
+          "Backfill DAG'ına, günlük üretim işleriyle aynı kapasiteyi paylaşmaması için düşük öncelik veya ayrı bir çalışma penceresi (ör. gece 02:00-06:00 arası) ata. Bu kararı ve gerekçesini bir notta yaz.",
+          "Assign the backfill DAG a low priority or a separate run window (e.g. 02:00-06:00) so it doesn't share capacity with daily production jobs. Write this decision and its rationale in a note.",
+        ],
+      },
+      githubStep("backfill-orkestrasyonu"),
+    ],
+    premium: true,
+  }),
 ];

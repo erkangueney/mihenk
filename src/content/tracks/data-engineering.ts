@@ -2080,6 +2080,198 @@ rapor.write.format("delta").mode("overwrite") \\
             }),
           ],
         }),
+        lesson({
+          slug: "cdc-degisiklik-verisi-yakalama",
+          title: L("CDC: kaynak veritabanındaki her değişikliği yakalamak", "CDC: capturing every change in the source database"),
+          summary: L(
+            "Kaynak tabloyu her seferinde tamamen kopyalamak yerine, yalnızca DEĞİŞEN satırları akış hâlinde yakalamak.",
+            "Instead of copying the source table in full every time, streaming only the CHANGED rows as they happen.",
+          ),
+          minutes: 17,
+          premium: true,
+          blocks: [
+            text(
+              "Bir kaynak tablodaki değişiklikleri yakalamanın en basit yolu, her seferinde **tamamını** yeniden çekmektir. 500 milyon satırlık bir müşteri tablosunda, saatte bir sadece 200 satır değişse bile tamamını taşımak hem yavaş hem pahalıdır. **CDC (Change Data Capture)**, farklı bir stratejidir: kaynak veritabanının kendi **işlem günlüğünü** (transaction log / WAL / binlog) okuyarak, yalnızca INSERT/UPDATE/DELETE olarak gerçekleşen değişiklikleri, gerçekleştikleri sırayla bir akışa yazar.\n\nBunun büyük avantajı: kaynak veritabanına ekstra sorgu yükü **bindirmez** — günlüğü okumak, tabloyu sorgulamaktan farklı bir mekanizmadır ve üretim veritabanını yavaşlatmaz. Debezium gibi araçlar bu günlüğü okuyup değişiklikleri Kafka gibi bir mesaj kuyruğuna yazar.",
+              "The simplest way to capture changes in a source table is to re-pull it **in full** every time. On a 500-million-row customer table, even if only 200 rows change per hour, moving the whole thing is both slow and expensive. **CDC (Change Data Capture)** takes a different approach: it reads the source database's own **transaction log** (WAL / binlog) and streams only the changes that happened as INSERT/UPDATE/DELETE, in the order they occurred.\n\nThe big advantage: it puts **no extra query load** on the source database — reading the log is a different mechanism from querying the table, and it doesn't slow down the production database. Tools like Debezium read this log and write the changes to a message queue like Kafka.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "CDC, kaynak veritabanındaki değişiklikleri nereden okuyarak yakalar?",
+                "Where does CDC read from to capture changes in the source database?",
+              ],
+              options: [
+                [
+                  "Veritabanının kendi işlem günlüğünden (transaction log / WAL / binlog)",
+                  "The database's own transaction log (WAL / binlog)",
+                ],
+                ["Her dakika SELECT * çalıştırarak", "By running SELECT * every minute"],
+                ["Uygulamanın kaynak kodunu okuyarak", "By reading the application's source code"],
+                ["Kullanıcıların manuel olarak girdiği değişiklik formlarından", "From change forms users fill in manually"],
+              ],
+              answer: 0,
+              explain: [
+                "CDC'nin temel fikri, veritabanının zaten tuttuğu, kurtarma/replikasyon için var olan işlem günlüğünü okumaktır. Bu günlük her INSERT/UPDATE/DELETE'i sırayla kaydeder — CDC yalnızca bunu dinler, kaynağa ekstra sorgu göndermez.",
+                "CDC's core idea is reading the transaction log the database already maintains for recovery/replication. This log records every INSERT/UPDATE/DELETE in order — CDC just listens to it, without sending extra queries to the source.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "500 milyon satırlık bir tabloda saatte yalnızca 200 satır değişiyorsa, tam tabloyu her saat yeniden çekmek yerine CDC kullanmanın avantajı nedir?",
+                "If only 200 rows change per hour in a 500-million-row table, what's the advantage of CDC over re-pulling the whole table every hour?",
+              ],
+              options: [
+                [
+                  "Yalnızca gerçekten değişen satırlar taşınır; kaynağa yük bindirmez ve çok daha az veri hareket eder",
+                  "Only the rows that actually changed are moved; it puts no load on the source and moves far less data",
+                ],
+                ["CDC her zaman anlık (gerçek zamanlı) değil, bu yüzden hiçbir avantajı yoktur", "CDC is never real-time, so it has no advantage"],
+                ["CDC yalnızca küçük tablolarda çalışır", "CDC only works on small tables"],
+                ["Tam tablo çekmek CDC'den her zaman daha ucuzdur", "Pulling the whole table is always cheaper than CDC"],
+              ],
+              answer: 0,
+              explain: [
+                "Tam tabloyu her seferinde çekmek, 200 değişen satır için 500 milyon satırı taşımak demektir — hem gereksiz hem yavaş hem de kaynağı sorgu yüküyle zorlar. CDC yalnızca gerçek değişikliği, gerçekleştiği anda akışa yazar.",
+                "Pulling the whole table every time means moving 500 million rows for 200 that changed — wasteful, slow, and it strains the source with query load. CDC only streams the actual change, the moment it happens.",
+              ],
+            }),
+            pitfall(
+              "CDC, hedefteki idempotent yazma ihtiyacını ortadan kaldırmaz",
+              "CDC doesn't remove the need for idempotent writes at the destination",
+              "Bir CDC akışı ağ hatası yüzünden aynı değişikliği iki kez gönderebilir. Hedef tarafta bu, daha önce görülen bir idempotent yazma deseniyle (bkz. bu patikanın 'idempotent akış' dersi) karşılanmalıdır — CDC, kaynağı verimli okumayı çözer ama hedefe güvenli yazmayı otomatik garanti etmez.",
+              "A CDC stream can send the same change twice due to a network hiccup. On the destination side this must be handled with the idempotent-write pattern seen earlier in this track (the \"idempotent pipeline\" lesson) — CDC solves reading the source efficiently, but it doesn't automatically guarantee safe writes at the destination.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "backfill-gecmis-veriyi-yeniden-isleme",
+          title: L("Backfill: geçmiş veriyi güvenle yeniden işlemek", "Backfill: safely reprocessing historical data"),
+          summary: L(
+            "Dönüşüm mantığında bir hata bulundu — son 8 ayın verisi yanlış hesaplanmış. Şimdi ne yaparsın?",
+            "A bug was found in the transformation logic — the last 8 months were computed wrong. Now what?",
+          ),
+          minutes: 15,
+          premium: true,
+          blocks: [
+            text(
+              "Bir dönüşüm mantığındaki hata düzeltildiğinde, yalnızca **bugünden itibaren** doğru çalışması yetmez — geçmişteki hatalı sonuçlar da düzeltilmelidir. Bu işleme **backfill** (geriye dönük doldurma) denir: düzeltilmiş mantığı, geçmişteki her bir dönem için yeniden çalıştırmak.\n\nSaf yaklaşım — \"tüm geçmişi tek seferde yeniden çalıştır\" — büyük tablolarda saatlerce sürebilir, tek bir hata tüm işi baştan başlatır ve üretim kapasitesini bloke eder. Doğru yaklaşım **parça parça** (partition bazında) backfill'dir: her günü/ayı ayrı bir çalışma olarak işlemek, birinde hata olursa yalnızca onu yeniden denemek, ilerlemeyi kaydetmek.",
+              "When a bug in transformation logic is fixed, it's not enough for it to work correctly **from today onward** — the historically wrong results need fixing too. This is called a **backfill**: rerunning the corrected logic for every past period.\n\nThe naive approach — \"rerun all of history in one go\" — can take hours on large tables, a single failure restarts the whole job, and it blocks production capacity. The right approach is a **partition-by-partition** backfill: process each day/month as its own run, retry only the one that fails, and track progress.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Neden 8 aylık geçmişi tek büyük bir işte değil, parça parça (gün/ay bazında) backfill etmek tercih edilir?",
+                "Why is backfilling 8 months of history preferred partition by partition (day/month) rather than as one big job?",
+              ],
+              options: [
+                [
+                  "Bir parçada hata olursa yalnızca onu yeniden denersin; tüm işi baştan başlatmaya gerek kalmaz ve ilerleme kaybolmaz",
+                  "If one partition fails, you only retry that one; you don't need to restart the whole job and progress isn't lost",
+                ],
+                ["Parça parça çalıştırmak her zaman daha hızlıdır", "Running it in pieces is always faster overall"],
+                ["Tek seferde çalıştırmak teknik olarak imkânsızdır", "Running it all at once is technically impossible"],
+                ["Parçalama yalnızca maliyeti artırır, başka faydası yoktur", "Partitioning only raises cost, with no other benefit"],
+              ],
+              answer: 0,
+              explain: [
+                "8 aylık işi tek parça çalıştırıp 7. ayda bir hata çıkarsa, tüm işi (ilk 6 ay dahil) baştan başlatman gerekir. Gün/ay bazında parçalarsan, yalnızca hatalı parça yeniden denenir — geri kalan ilerleme korunur.",
+                "Run 8 months as one job and hit a failure in month 7, and you must restart the entire job — including the first 6 months that already succeeded. Partition it by day/month, and only the failed piece needs a retry — the rest of the progress is preserved.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "Bir backfill sırasında hedef tabloya sürekli `INSERT` ile ekleme yapmak (silme/üzerine yazma olmadan) neden risklidir?",
+                "Why is it risky to keep `INSERT`-appending into the destination table during a backfill (without deleting/overwriting)?",
+              ],
+              options: [
+                [
+                  "Backfill bir kez daha çalıştırılırsa veya kısmen tekrarlanırsa aynı dönem için veri iki katına çıkar — akış idempotent olmaz",
+                  "If the backfill runs again, even partially, data for the same period doubles — the pipeline stops being idempotent",
+                ],
+                ["INSERT hiçbir zaman risklidir değildir", "INSERT is never risky in any scenario"],
+                ["Bu yalnızca depolama maliyetini artırır, veri doğruluğunu etkilemez", "It only raises storage cost, it doesn't affect data correctness"],
+                ["Backfill sırasında INSERT kullanmak teknik olarak mümkün değildir", "Using INSERT during a backfill isn't technically possible"],
+              ],
+              answer: 0,
+              explain: [
+                "Bu, bu patikadaki idempotent akış dersinin aynı ilkesidir: backfill de dâhil her yeniden çalıştırma, ilgili bölümü silip yeniden yazmalı (`DELETE WHERE tarih = ...` + `INSERT`, ya da `MERGE`) — aksi hâlde bir backfill'in yarıda kesilip tekrar çalıştırılması veriyi ikiye katlar.",
+                "This is the same principle as the idempotent-pipeline lesson earlier in this track: every rerun, including a backfill, should replace the relevant partition (`DELETE WHERE date = ...` + `INSERT`, or `MERGE`) — otherwise a backfill that gets interrupted and rerun doubles the data.",
+              ],
+            }),
+            tip(
+              "Backfill'i üretim kapasitesinden ayrı çalıştır",
+              "Run the backfill separate from production capacity",
+              "8 aylık bir backfill, normal günlük işlerle aynı hesaplama kapasitesini paylaşırsa, günlük raporları geciktirebilir. Mümkünse backfill'i düşük öncelikli bir kuyrukta veya ayrı bir kapasitede çalıştır — geçmişi düzeltmek, bugünün raporunu geciktirmeye değmez.",
+              "If an 8-month backfill shares the same compute capacity as regular daily jobs, it can delay today's reports. Where possible, run the backfill on a low-priority queue or separate capacity — fixing the past isn't worth delaying today's report.",
+            ),
+          ],
+        }),
+        lesson({
+          slug: "kafka-temelleri-topic-partition",
+          title: L("Kafka temelleri: topic, partition, consumer group", "Kafka fundamentals: topic, partition, consumer group"),
+          summary: L(
+            "Akış işlemenin en yaygın altyapısının üç temel kavramı — bir kez anlaşılınca her akış mimarisi daha net olur.",
+            "The three core concepts of the most common streaming infrastructure — once understood, every streaming architecture makes more sense.",
+          ),
+          minutes: 16,
+          premium: true,
+          blocks: [
+            text(
+              "Daha önce Kafka'yı akış işlemenin bir aracı olarak gördün. Onu anlamanın anahtarı üç kavramdır:\n\n- **Topic** — bir olay kategorisi, ör. `siparis-olaylari`. SQL'deki bir tabloya benzer ama sıralı ve **eklenerek büyüyen** bir günlüktür — kayıtlar silinmez, yalnızca eklenir (belirlenen bir süre sonra otomatik temizlenene kadar).\n- **Partition** — bir topic, paralellik için birden fazla partition'a bölünür. Her partition kendi içinde **sıralıdır**; ama partition'lar arası sıralama garantisi yoktur. Aynı anahtara (ör. müşteri ID) sahip olaylar hep aynı partition'a gider — bu, bir müşterinin olaylarının kendi içinde sırayla işlenmesini garanti eder.\n- **Consumer group** — aynı topic'i birlikte okuyan bir grup tüketici. Kafka, bir topic'in partition'larını grup içindeki tüketicilere paylaştırır — her partition yalnızca gruptaki **bir** tüketici tarafından okunur, böylece iş paralel ama tekrarsız dağıtılır.",
+              "You've already seen Kafka as a streaming tool. Understanding it comes down to three concepts:\n\n- **Topic** — a category of events, e.g. `order-events`. It resembles a SQL table, but it's an ordered, **append-only** log — records are never deleted, only added (until an automatic retention period clears them).\n- **Partition** — a topic is split into multiple partitions for parallelism. Each partition is **ordered** on its own; there's no ordering guarantee across partitions. Events sharing the same key (e.g. customer ID) always land in the same partition — guaranteeing that one customer's events are processed in order among themselves.\n- **Consumer group** — a group of consumers reading the same topic together. Kafka divides a topic's partitions among the group's consumers — each partition is read by only **one** consumer in the group, distributing work in parallel without duplication.",
+            ),
+            quiz({
+              id: "q1",
+              q: [
+                "Aynı müşteri ID'sine sahip tüm olayların her zaman aynı partition'a gitmesi neden önemlidir?",
+                "Why does it matter that all events with the same customer ID always land in the same partition?",
+              ],
+              options: [
+                [
+                  "Partition içi sıralama garantisi olduğu için, o müşterinin olayları gerçekleştikleri sırayla işlenir — farklı partition'lara dağılsalardı sıralama garantisi kaybolurdu",
+                  "Because a partition guarantees internal order, that customer's events get processed in the order they happened — spread across different partitions, that ordering guarantee would be lost",
+                ],
+                ["Kafka'da anahtar (key) yalnızca gösterim amaçlıdır, hiçbir işlevi yoktur", "The key in Kafka is purely cosmetic and serves no function"],
+                ["Bu yalnızca depolama alanından tasarruf sağlar", "It's only there to save storage space"],
+                ["Her müşteri kendi topic'ini almalıdır, bu ondan kaçınmanın bir yoludur", "Every customer should get their own topic, this is a way to avoid that"],
+              ],
+              answer: 0,
+              explain: [
+                "Kafka yalnızca TEK bir partition içinde sıralama garantisi verir, topic genelinde değil. Aynı müşterinin 'sipariş verildi' → 'ödeme alındı' → 'kargoya verildi' olaylarının bu sırayla işlenmesi gerekiyorsa, hepsinin aynı partition'a gitmesi şarttır — bu da anahtarlama (partitioning key) ile sağlanır.",
+                "Kafka only guarantees order WITHIN a single partition, not across the whole topic. If a customer's \"order placed\" → \"payment received\" → \"shipped\" events must be processed in that order, they all need to land in the same partition — which is what the partitioning key ensures.",
+              ],
+            }),
+            quiz({
+              id: "q2",
+              q: [
+                "Bir consumer group'ta, bir topic'in partition'ları tüketiciler arasında nasıl paylaştırılır?",
+                "In a consumer group, how are a topic's partitions divided among the consumers?",
+              ],
+              options: [
+                [
+                  "Her partition, gruptaki yalnızca BİR tüketici tarafından okunur — iş paralel ama tekrarsız dağıtılır",
+                  "Each partition is read by only ONE consumer in the group — work is distributed in parallel without duplication",
+                ],
+                ["Her tüketici her partition'ı okur, veri her tüketicide tekrar eder", "Every consumer reads every partition, so data repeats across every consumer"],
+                ["Yalnızca bir tüketici tüm partition'ları tek başına okuyabilir, diğerleri beklemede kalır", "Only one consumer can read all partitions alone, the rest sit idle"],
+                ["Partition'lar tüketiciler arasında rastgele ve tutarsız şekilde dağıtılır", "Partitions are distributed randomly and inconsistently among consumers"],
+              ],
+              answer: 0,
+              explain: [
+                "Bu, Kafka'nın yatay ölçeklenme mekanizmasıdır: bir topic'in N partition'ı varsa ve grupta N tüketici varsa, her tüketici tam olarak bir partition okur — iş paralelleşir ama hiçbir mesaj iki kez işlenmez (gruptaki bir tüketici tarafından).",
+                "This is Kafka's horizontal scaling mechanism: if a topic has N partitions and the group has N consumers, each consumer reads exactly one partition — work parallelizes, but no message gets processed twice by consumers within that group.",
+              ],
+            }),
+            pitfall(
+              "Tüketici sayısı partition sayısını geçerse fazlalar boşta kalır",
+              "More consumers than partitions means the extras sit idle",
+              "Bir topic'in 4 partition'ı varsa ve bir grupta 6 tüketici varsa, 2 tüketici hiçbir partition alamaz ve boşta bekler. Paralelliğin üst sınırı partition sayısıdır — daha fazla işlem gücü istiyorsan önce partition sayısını artırman gerekir, tüketici eklemek tek başına yetmez.",
+              "If a topic has 4 partitions and a group has 6 consumers, 2 consumers get no partition and sit idle. The ceiling on parallelism is the partition count — to get more throughput you first need more partitions; adding consumers alone won't help.",
+            ),
+          ],
+        }),
       ],
     },
   ],
