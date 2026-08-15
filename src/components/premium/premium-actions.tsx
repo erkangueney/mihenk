@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { startTrialAction } from "@/lib/entitlements-actions";
 import { usePlanInfo } from "@/lib/entitlements-client";
 import { emptyActionResult } from "@/lib/auth/types";
@@ -9,6 +9,17 @@ import type { Locale } from "@/lib/types";
 
 function formatDate(value: string, locale: Locale): string {
   return new Date(value).toLocaleDateString(locale, { day: "2-digit", month: "long", year: "numeric" });
+}
+
+async function beginCheckout(planId: "monthly" | "yearly"): Promise<string | null> {
+  const response = await fetch("/api/checkout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ planId }),
+  });
+  if (!response.ok) return null;
+  const data = (await response.json()) as { url?: string };
+  return data.url ?? null;
 }
 
 /** Deneme başlatma + abonelik butonları. Ödeme sağlayıcısı kurulana kadar abonelik butonları devre dışıdır. */
@@ -21,6 +32,17 @@ export function PremiumActions({
 }) {
   const { ready, isPremium, planExpiresAt } = usePlanInfo();
   const [result, action, pending] = useActionState(startTrialAction, emptyActionResult);
+  const [checkoutPending, setCheckoutPending] = useState<"monthly" | "yearly" | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
+  const subscribe = async (planId: "monthly" | "yearly") => {
+    setCheckoutError(null);
+    setCheckoutPending(planId);
+    const url = await beginCheckout(planId);
+    setCheckoutPending(null);
+    if (url) window.location.href = url;
+    else setCheckoutError(locale === "tr" ? "Ödeme başlatılamadı, tekrar dene." : "Could not start checkout, try again.");
+  };
 
   if (!ready) return <div className="card h-40 animate-pulse bg-surface-2/50" aria-hidden />;
 
@@ -62,23 +84,27 @@ export function PremiumActions({
         <p className="mt-2 text-center text-xs text-muted">{ui("premium.trial", locale)}</p>
       </form>
 
+      {checkoutError ? <p className="text-sm text-danger">{checkoutError}</p> : null}
+
       <div className="grid gap-3 sm:grid-cols-2">
         <button
           type="button"
-          disabled={!checkoutEnabled}
+          disabled={!checkoutEnabled || checkoutPending !== null}
+          onClick={() => void subscribe("monthly")}
           title={checkoutEnabled ? undefined : ui("premium.comingSoon", locale)}
           className="rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm font-semibold text-text transition disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {ui("premium.subscribeMonthly", locale)}
+          {checkoutPending === "monthly" ? ui("auth.pending", locale) : ui("premium.subscribeMonthly", locale)}
           {!checkoutEnabled ? ` · ${ui("premium.comingSoon", locale)}` : ""}
         </button>
         <button
           type="button"
-          disabled={!checkoutEnabled}
+          disabled={!checkoutEnabled || checkoutPending !== null}
+          onClick={() => void subscribe("yearly")}
           title={checkoutEnabled ? undefined : ui("premium.comingSoon", locale)}
           className="rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm font-semibold text-text transition disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {ui("premium.subscribeYearly", locale)}
+          {checkoutPending === "yearly" ? ui("auth.pending", locale) : ui("premium.subscribeYearly", locale)}
           {!checkoutEnabled ? ` · ${ui("premium.comingSoon", locale)}` : ""}
         </button>
       </div>

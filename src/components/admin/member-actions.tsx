@@ -5,6 +5,7 @@ import {
   deleteMemberAction,
   resetProgressAction,
   sendResetEmailAction,
+  setMemberPlanAction,
   setPasswordAction,
   updateMemberAction,
 } from "@/lib/admin/actions";
@@ -85,6 +86,49 @@ export function MemberSettingsForm({ member }: { member: AdminMemberRow }) {
         />
       </div>
 
+      <SubmitButton>Kaydet</SubmitButton>
+    </form>
+  );
+}
+
+/** Premium/free planını elle atar — İyzico kurulana kadar test/destek amaçlı. */
+export function MemberPlanForm({ member }: { member: AdminMemberRow }) {
+  const [result, action] = useActionState(setMemberPlanAction, emptyActionResult);
+
+  return (
+    <form action={action} className="card space-y-4 p-4 sm:p-5">
+      <h2 className="font-semibold">Premium planı</h2>
+      <input type="hidden" name="id" value={member.id} />
+      <ResultNotice result={result} />
+      <p className="text-xs text-muted">
+        Şu an: <span className="font-semibold text-text">{member.plan}</span>
+        {member.plan === "premium" && member.plan_expires_at
+          ? ` · ${new Date(member.plan_expires_at).toLocaleDateString("tr")}'e kadar`
+          : member.plan === "premium"
+            ? " · süresiz"
+            : ""}
+        {member.plan_source !== "none" ? ` · kaynak: ${member.plan_source}` : ""}
+      </p>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <Label htmlFor="plan">Plan</Label>
+          <select id="plan" name="plan" defaultValue={member.plan} className={adminField}>
+            <option value="free">Ücretsiz</option>
+            <option value="premium">Premium</option>
+          </select>
+        </div>
+        <div>
+          <Label htmlFor="days">Süre (gün, boş = süresiz)</Label>
+          <input
+            id="days"
+            name="days"
+            type="number"
+            min={0}
+            placeholder="Örn. 30"
+            className={adminField}
+          />
+        </div>
+      </div>
       <SubmitButton>Kaydet</SubmitButton>
     </form>
   );

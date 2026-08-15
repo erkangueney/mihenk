@@ -37,9 +37,9 @@ export default async function PremiumPage({
   if (!isLocale(raw)) notFound();
   const locale: Locale = raw;
 
-  // İyzico anahtarları henüz kurulmadıysa abonelik butonları "çok yakında" gösterir
-  // (checkout API route Faz 4'te eklenir) — deneme (trial) bundan bağımsız çalışır.
-  const checkoutEnabled = Boolean(process.env.IYZICO_API_KEY);
+  // İyzico anahtarları henüz kurulmadıysa abonelik butonları "çok yakında"
+  // gösterir — deneme (trial) bundan bağımsız her zaman çalışır.
+  const checkoutEnabled = Boolean(process.env.IYZICO_API_KEY && process.env.IYZICO_SECRET_KEY);
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">

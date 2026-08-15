@@ -289,6 +289,43 @@ export async function resetProgressAction(
   return ok("İlerleme sıfırlandı.");
 }
 
+/**
+ * Üyeye elle premium/free planı atar — İyzico henüz kurulmadıysa test/destek
+ * amaçlı kullanılır (bkz. docs/plan-reklam-ve-premium.md §5).
+ */
+export async function setMemberPlanAction(
+  _prev: ActionResult,
+  form: FormData,
+): Promise<ActionResult> {
+  const g = await guard();
+  if ("error" in g) return g.error;
+
+  const id = String(form.get("id") ?? "");
+  const plan = String(form.get("plan") ?? "free") === "premium" ? "premium" : "free";
+  const days = Number(form.get("days") ?? 0);
+  if (!id) return fail("Üye bulunamadı.");
+
+  const expiresAt =
+    plan === "premium" && Number.isFinite(days) && days > 0
+      ? new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString()
+      : null;
+
+  const { error } = await getSupabaseAdmin()
+    .from("profiles")
+    .update({
+      plan,
+      plan_expires_at: expiresAt,
+      plan_source: plan === "premium" ? "manual" : "none",
+    })
+    .eq("id", id);
+
+  if (error) return fail(`Güncellenemedi: ${error.message}`);
+
+  await audit(g.actor, "member.set_plan", id, { plan, expiresAt });
+  refreshAdmin();
+  return ok(plan === "premium" ? "Premium atandı." : "Ücretsiz katmana alındı.");
+}
+
 /* ------------------------------------------------------------------ */
 /* İçerik işlemleri                                                    */
 /* ------------------------------------------------------------------ */

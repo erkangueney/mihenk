@@ -4,6 +4,7 @@ import { getMember } from "@/lib/admin/queries";
 import {
   MemberDangerZone,
   MemberPasswordForms,
+  MemberPlanForm,
   MemberSettingsForm,
 } from "@/components/admin/member-actions";
 import { Badge, StatCard } from "@/components/admin/ui";
@@ -150,6 +151,8 @@ export default async function MemberDetailPage({
         <MemberSettingsForm member={member} />
         <MemberPasswordForms member={member} />
       </div>
+
+      <MemberPlanForm member={member} />
 
       <MemberDangerZone member={member} />
     </div>
